@@ -1,0 +1,47 @@
+{% extends 'stores/dashboard/base.html' %}
+
+{% block title %}Movimientos de inventario{% endblock %}
+
+{% block content %}
+<h1>Historial de movimientos</h1>
+<table style="width: 100%; border-collapse: collapse;">
+    <thead>
+        <tr>
+            <th>Producto</th>
+            <th>Cantidad</th>
+            <th>Tipo</th>
+            <th>Responsable</th>
+            <th>Fecha</th>
+            <th>Referencia</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for movement in movements %}
+        <tr>
+            <td>{{ movement.product.name }}</td>
+            <td>{{ movement.quantity_change }}</td>
+            <td>{{ movement.get_movement_type_display }}</td>
+            <td>{{ movement.created_by }}</td>
+            <td>{{ movement.created_at|date:"d/m/Y H:i" }}</td>
+            <td>{{ movement.order_reference|default:"-" }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="6">No hay movimientos registrados.</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% if is_paginated %}
+    <div style="margin-top: 20px;">
+        {% if page_obj.has_previous %}
+            <a href="?page=1">&laquo; primera</a>
+            <a href="?page={{ page_obj.previous_page_number }}">anterior</a>
+        {% endif %}
+        Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}
+        {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}">siguiente</a>
+            <a href="?page={{ page_obj.paginator.num_pages }}">última &raquo;</a>
+        {% endif %}
+    </div>
+{% endif %}
+{% endblock %}

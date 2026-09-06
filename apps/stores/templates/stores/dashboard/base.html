@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Dashboard{% endblock %} - Mi Marketplace</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <style>
+        .dashboard-nav {
+            background: #1a1a2e;
+            color: white;
+            padding: 12px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        .dashboard-nav a, .dashboard-nav .logout-btn {
+            color: rgba(255,255,255,0.85);
+            margin: 0 10px;
+            text-decoration: none;
+            font-size: 0.95rem;
+            transition: color 0.3s;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-family: inherit;
+        }
+        .dashboard-nav a:hover, .dashboard-nav .logout-btn:hover {
+            color: #e94560;
+        }
+        .dashboard-nav .brand {
+            font-weight: 700;
+            font-size: 1.2rem;
+        }
+        .dashboard-content {
+            padding: 24px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .messages {
+            list-style: none;
+            padding: 0;
+        }
+        .messages li {
+            padding: 12px 18px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+        }
+        .messages .success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .messages .error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .messages .info { background: #cce5ff; color: #004085; border: 1px solid #b8daff; }
+        @media (max-width: 768px) {
+            .dashboard-nav { flex-direction: column; align-items: stretch; text-align: center; }
+            .dashboard-nav div { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; }
+        }
+    </style>
+</head>
+<body>
+    <nav class="dashboard-nav">
+        <div class="brand">🏪 {{ store.name }}</div>
+        <div>
+            <!-- El dashboard siempre visible -->
+            <a href="{% url 'stores:dashboard' store.id %}">📊 Dashboard</a>
+
+            <!-- Opciones según el rol -->
+            {% if user.is_superuser or user_role == 'owner' or user_role == 'manager' %}
+                <a href="{% url 'stores:product_list' store.id %}">📦 Productos</a>
+                <a href="{% url 'stores:product_create' store.id %}">➕ Agregar</a>
+            {% endif %}
+
+            {% if user.is_superuser or user_role == 'owner' %}
+                <a href="{% url 'stores:movements' store.id %}">📈 Movimientos</a>
+                <a href="{% url 'stores:store_edit' store.id %}">⚙️ Perfil</a>
+            {% endif %}
+
+            <!-- Logout siempre visible -->
+            <form action="{% url 'logout' %}" method="post" style="display: inline;">
+                {% csrf_token %}
+                <button type="submit" class="logout-btn">🚪 Salir</button>
+            </form>
+        </div>
+    </nav>
+
+    <div class="dashboard-content">
+        {% if messages %}
+            <ul class="messages">
+                {% for message in messages %}
+                    <li class="{{ message.tags }}">{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+        {% block content %}{% endblock %}
+    </div>
+</body>
+</html>

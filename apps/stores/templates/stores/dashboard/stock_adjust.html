@@ -1,0 +1,14 @@
+{% extends 'stores/dashboard/base.html' %}
+
+{% block title %}Ajustar stock de {{ object.name }}{% endblock %}
+
+{% block content %}
+<h1>Ajustar stock de "{{ object.name }}"</h1>
+<p><strong>Stock actual:</strong> {{ object.stock }}</p>
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" style="background: #3498db; color: white; border: none; padding: 10px 25px; border-radius: 25px;">Actualizar stock</button>
+    <a href="{% url 'stores:product_list' store.id %}">Cancelar</a>
+</form>
+{% endblock %}

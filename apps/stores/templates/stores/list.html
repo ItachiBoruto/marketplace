@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comercios - Mi Marketplace</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>🏪 Comercios</h1>
+            <nav>
+                <a href="/">🏠 Inicio</a>
+                <a href="/stores/">📦 Comercios</a>
+                <a href="/admin/">⚙️ Admin</a>
+            </nav>
+        </div>
+    </header>
+    <main>
+        <div class="container">
+            <h2>Lista de comercios disponibles</h2>
+            <div class="store-grid">
+                {% for store in stores %}
+                    <a href="{% url 'stores:detail' store.id %}" class="store-card-link">
+                        <div class="store-card">
+                            <div class="store-logo">
+                                {% if store.logo %}
+                                    <img src="{{ store.logo.url }}" alt="{{ store.name }}">
+                                {% else %}
+                                    <div class="no-logo">🏪</div>
+                                {% endif %}
+                            </div>
+                            <div class="store-info">
+                                <h3>{{ store.name }}</h3>
+                                <p>{{ store.description|truncatechars:60 }}</p>
+                            </div>
+                        </div>
+                    </a>
+                {% empty %}
+                    <p>No hay comercios disponibles.</p>
+                {% endfor %}
+            </div>
+        </div>
+    </main>
+</body>
+</html>

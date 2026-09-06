@@ -1,0 +1,56 @@
+{% extends 'stores/dashboard/base.html' %}
+
+{% block title %}Mis productos{% endblock %}
+
+{% block content %}
+<h1>Mis productos (variantes)</h1>
+<a href="{% url 'stores:variant_create' %}" class="btn btn-primary">+ Nuevo producto</a>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Nombre</th>
+            <th>Categoría</th>
+            <th>Precio</th>
+            <th>Stock</th>
+            <th>Disponible</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for variant in variants %}
+        <tr>
+            <td>{{ variant.name }}</td>
+            <td>{{ variant.product.name }}</td>
+            <td>${{ variant.price }}</td>
+            <td>{{ variant.stock }}</td>
+            <td>{{ variant.is_available|yesno:"✅,❌" }}</td>
+            <td>
+                <a href="{% url 'stores:variant_update' variant.id %}">Editar</a>
+                <a href="{% url 'stores:variant_delete' variant.id %}" style="color: red;">Eliminar</a>
+                <a href="{% url 'stores:stock_adjust' variant.id %}">Ajustar stock</a>
+            </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="6">No tienes productos registrados.</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% if is_paginated %}
+    <div class="pagination">
+        <span class="step-links">
+            {% if page_obj.has_previous %}
+                <a href="?page=1">&laquo; primera</a>
+                <a href="?page={{ page_obj.previous_page_number }}">anterior</a>
+            {% endif %}
+            <span class="current">
+                Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}
+            </span>
+            {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}">siguiente</a>
+                <a href="?page={{ page_obj.paginator.num_pages }}">última &raquo;</a>
+            {% endif %}
+        </span>
+    </div>
+{% endif %}
+{% endblock %}

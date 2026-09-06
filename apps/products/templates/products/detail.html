@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ product.name }} - Mi Marketplace</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <style>
+        .product-detail-page {
+            padding: 30px 0;
+        }
+        .product-detail-card {
+            display: flex;
+            gap: 30px;
+            align-items: flex-start;
+            background: var(--bg-white);
+            padding: 24px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-sm);
+        }
+        .product-detail-image {
+            flex: 0 0 300px;
+            height: 300px;
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            background: #f5f7fa;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .product-detail-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .no-image-large {
+            font-size: 3rem;
+            color: #ccc;
+        }
+        .product-detail-info {
+            flex: 1;
+        }
+        .product-detail-info h2 {
+            font-size: 1.8rem;
+            margin: 0 0 8px;
+            color: var(--text-dark);
+        }
+        .product-price {
+            font-size: 1.6rem;
+            color: var(--highlight-color);
+            font-weight: 700;
+            margin: 4px 0;
+        }
+        .product-stock {
+            font-size: 1rem;
+            margin: 4px 0;
+            color: var(--text-muted);
+        }
+        .product-description {
+            color: #444;
+            line-height: 1.6;
+            margin: 12px 0;
+        }
+        .product-additional {
+            background: #f8f9fa;
+            padding: 12px 16px;
+            border-radius: var(--border-radius-sm);
+            margin: 12px 0;
+        }
+        .product-additional h4 {
+            font-size: 0.95rem;
+            margin-bottom: 4px;
+            color: var(--text-dark);
+        }
+        .product-actions {
+            margin-top: 16px;
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .btn-add-cart {
+            padding: 12px 32px;
+            background: var(--highlight-color);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background var(--transition-speed);
+            text-decoration: none;
+            display: inline-block;
+        }
+        .btn-add-cart:hover {
+            background: #c0392b;
+        }
+        .btn-visit-store {
+            padding: 12px 32px;
+            background: var(--accent-color);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: background var(--transition-speed);
+        }
+        .btn-visit-store:hover {
+            background: var(--primary-color);
+        }
+        @media (max-width: 768px) {
+            .product-detail-card {
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+            }
+            .product-detail-image {
+                flex: 0 0 200px;
+                height: 200px;
+                width: 100%;
+                max-width: 300px;
+            }
+            .product-actions {
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>🛒 Mi Marketplace</h1>
+            <nav>
+                <a href="/">🏠 Inicio</a>
+                <a href="/stores/">📦 Comercios</a>
+                <a href="{% url 'cart:view' %}">🛒 Carrito</a>
+                {% if user.is_authenticated and user.is_staff %}
+                    <a href="/admin/">⚙️ Admin</a>
+                {% endif %}
+                {% if user.is_authenticated %}
+                    <span style="color: rgba(255,255,255,0.7); margin: 0 10px;">👤 {{ user.username }}</span>
+                    <form action="{% url 'logout' %}" method="post" style="display: inline;">
+                        {% csrf_token %}
+                        <button type="submit" style="background: none; border: none; color: rgba(255,255,255,0.85); cursor: pointer; font-size: 0.95rem; padding: 0; margin: 0 10px;">🚪 Cerrar sesión</button>
+                    </form>
+                {% endif %}
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <div class="container">
+            <div class="product-detail-page">
+                <div class="product-detail-card">
+                    <div class="product-detail-image">
+                        {% if product.image %}
+                            <img src="{{ product.image.url }}" alt="{{ product.name }}">
+                        {% else %}
+                            <div class="no-image-large">📷 Sin imagen</div>
+                        {% endif %}
+                    </div>
+                    <div class="product-detail-info">
+                        <h2>{{ product.name }}</h2>
+                        <p class="product-price">💰 ${{ product.price }}</p>
+                        <p class="product-stock">📦 Stock: {{ product.stock }}</p>
+                        <p class="product-description">{{ product.description|linebreaks }}</p>
+                        {% if product.additional_info %}
+                            <div class="product-additional">
+                                <h4>Información adicional</h4>
+                                <p>{{ product.additional_info|linebreaks }}</p>
+                            </div>
+                        {% endif %}
+                        <div class="product-actions">
+                            <a href="{% url 'cart:add' product.id %}" class="btn-add-cart">🛒 Agregar al carrito</a>
+                            <a href="{% url 'stores:detail' product.store.id %}" class="btn-visit-store">🏪 Visitar comercio</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</body>
+</html>

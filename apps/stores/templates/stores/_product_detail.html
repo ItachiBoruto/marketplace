@@ -1,0 +1,28 @@
+<div class="product-detail-container">
+    <div class="product-detail-card">
+        <div class="product-detail-image">
+            {% if product.image %}
+                <img src="{{ product.image.url }}" alt="{{ product.name }}">
+            {% else %}
+                <div class="no-image-large">📷 Sin imagen</div>
+            {% endif %}
+        </div>
+        <div class="product-detail-info">
+            <h2>{{ product.name }}</h2>
+            <p class="product-price">💰 ${{ product.price }}</p>
+            <p class="product-stock">📦 Stock: {{ product.stock }}</p>
+            <p class="product-description">{{ product.description|linebreaks }}</p>
+            {% if product.additional_info %}
+                <div class="product-additional">
+                    <h4>Información adicional</h4>
+                    <p>{{ product.additional_info|linebreaks }}</p>
+                </div>
+            {% endif %}
+            <div class="product-actions">
+                <button class="btn-add-cart" onclick="alert('Carrito en construcción. Próximamente podrás agregar productos.')">
+                    🛒 Agregar al carrito
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

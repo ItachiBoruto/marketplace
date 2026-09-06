@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Iniciar sesión</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .login-container {
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            width: 360px;
+            max-width: 90%;
+        }
+        .login-container h2 {
+            text-align: center;
+            margin-bottom: 24px;
+            color: #1a1a2e;
+        }
+        .login-container form {
+            display: flex;
+            flex-direction: column;
+        }
+        .login-container form p {
+            margin: 0 0 16px 0;
+        }
+        .login-container label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 4px;
+            color: #333;
+        }
+        .login-container input {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            box-sizing: border-box;
+        }
+        .login-container input:focus {
+            outline: none;
+            border-color: #e94560;
+            box-shadow: 0 0 0 3px rgba(233,69,96,0.2);
+        }
+        .login-container button {
+            padding: 12px;
+            background: #e94560;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        .login-container button:hover {
+            background: #c0392b;
+        }
+        .login-container .error {
+            color: #e74c3c;
+            text-align: center;
+            margin-top: 12px;
+        }
+        .login-container .register-link {
+            text-align: center;
+            margin-top: 16px;
+            color: #666;
+        }
+        .login-container .register-link a {
+            color: #e94560;
+            text-decoration: none;
+        }
+        .login-container .register-link a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <h2>🔐 Iniciar sesión</h2>
+        <form method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit">Ingresar</button>
+        </form>
+        {% if form.errors %}
+            <p class="error">❌ Usuario o contraseña incorrectos. Intenta de nuevo.</p>
+        {% endif %}
+        <div class="register-link">
+            ¿No tienes cuenta? <a href="#">Regístrate (próximamente)</a>
+        </div>
+    </div>
+</body>
+</html>

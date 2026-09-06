@@ -1,0 +1,13 @@
+{% extends 'stores/dashboard/base.html' %}
+
+{% block title %}Editar perfil del comercio{% endblock %}
+
+{% block content %}
+<h1>Editar perfil de {{ store.name }}</h1>
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" style="background: #3498db; color: white; border: none; padding: 10px 25px; border-radius: 25px;">Guardar cambios</button>
+    <a href="{% url 'stores:dashboard' store.id %}">Cancelar</a>
+</form>
+{% endblock %}

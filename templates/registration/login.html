@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Iniciar sesión - Mi Marketplace</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+        .login-container {
+            background: white;
+            padding: 40px 32px;
+            border-radius: 16px;
+            box-shadow: 0 8px 40px rgba(0,0,0,0.3);
+            width: 100%;
+            max-width: 380px;
+        }
+        .login-container h1 {
+            text-align: center;
+            font-size: 2rem;
+            font-weight: 700;
+            color: #1a1a2e;
+            margin-bottom: 8px;
+        }
+        .login-container .subtitle {
+            text-align: center;
+            color: #7f8c8d;
+            font-size: 0.9rem;
+            margin-bottom: 28px;
+        }
+        .login-container form p {
+            margin-bottom: 16px;
+        }
+        .login-container label {
+            display: block;
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: #333;
+            margin-bottom: 4px;
+        }
+        .login-container input[type="text"],
+        .login-container input[type="password"] {
+            width: 100%;
+            padding: 12px 14px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s, box-shadow 0.3s;
+            background: #f8f9fa;
+        }
+        .login-container input:focus {
+            outline: none;
+            border-color: #e94560;
+            box-shadow: 0 0 0 3px rgba(233,69,96,0.15);
+            background: white;
+        }
+        .login-container button {
+            width: 100%;
+            padding: 14px;
+            background: #e94560;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s, transform 0.2s;
+            margin-top: 8px;
+        }
+        .login-container button:hover {
+            background: #c0392b;
+            transform: scale(1.02);
+        }
+        .login-container .error {
+            color: #e74c3c;
+            text-align: center;
+            font-size: 0.9rem;
+            margin-top: 12px;
+            padding: 8px;
+            background: #fdedec;
+            border-radius: 6px;
+        }
+        .login-container .register-link {
+            text-align: center;
+            margin-top: 16px;
+            font-size: 0.9rem;
+            color: #666;
+        }
+        .login-container .register-link a {
+            color: #e94560;
+            text-decoration: none;
+            font-weight: 600;
+        }
+        .login-container .register-link a:hover {
+            text-decoration: underline;
+        }
+        .login-container .logo {
+            text-align: center;
+            font-size: 3rem;
+            margin-bottom: 8px;
+        }
+        @media (max-width: 480px) {
+            .login-container { padding: 28px 20px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="logo">🛒</div>
+        <h1>Mi Marketplace</h1>
+        <p class="subtitle">Inicia sesión para ver los productos</p>
+
+        <form method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit">Ingresar</button>
+        </form>
+
+        {% if form.errors %}
+            <p class="error">❌ Usuario o contraseña incorrectos. Intenta de nuevo.</p>
+        {% endif %}
+
+        <div class="register-link">
+            ¿No tienes cuenta? <a href="{% url 'stores:register' %}">Regístrate</a>
+        </div>
+    </div>
+</body>
+</html>

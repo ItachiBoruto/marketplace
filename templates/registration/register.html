@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro - Mi Marketplace</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+        .register-container {
+            background: white;
+            padding: 40px 32px;
+            border-radius: 16px;
+            box-shadow: 0 8px 40px rgba(0,0,0,0.3);
+            width: 100%;
+            max-width: 420px;
+        }
+        .register-container h1 {
+            text-align: center;
+            font-size: 2rem;
+            font-weight: 700;
+            color: #1a1a2e;
+            margin-bottom: 8px;
+        }
+        .register-container .subtitle {
+            text-align: center;
+            color: #7f8c8d;
+            font-size: 0.9rem;
+            margin-bottom: 28px;
+        }
+        .register-container form p {
+            margin-bottom: 16px;
+        }
+        .register-container label {
+            display: block;
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: #333;
+            margin-bottom: 4px;
+        }
+        .register-container input {
+            width: 100%;
+            padding: 12px 14px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s, box-shadow 0.3s;
+            background: #f8f9fa;
+        }
+        .register-container input:focus {
+            outline: none;
+            border-color: #e94560;
+            box-shadow: 0 0 0 3px rgba(233,69,96,0.15);
+            background: white;
+        }
+        .register-container .helptext {
+            font-size: 0.8rem;
+            color: #7f8c8d;
+            display: block;
+            margin-top: 4px;
+        }
+        .register-container .errorlist {
+            color: #e74c3c;
+            list-style: none;
+            font-size: 0.85rem;
+            margin: 4px 0 8px;
+        }
+        .register-container button {
+            width: 100%;
+            padding: 14px;
+            background: #e94560;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s, transform 0.2s;
+            margin-top: 8px;
+        }
+        .register-container button:hover {
+            background: #c0392b;
+            transform: scale(1.02);
+        }
+        .register-container .login-link {
+            text-align: center;
+            margin-top: 16px;
+            font-size: 0.9rem;
+            color: #666;
+        }
+        .register-container .login-link a {
+            color: #e94560;
+            text-decoration: none;
+            font-weight: 600;
+        }
+        .register-container .login-link a:hover {
+            text-decoration: underline;
+        }
+        .register-container .logo {
+            text-align: center;
+            font-size: 3rem;
+            margin-bottom: 8px;
+        }
+        @media (max-width: 480px) {
+            .register-container { padding: 28px 20px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="register-container">
+        <div class="logo">🛒</div>
+        <h1>Crear cuenta</h1>
+        <p class="subtitle">Regístrate para empezar a comprar</p>
+
+        <form method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit">Registrarse</button>
+        </form>
+
+        <div class="login-link">
+            ¿Ya tienes cuenta? <a href="{% url 'login' %}">Inicia sesión</a>
+        </div>
+    </div>
+</body>
+</html>

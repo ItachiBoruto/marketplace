@@ -1,0 +1,35 @@
+{% extends 'stores/dashboard/base.html' %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<h1>Bienvenido, {{ request.user.username }}</h1>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
+    <div style="background: #f8f9fa; padding: 20px; border-radius: 10px;">
+        <h3>Total productos</h3>
+        <p style="font-size: 2rem;">{{ total_products }}</p>
+    </div>
+    <div style="background: #fff3cd; padding: 20px; border-radius: 10px;">
+        <h3>Bajo stock (< 5)</h3>
+        <p style="font-size: 2rem;">{{ low_stock }}</p>
+    </div>
+</div>
+
+<h2 style="margin-top: 30px;">Últimos productos</h2>
+<ul>
+    {% for product in products %}
+        <li>{{ product.name }} - Stock: {{ product.stock }}</li>
+    {% empty %}
+        <li>No tienes productos. <a href="{% url 'stores:product_create' store.id %}">Crear uno</a></li>
+    {% endfor %}
+</ul>
+
+<h2>Últimos movimientos</h2>
+<ul>
+    {% for movement in recent_movements %}
+        <li>{{ movement.product.name }}: {{ movement.quantity_change }} ({{ movement.get_movement_type_display }}) - {{ movement.created_at|date:"d/m/Y H:i" }}</li>
+    {% empty %}
+        <li>Sin movimientos registrados.</li>
+    {% endfor %}
+</ul>
+{% endblock %}

@@ -1,0 +1,12 @@
+{% extends 'stores/dashboard/base.html' %}
+
+{% block title %}Eliminar producto{% endblock %}
+
+{% block content %}
+<h1>¿Estás seguro de eliminar "{{ object.name }}"?</h1>
+<form method="post">
+    {% csrf_token %}
+    <button type="submit" style="background: #dc3545; color: white; border: none; padding: 10px 25px; border-radius: 25px;">Sí, eliminar</button>
+    <a href="{% url 'stores:product_list' store.id %}">Cancelar</a>
+</form>
+{% endblock %}
