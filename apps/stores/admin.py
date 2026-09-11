@@ -1,5 +1,6 @@
 from django.contrib import admin
-from .models import Store, StoreUserPermission, AuditLog
+from .models import Store, StoreUserPermission
+from apps.audit.models import AuditLog
 
 class StoreUserPermissionInline(admin.TabularInline):
     model = StoreUserPermission

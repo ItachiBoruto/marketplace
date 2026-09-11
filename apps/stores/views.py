@@ -9,7 +9,8 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Q
 
 # Modelos
-from .models import Store, StoreUserPermission, AuditLog
+from .models import Store, StoreUserPermission
+from apps.audit.models import AuditLog
 from apps.products.models import Product
 from apps.inventory.models import StockMovement
 

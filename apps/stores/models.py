@@ -49,31 +49,6 @@ class StoreUserPermission(models.Model):
         return f"{self.user.username} - {self.store.name} ({self.get_role_display()})"
 
 
-class AuditLog(models.Model):
-    ACTION_CHOICES = [
-        ('create', 'Creación'),
-        ('update', 'Actualización'),
-        ('delete', 'Eliminación'),
-        ('stock_adjust', 'Ajuste de stock'),
-        ('permission_change', 'Cambio de permisos'),
-        ('login', 'Inicio de sesión'),
-        ('logout', 'Cierre de sesión'),
-    ]
-    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
-    store = models.ForeignKey(Store, on_delete=models.SET_NULL, null=True, blank=True)
-    action = models.CharField(max_length=20, choices=ACTION_CHOICES)
-    details = models.TextField()
-    ip_address = models.GenericIPAddressField(null=True, blank=True)
-    timestamp = models.DateTimeField(auto_now_add=True)
-    
-    class Meta:
-        ordering = ['-timestamp']
-        verbose_name = "Registro de auditoría"
-        verbose_name_plural = "Registros de auditoría"
-    
-    def __str__(self):
-        return f"{self.user} - {self.action} - {self.timestamp}"
-
 
 class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
