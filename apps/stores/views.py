@@ -16,7 +16,10 @@ from apps.inventory.models import StockMovement
 
 # Mixins y formularios
 from .mixins import StoreOwnerRequiredMixin, ManagerRequiredMixin, OwnerRequiredMixin, RoleContextMixin
-from .forms import ProductForm, StockAdjustForm, StoreProfileForm, CustomUserCreationForm
+from .forms import StoreProfileForm
+from apps.accounts.forms import CustomUserCreationForm
+from apps.products.forms import ProductForm
+from apps.inventory.forms import StockAdjustForm
 
 
 # ===================== VISTAS PÚBLICAS =====================
