@@ -1,7 +1,8 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
-from .models import Store, UserProfile
+from .models import Store
+from apps.accounts.models import UserProfile
 from apps.products.models import Product
 
 
