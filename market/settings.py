@@ -23,8 +23,8 @@ SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-l*+*v9l48a1in4aa2ur^^
 # ⚠️ DEBUG = False en producción
 DEBUG = os.environ.get('DEBUG', 'True') == 'True'
 
-# ⚠️ ALLOWED_HOSTS para Render
-ALLOWED_HOSTS = ['*']
+# ⚠️ En producción debes restringir esto vía variable de entorno
+ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '*').split(',')  # ← CAMBIO
 
 # ===== APLICACIONES INSTALADAS =====
 INSTALLED_APPS = [
@@ -33,19 +33,24 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
+
+    # Cloudinary (debe ir ANTES de staticfiles)  # ← CAMBIO
+    'cloudinary_storage',
+
     'django.contrib.staticfiles',
+
     'rest_framework',
     'corsheaders',
-
-    # Cloudinary
-    'cloudinary_storage',
     'cloudinary',
 
     # Nuestras apps
+    'apps.accounts',   # ← CAMBIO (nuevo)
     'apps.stores',
     'apps.products',
     'apps.inventory',
     'apps.cart',
+    'apps.audit',      # ← CAMBIO (nuevo)
+    'apps.utils',      # ← CAMBIO (nuevo)
 ]
 
 # ===== MIDDLEWARE =====
@@ -142,13 +147,15 @@ LOGIN_URL = 'login'
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/'
 
-# Seguridad para producción (Render configura HTTPS)
-SESSION_COOKIE_SECURE = True
-CSRF_COOKIE_SECURE = True
-SECURE_SSL_REDIRECT = True
-SECURE_HSTS_SECONDS = 31536000
-SECURE_HSTS_INCLUDE_SUBDOMAINS = True
-SECURE_HSTS_PRELOAD = True
+# Seguridad solo en producción (si DEBUG=True esto rompe el login local)  # ← CAMBIO
+if not DEBUG:
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_SSL_REDIRECT = True
+    SECURE_HSTS_SECONDS = 31536000
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
 
 # ===== LOGGING =====
 LOGGING = {
