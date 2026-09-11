@@ -3,11 +3,16 @@ Django settings for market project.
 """
 
 import os
-import dj_database_url
+import importlib
 from pathlib import Path
 import cloudinary
 import cloudinary.uploader
 import cloudinary.api
+
+try:
+    dj_database_url = importlib.import_module('dj_database_url')
+except ModuleNotFoundError:
+    dj_database_url = None
 
 # ===== CONFIGURACIÓN BASE =====
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -77,7 +82,11 @@ WSGI_APPLICATION = 'market.wsgi.application'
 
 # ===== BASE DE DATOS (RENDER) =====
 DATABASES = {
-    'default': dj_database_url.config(default='sqlite:///db.sqlite3')
+    'default': (
+        dj_database_url.config(default='sqlite:///db.sqlite3')
+        if dj_database_url is not None
+        else {'ENGINE': 'django.db.backends.sqlite3', 'NAME': BASE_DIR / 'db.sqlite3'}
+    )
 }
 
 # ===== VALIDACIÓN DE CONTRASEÑAS =====
