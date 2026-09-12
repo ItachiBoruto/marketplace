@@ -5,7 +5,11 @@ from django.conf.urls.static import static
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('accounts/', include('django.contrib.auth.urls')),
+
+    # Cuenta: registro propio + auth estándar de Django
+    path('accounts/', include('apps.accounts.urls')),         # ← NUEVO
+    path('accounts/', include('django.contrib.auth.urls')),   # login, logout, password reset
+
     path('stores/', include('apps.stores.urls')),
     path('cart/', include('apps.cart.urls')),
     path('', include('apps.products.urls')),
