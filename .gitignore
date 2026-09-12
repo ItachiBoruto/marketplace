@@ -15,3 +15,6 @@ staticfiles/
 
 # Excepción: el ejemplo SÍ debe subir a git
 !.env.example
+
+# Render / build
+.python-version.bak

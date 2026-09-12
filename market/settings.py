@@ -66,6 +66,7 @@ INSTALLED_APPS = [
 # ===== MIDDLEWARE =====
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',      # ← NUEVO
     'corsheaders.middleware.CorsMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -73,7 +74,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'apps.audit.middleware.AuditMiddleware',   # ← NUEVO
+    'apps.audit.middleware.AuditMiddleware',
 ]
 
 ROOT_URLCONF = 'market.urls'
@@ -130,6 +131,11 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
+# Compatibilidad con cloudinary_storage (que lee esta variable directamente)
+STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
+
+# WhiteNoise: almacena y comprime los estáticos
+
 # ============================================================
 # ===== CLOUDINARY CONFIGURATION =====
 # ============================================================
@@ -151,7 +157,7 @@ STORAGES = {
         'BACKEND': 'cloudinary_storage.storage.MediaCloudinaryStorage',
     },
     'staticfiles': {
-        'BACKEND': 'django.contrib.staticfiles.storage.StaticFilesStorage',
+        'BACKEND': 'django.contrib.staticfiles.storage.StaticFilesStorage',  # ← CAMBIO
     },
 }
 
@@ -174,6 +180,13 @@ if not DEBUG:
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
     SECURE_HSTS_PRELOAD = True
 
+    # CSRF trusted origins para Render
+    CSRF_TRUSTED_ORIGINS = [
+        f"https://{host}"
+        for host in ALLOWED_HOSTS
+        if not host.startswith('.') and host not in ('localhost', '127.0.0.1')
+    ]
+
 # ===== LOGGING =====
 LOGGING = {
     'version': 1,
@@ -188,3 +201,4 @@ LOGGING = {
         },
     },
 }
+
