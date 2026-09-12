@@ -5,9 +5,15 @@ Django settings for market project.
 import os
 import importlib
 from pathlib import Path
+from dotenv import load_dotenv
 import cloudinary
 import cloudinary.uploader
 import cloudinary.api
+
+# ===== CARGAR .env (desarrollo local) =====
+# En producción, las variables vienen del entorno (Render).
+# Si no hay .env, load_dotenv() no hace nada y seguimos con el entorno.
+load_dotenv()
 
 try:
     dj_database_url = importlib.import_module('dj_database_url')
@@ -17,14 +23,18 @@ except ModuleNotFoundError:
 # ===== CONFIGURACIÓN BASE =====
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# ⚠️ En producción, esta clave se tomará de las variables de entorno
-SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-l*+*v9l48a1in4aa2ur^^&+p%-q8@5a#4nzddux8i!oa)njxxs')
+# SECRET_KEY desde entorno (obligatorio)
+SECRET_KEY = os.environ.get(
+    'SECRET_KEY',
+    'django-insecure-dev-only-CHANGE-ME-before-deploy-xyz'
+)
 
-# ⚠️ DEBUG = False en producción
 DEBUG = os.environ.get('DEBUG', 'True') == 'True'
 
-# ⚠️ En producción debes restringir esto vía variable de entorno
-ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '*').split(',')  # ← CAMBIO
+# ALLOWED_HOSTS desde entorno (lista separada por comas)
+ALLOWED_HOSTS = [
+    h.strip() for h in os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',') if h.strip()
+]
 
 # ===== APLICACIONES INSTALADAS =====
 INSTALLED_APPS = [
@@ -34,7 +44,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
 
-    # Cloudinary (debe ir ANTES de staticfiles)  # ← CAMBIO
+    # Cloudinary (debe ir ANTES de staticfiles)
     'cloudinary_storage',
 
     'django.contrib.staticfiles',
@@ -44,13 +54,13 @@ INSTALLED_APPS = [
     'cloudinary',
 
     # Nuestras apps
-    'apps.accounts',   # ← CAMBIO (nuevo)
+    'apps.accounts',
     'apps.stores',
     'apps.products',
     'apps.inventory',
     'apps.cart',
-    'apps.audit',      # ← CAMBIO (nuevo)
-    'apps.utils',      # ← CAMBIO (nuevo)
+    'apps.audit',
+    'apps.utils',
 ]
 
 # ===== MIDDLEWARE =====
@@ -85,14 +95,20 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'market.wsgi.application'
 
-# ===== BASE DE DATOS (RENDER) =====
-DATABASES = {
-    'default': (
-        dj_database_url.config(default='sqlite:///db.sqlite3')
-        if dj_database_url is not None
-        else {'ENGINE': 'django.db.backends.sqlite3', 'NAME': BASE_DIR / 'db.sqlite3'}
-    )
-}
+# ===== BASE DE DATOS =====
+# Local: SQLite si no hay DATABASE_URL
+# Producción (Render): DATABASE_URL apuntando a PostgreSQL
+DATABASE_URL = os.environ.get('DATABASE_URL', '')
+
+if DATABASE_URL and dj_database_url is not None:
+    DATABASES = {'default': dj_database_url.parse(DATABASE_URL, conn_max_age=600)}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
 
 # ===== VALIDACIÓN DE CONTRASEÑAS =====
 AUTH_PASSWORD_VALIDATORS = [
@@ -117,9 +133,9 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 # ===== CLOUDINARY CONFIGURATION =====
 # ============================================================
 CLOUDINARY_STORAGE = {
-    'CLOUD_NAME': os.environ.get('CLOUDINARY_CLOUD_NAME', 'b317uyfe'),
-    'API_KEY': os.environ.get('CLOUDINARY_API_KEY', '333937275256198'),
-    'API_SECRET': os.environ.get('CLOUDINARY_API_SECRET', 'MKfE3PrDuUFt8A8oi-rbQP_NJ4A'),
+    'CLOUD_NAME': os.environ.get('CLOUDINARY_CLOUD_NAME', ''),
+    'API_KEY': os.environ.get('CLOUDINARY_API_KEY', ''),
+    'API_SECRET': os.environ.get('CLOUDINARY_API_SECRET', ''),
 }
 
 cloudinary.config(
@@ -147,7 +163,7 @@ LOGIN_URL = 'login'
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/'
 
-# Seguridad solo en producción (si DEBUG=True esto rompe el login local)  # ← CAMBIO
+# Seguridad solo en producción
 if not DEBUG:
     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
     SESSION_COOKIE_SECURE = True

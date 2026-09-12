@@ -12,3 +12,6 @@ media/
 *.pid
 *.pid.lock
 staticfiles/
+
+# Excepción: el ejemplo SÍ debe subir a git
+!.env.example
