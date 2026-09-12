@@ -9,67 +9,71 @@
 </head>
 <body>
     <header>
-        <div class="container">
-            <h1>🛒 Mi Marketplace</h1>
-            <nav>
+        <div class="container header-container">
+            <div class="header-top">
+                <h1 class="header-logo">🛒 Mi Marketplace</h1>
+                <button class="header-menu-toggle" id="menuToggle" aria-label="Menú">☰</button>
+            </div>
+
+            <nav class="header-nav" id="headerNav">
                 <a href="/">🏠 Inicio</a>
                 <a href="/stores/">📦 Comercios</a>
-                
-                <!-- Admin solo para staff -->
                 {% if user.is_authenticated and user.is_staff %}
                     <a href="/admin/">⚙️ Admin</a>
                 {% endif %}
-                
-                <!-- Carrito para autenticados -->
                 {% if user.is_authenticated %}
                     <a href="{% url 'cart:view' %}">🛒 Carrito</a>
-                {% endif %}
-                
-                <!-- Usuario autenticado: nombre y logout -->
-                {% if user.is_authenticated %}
-                    <span style="color: rgba(255,255,255,0.7); margin: 0 10px;">👤 {{ user.username }}</span>
-                    <form action="{% url 'logout' %}" method="post" style="display: inline;">
+                    <span class="header-user">👤 {{ user.username }}</span>
+                    <form action="{% url 'logout' %}" method="post" class="logout-form">
                         {% csrf_token %}
-                        <button type="submit" style="background: none; border: none; color: rgba(255,255,255,0.85); cursor: pointer; font-size: 0.95rem; padding: 0; margin: 0 10px;">🚪 Cerrar sesión</button>
+                        <button type="submit" class="logout-btn">🚪 Cerrar sesión</button>
                     </form>
+                {% else %}
+                    <a href="{% url 'login' %}">🔑 Ingresar</a>
+                    <a href="{% url 'accounts:register' %}">📝 Registrarse</a>
                 {% endif %}
             </nav>
-            <div class="search-bar">
-                <input type="text" id="searchInput" placeholder="Buscar productos...">
-                <button id="searchBtn">🔍</button>
+
+            <div class="header-search-row">
+                <div class="search-bar">
+                    <input type="text" id="searchInput" placeholder="Buscar productos...">
+                    <button id="searchBtn" aria-label="Buscar">🔍</button>
+                </div>
+                <button class="filters-toggle" id="filtersToggle" aria-label="Filtros">🔽 Filtros</button>
             </div>
-            <div class="filter">
-                <select id="storeFilter">
-                    <option value="">Todos los comercios</option>
-                    {% for store in stores %}
-                        <option value="{{ store.id }}">{{ store.name }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-            <div class="filter">
-                <select id="categoryFilter">
-                    <option value="">Todas las categorías</option>
-                    {% for category in categories %}
-                        <option value="{{ category }}">{{ category }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-            <div class="filter">
-                <select id="sortFilter">
-                    <option value="name">Orden alfabético</option>
-                    <option value="price">Menor precio</option>
-                    <option value="-price">Mayor precio</option>
-                    <option value="-created_at">Más recientes</option>
-                </select>
+
+            <div class="header-filters" id="headerFilters">
+                <div class="filter">
+                    <select id="storeFilter">
+                        <option value="">Todos los comercios</option>
+                        {% for store in stores %}
+                            <option value="{{ store.id }}">{{ store.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="filter">
+                    <select id="categoryFilter">
+                        <option value="">Todas las categorías</option>
+                        {% for category in categories %}
+                            <option value="{{ category }}">{{ category }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="filter">
+                    <select id="sortFilter">
+                        <option value="name">Orden alfabético</option>
+                        <option value="price">Menor precio</option>
+                        <option value="-price">Mayor precio</option>
+                        <option value="-created_at">Más recientes</option>
+                    </select>
+                </div>
             </div>
         </div>
     </header>
 
     <main>
         <div class="container">
-            <div id="productGrid" class="product-grid">
-                <!-- Los productos se cargan vía JavaScript -->
-            </div>
+            <div id="productGrid" class="product-grid"></div>
             <div id="loading" style="display: none; text-align: center; padding: 20px;">
                 Cargando más productos...
             </div>
@@ -86,6 +90,25 @@
         const categoryFilter = document.getElementById('categoryFilter');
         const sortFilter = document.getElementById('sortFilter');
 
+        // ===== TOGGLES MÓVIL =====
+        const menuToggle = document.getElementById('menuToggle');
+        const headerNav = document.getElementById('headerNav');
+        const filtersToggle = document.getElementById('filtersToggle');
+        const headerFilters = document.getElementById('headerFilters');
+
+        if (menuToggle) {
+            menuToggle.addEventListener('click', () => {
+                headerNav.classList.toggle('open');
+                menuToggle.textContent = headerNav.classList.contains('open') ? '✕' : '☰';
+            });
+        }
+
+        if (filtersToggle) {
+            filtersToggle.addEventListener('click', () => {
+                headerFilters.classList.toggle('open');
+            });
+        }
+
         let currentPage = 1;
         let isLoading = false;
         let hasMore = true;
@@ -94,7 +117,12 @@
         let currentCategory = '';
         let currentSort = 'name';
 
-        // ===== CARGAR PRODUCTOS =====
+        function escapeHtml(str) {
+            return String(str || '').replace(/[&<>"']/g, c => (
+                {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]
+            ));
+        }
+
         async function loadProducts(page = 1, search = '', store = '', category = '', sort = 'name') {
             if (isLoading || !hasMore) return;
             isLoading = true;
@@ -112,33 +140,25 @@
                     return;
                 }
 
-                if (data.results.length === 0) {
-                    hasMore = false;
-                    loading.textContent = '✅ Todos los productos cargados';
-                    loading.style.display = 'block';
-                    return;
-                }
-
-                if (page === 1) {
-                    productGrid.innerHTML = '';
-                }
+                if (page === 1) productGrid.innerHTML = '';
 
                 data.results.forEach(product => {
                     const card = document.createElement('div');
                     card.className = 'product-card';
                     card.dataset.store = product.store_id;
-                    card.onclick = function() {
-                        window.location.href = `/product/${product.id}/`;
-                    };
+                    card.onclick = () => { window.location.href = `/product/${product.id}/`; };
+
+                    const imgHtml = product.image
+                        ? `<img src="${escapeHtml(product.image)}" alt="${escapeHtml(product.name)}" loading="lazy">`
+                        : '<div class="no-image">Sin imagen</div>';
+
                     card.innerHTML = `
-                        <div class="product-image">
-                            ${product.image ? `<img src="${product.image}" alt="${product.name}">` : '<div class="no-image">Sin imagen</div>'}
-                        </div>
+                        <div class="product-image">${imgHtml}</div>
                         <div class="product-info">
-                            <h3 class="product-name">${product.name}</h3>
-                            <p class="store-name">${product.store_name || 'Sin comercio'}</p>
-                            <p class="price">$${product.price}</p>
-                            <p class="stock-counter">📦 Stock: <span id="stock-${product.id}">${product.stock}</span></p>
+                            <h3 class="product-name">${escapeHtml(product.name)}</h3>
+                            <p class="store-name">${escapeHtml(product.store_name || 'Sin comercio')}</p>
+                            <p class="price">$${escapeHtml(product.price)}</p>
+                            <p class="stock-counter">📦 <span>${escapeHtml(product.stock)}</span></p>
                         </div>
                     `;
                     productGrid.appendChild(card);
@@ -165,11 +185,9 @@
         // ===== SCROLL INFINITO =====
         const observer = new IntersectionObserver((entries) => {
             if (entries[0].isIntersecting && hasMore && !isLoading) {
-                const nextPage = currentPage + 1;
-                loadProducts(nextPage, currentSearch, currentStore, currentCategory, currentSort);
+                loadProducts(currentPage + 1, currentSearch, currentStore, currentCategory, currentSort);
             }
         }, { threshold: 0.5 });
-
         observer.observe(loading);
 
         // ===== BÚSQUEDA Y FILTROS =====
@@ -187,14 +205,11 @@
         }
 
         searchBtn.addEventListener('click', performSearch);
-        searchInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') performSearch();
-        });
+        searchInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') performSearch(); });
         storeFilter.addEventListener('change', performSearch);
         categoryFilter.addEventListener('change', performSearch);
         sortFilter.addEventListener('change', performSearch);
 
-        // ===== CARGA INICIAL =====
         loadProducts(1, '', '', '', 'name');
     </script>
 </body>

@@ -18,3 +18,5 @@ staticfiles/
 
 # Render / build
 .python-version.bak
+
+datos_export.json
