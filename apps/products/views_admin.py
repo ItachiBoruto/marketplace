@@ -1,11 +1,9 @@
 from django.urls import reverse
 from django.views.generic import CreateView, UpdateView, DeleteView
 
-from apps.audit.models import AuditLog
 from apps.stores.mixins import ManagerRequiredMixin, OwnerRequiredMixin, RoleContextMixin
 from .forms import ProductForm
 from .models import Product
-
 
 class ProductCreateView(RoleContextMixin, ManagerRequiredMixin, CreateView):
     model = Product
@@ -17,20 +15,12 @@ class ProductCreateView(RoleContextMixin, ManagerRequiredMixin, CreateView):
 
     def form_valid(self, form):
         form.instance.store = self.get_store()
-        AuditLog.objects.create(
-            user=self.request.user,
-            store=self.get_store(),
-            action="create",
-            details=f"Producto creado: {form.instance.name}",
-            ip_address=self.request.META.get("REMOTE_ADDR"),
-        )
         return super().form_valid(form)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["store"] = self.get_store()
         return context
-
 
 class ProductUpdateView(RoleContextMixin, ManagerRequiredMixin, UpdateView):
     model = Product
@@ -44,20 +34,12 @@ class ProductUpdateView(RoleContextMixin, ManagerRequiredMixin, UpdateView):
         return Product.objects.filter(store=self.get_store())
 
     def form_valid(self, form):
-        AuditLog.objects.create(
-            user=self.request.user,
-            store=self.get_store(),
-            action="update",
-            details=f"Producto actualizado: {form.instance.name}",
-            ip_address=self.request.META.get("REMOTE_ADDR"),
-        )
         return super().form_valid(form)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["store"] = self.get_store()
         return context
-
 
 class ProductDeleteView(RoleContextMixin, OwnerRequiredMixin, DeleteView):
     model = Product
@@ -71,13 +53,6 @@ class ProductDeleteView(RoleContextMixin, OwnerRequiredMixin, DeleteView):
 
     def delete(self, request, *args, **kwargs):
         product = self.get_object()
-        AuditLog.objects.create(
-            user=self.request.user,
-            store=self.get_store(),
-            action="delete",
-            details=f"Producto eliminado: {product.name}",
-            ip_address=self.request.META.get("REMOTE_ADDR"),
-        )
         return super().delete(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):

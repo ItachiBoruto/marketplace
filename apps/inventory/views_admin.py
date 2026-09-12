@@ -2,12 +2,10 @@ from django.contrib import messages
 from django.urls import reverse
 from django.views.generic import ListView, UpdateView
 
-from apps.audit.models import AuditLog
 from apps.products.models import Product
 from apps.stores.mixins import ManagerRequiredMixin, OwnerRequiredMixin, RoleContextMixin
 from .forms import StockAdjustForm
 from .models import StockMovement
-
 
 class StockAdjustView(RoleContextMixin, ManagerRequiredMixin, UpdateView):
     model = Product
@@ -34,13 +32,6 @@ class StockAdjustView(RoleContextMixin, ManagerRequiredMixin, UpdateView):
                 created_by=self.request.user.username,
                 order_reference="Ajuste manual desde dashboard",
             )
-            AuditLog.objects.create(
-                user=self.request.user,
-                store=self.get_store(),
-                action="stock_adjust",
-                details=f"Stock ajustado: {product.name} (cambio: {quantity_change})",
-                ip_address=self.request.META.get("REMOTE_ADDR"),
-            )
             messages.success(self.request, f"Stock actualizado de {old_stock} a {new_stock}.")
         return super().form_valid(form)
 
@@ -48,7 +39,6 @@ class StockAdjustView(RoleContextMixin, ManagerRequiredMixin, UpdateView):
         context = super().get_context_data(**kwargs)
         context["store"] = self.get_store()
         return context
-
 
 class MovementListView(RoleContextMixin, OwnerRequiredMixin, ListView):
     model = StockMovement
