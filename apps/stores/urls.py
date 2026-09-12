@@ -15,9 +15,6 @@ urlpatterns = [
     # Páginas públicas
     path("", views.store_list, name="list"),
     path("<int:store_id>/", views.store_detail, name="detail"),
-    path("product-detail/<int:product_id>/", views.product_detail_ajax, name="product_detail_ajax"),
-
-    # Registro de usuarios
 
     # Dashboard del vendedor
     path("dashboard/<int:store_id>/", views.DashboardView.as_view(), name="dashboard"),

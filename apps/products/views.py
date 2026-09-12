@@ -128,3 +128,10 @@ class StoreProductListAPI(APIView):
         result_page = paginator.paginate_queryset(products, request)
         serializer = ProductSerializer(result_page, many=True)
         return paginator.get_paginated_response(serializer.data)
+
+# ===== DETALLE DE PRODUCTO (AJAX, para modales) =====
+def product_detail_ajax(request, product_id):
+    """Devuelve el HTML parcial del producto para cargar en modal."""
+    product = get_object_or_404(Product, id=product_id, is_available=True)
+    return render(request, "products/_product_detail.html", {"product": product})
+

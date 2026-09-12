@@ -25,10 +25,6 @@ def store_detail(request, store_id):
         'products': products,
     })
 
-def product_detail_ajax(request, product_id):
-    product = get_object_or_404(Product, id=product_id, is_available=True)
-    return render(request, 'stores/_product_detail.html', {'product': product})
-
 # ===================== REGISTRO DE USUARIOS =====================
 
 # ===================== DASHBOARD DEL VENDEDOR =====================

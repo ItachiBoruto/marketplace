@@ -54,7 +54,7 @@
                 console.error('Product ID no válido');
                 return;
             }
-            const url = '/stores/product-detail/' + productId + '/';
+            const url = '/product-detail/' + productId + '/';
             console.log('Cargando detalle del producto:', productId);
             fetch(url)
                 .then(function(response) {
