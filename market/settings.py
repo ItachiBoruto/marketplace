@@ -203,8 +203,8 @@ if not DEBUG:
 BANK_INFO = {
     'bank_name': os.environ.get('BANK_NAME', 'Banco de Venezuela'),
     'account_number': os.environ.get('BANK_ACCOUNT', '0102-XXXX-XXXX-XXXX'),
-    'account_holder': os.environ.get('BANK_HOLDER', 'Mi Marketplace C.A.'),
-    'rif': os.environ.get('BANK_RIF', 'J-XXXXXXXX-X'),
+    'account_holder': os.environ.get('BANK_HOLDER', 'Mi Marketplace'),
+    'document': os.environ.get('BANK_DOCUMENT', ''),  # Cédula o RIF
     'email': os.environ.get('BANK_EMAIL', 'pagos@marketplace.com'),
     'phone': os.environ.get('BANK_PHONE', '+58 XXX-XXX-XXXX'),
 }

@@ -185,8 +185,8 @@
                             <span>{{ bank_info.account_holder }}</span>
                         </div>
                         <div class="bank-row">
-                            <strong>RIF:</strong>
-                            <span>{{ bank_info.rif }}</span>
+                            <strong>Cédula / RIF:</strong>
+                            <span>{{ bank_info.document|default:"—" }}</span>
                         </div>
                         <div class="bank-row">
                             <strong>Email:</strong>
