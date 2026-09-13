@@ -1058,6 +1058,7 @@ header nav a:hover {
     line-height: 1.25;
     display: -webkit-box;
     -webkit-line-clamp: 2;
+    line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
 }
@@ -1228,4 +1229,133 @@ header nav a:hover {
     .product-image { aspect-ratio: 4 / 3; }
     .product-info h3 { font-size: 1rem; }
     .price { font-size: 1.1rem; }
+}
+
+/* ============================================================
+   MENSAJES DE ERROR/AVISO
+   ============================================================ */
+.messages {
+    margin-bottom: 15px;
+}
+
+.message {
+    padding: 10px 14px;
+    border-radius: 8px;
+    margin: 6px 0;
+    font-size: 0.9rem;
+    line-height: 1.4;
+}
+
+.message.error {
+    background: #fdedec;
+    color: #c0392b;
+    border-left: 4px solid #e74c3c;
+}
+
+.message.warning {
+    background: #fef5e7;
+    color: #b9770e;
+    border-left: 4px solid #f39c12;
+}
+
+.message.success {
+    background: #eafaf1;
+    color: #229954;
+    border-left: 4px solid #2ecc71;
+}
+
+.message.info {
+    background: #eaf2f8;
+    color: #21618c;
+    border-left: 4px solid #3498db;
+}
+
+/* ============================================================
+   LOGIN - Estilos básicos
+   ============================================================ */
+.login-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 20px;
+    background: var(--bg-light);
+}
+
+.login-card {
+    background: white;
+    padding: 30px 26px;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-md);
+    width: 100%;
+    max-width: 400px;
+}
+
+.login-card h1 {
+    font-size: 1.5rem;
+    margin: 0 0 20px;
+    color: var(--text-dark);
+    text-align: center;
+}
+
+.form-group {
+    margin-bottom: 14px;
+}
+
+.form-group label {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 500;
+    margin-bottom: 4px;
+    color: var(--text-dark);
+}
+
+.form-group input {
+    width: 100%;
+    padding: 10px 14px;
+    border: 2px solid #e1e5ea;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-family: inherit;
+    transition: border-color 0.3s;
+}
+
+.form-group input:focus {
+    outline: none;
+    border-color: var(--highlight-color);
+}
+
+.btn-login {
+    width: 100%;
+    padding: 12px;
+    background: var(--highlight-color);
+    color: white;
+    border: none;
+    border-radius: 50px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.3s;
+    margin-top: 8px;
+}
+
+.btn-login:hover {
+    background: #c0392b;
+}
+
+.register-link {
+    text-align: center;
+    margin-top: 18px;
+    font-size: 0.9rem;
+    color: var(--text-muted);
+}
+
+.register-link a {
+    color: var(--highlight-color);
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.register-link a:hover {
+    text-decoration: underline;
 }

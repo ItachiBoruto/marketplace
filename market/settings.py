@@ -4,6 +4,7 @@ Django settings for market project.
 
 import os
 import importlib
+from datetime import timedelta
 from pathlib import Path
 from dotenv import load_dotenv
 import cloudinary
@@ -11,8 +12,6 @@ import cloudinary.uploader
 import cloudinary.api
 
 # ===== CARGAR .env (desarrollo local) =====
-# En producción, las variables vienen del entorno (Render).
-# Si no hay .env, load_dotenv() no hace nada y seguimos con el entorno.
 load_dotenv()
 
 try:
@@ -23,7 +22,6 @@ except ModuleNotFoundError:
 # ===== CONFIGURACIÓN BASE =====
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# SECRET_KEY desde entorno (obligatorio)
 SECRET_KEY = os.environ.get(
     'SECRET_KEY',
     'django-insecure-dev-only-CHANGE-ME-before-deploy-xyz'
@@ -31,7 +29,6 @@ SECRET_KEY = os.environ.get(
 
 DEBUG = os.environ.get('DEBUG', 'True') == 'True'
 
-# ALLOWED_HOSTS desde entorno (lista separada por comas)
 ALLOWED_HOSTS = [
     h.strip() for h in os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',') if h.strip()
 ]
@@ -52,6 +49,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'corsheaders',
     'cloudinary',
+    'axes',
 
     # Nuestras apps
     'apps.accounts',
@@ -66,7 +64,7 @@ INSTALLED_APPS = [
 # ===== MIDDLEWARE =====
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',      # ← NUEVO
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -75,6 +73,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'apps.audit.middleware.AuditMiddleware',
+    'axes.middleware.AxesMiddleware',
 ]
 
 ROOT_URLCONF = 'market.urls'
@@ -98,8 +97,6 @@ TEMPLATES = [
 WSGI_APPLICATION = 'market.wsgi.application'
 
 # ===== BASE DE DATOS =====
-# Local: SQLite si no hay DATABASE_URL
-# Producción (Render): DATABASE_URL apuntando a PostgreSQL
 DATABASE_URL = os.environ.get('DATABASE_URL', '')
 
 if DATABASE_URL and dj_database_url is not None:
@@ -130,11 +127,7 @@ USE_TZ = True
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
 STATIC_ROOT = BASE_DIR / 'staticfiles'
-
-# Compatibilidad con cloudinary_storage (que lee esta variable directamente)
 STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
-
-# WhiteNoise: almacena y comprime los estáticos
 
 # ============================================================
 # ===== CLOUDINARY CONFIGURATION =====
@@ -151,13 +144,12 @@ cloudinary.config(
     api_secret=CLOUDINARY_STORAGE['API_SECRET']
 )
 
-# Almacenamiento de archivos (Django 6.1)
 STORAGES = {
     'default': {
         'BACKEND': 'cloudinary_storage.storage.MediaCloudinaryStorage',
     },
     'staticfiles': {
-        'BACKEND': 'django.contrib.staticfiles.storage.StaticFilesStorage',  # ← CAMBIO
+        'BACKEND': 'django.contrib.staticfiles.storage.StaticFilesStorage',
     },
 }
 
@@ -170,7 +162,26 @@ LOGIN_URL = 'login'
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/'
 
-# Seguridad solo en producción
+# ===== DJANGO-AXES (Rate limiting de login) =====
+AUTHENTICATION_BACKENDS = [
+    'axes.backends.AxesStandaloneBackend',
+    'django.contrib.auth.backends.ModelBackend',
+]
+
+AXES_FAILURE_LIMIT = 5
+AXES_COOLOFF_TIME = timedelta(minutes=5)         # Desbloquear después de 5 minutos
+AXES_RESET_ON_SUCCESS = True
+AXES_LOCKOUT_PARAMETERS = ['ip_address', 'username']
+AXES_LOCKOUT_CALLABLE = "apps.accounts.views.axes_lockout_response"  # ← Redirige con mensaje amigable
+AXES_VERBOSE = False
+
+# Detectar IP real detrás de proxies (Render)
+AXES_IPWARE_META_PRECEDENCE_ORDER = [
+    'HTTP_X_FORWARDED_FOR',
+    'REMOTE_ADDR',
+]
+
+# ===== SEGURIDAD SOLO EN PRODUCCIÓN =====
 if not DEBUG:
     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
     SESSION_COOKIE_SECURE = True
@@ -180,7 +191,6 @@ if not DEBUG:
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
     SECURE_HSTS_PRELOAD = True
 
-    # CSRF trusted origins para Render
     CSRF_TRUSTED_ORIGINS = [
         f"https://{host}"
         for host in ALLOWED_HOSTS
@@ -201,4 +211,3 @@ LOGGING = {
         },
     },
 }
-

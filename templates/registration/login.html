@@ -80,15 +80,6 @@
             background: #c0392b;
             transform: scale(1.02);
         }
-        .login-container .error {
-            color: #e74c3c;
-            text-align: center;
-            font-size: 0.9rem;
-            margin-top: 12px;
-            padding: 8px;
-            background: #fdedec;
-            border-radius: 6px;
-        }
         .login-container .register-link {
             text-align: center;
             margin-top: 16px;
@@ -108,6 +99,40 @@
             font-size: 3rem;
             margin-bottom: 8px;
         }
+
+        /* ===== MENSAJES (aviso de intentos, errores, etc.) ===== */
+        .messages {
+            margin-bottom: 16px;
+        }
+        .message {
+            padding: 10px 14px;
+            border-radius: 8px;
+            margin: 6px 0;
+            font-size: 0.88rem;
+            line-height: 1.4;
+            text-align: left;
+        }
+        .message.error {
+            background: #fdedec;
+            color: #c0392b;
+            border-left: 4px solid #e74c3c;
+        }
+        .message.warning {
+            background: #fef5e7;
+            color: #b9770e;
+            border-left: 4px solid #f39c12;
+        }
+        .message.success {
+            background: #eafaf1;
+            color: #229954;
+            border-left: 4px solid #2ecc71;
+        }
+        .message.info {
+            background: #eaf2f8;
+            color: #21618c;
+            border-left: 4px solid #3498db;
+        }
+
         @media (max-width: 480px) {
             .login-container { padding: 28px 20px; }
         }
@@ -119,15 +144,19 @@
         <h1>Mi Marketplace</h1>
         <p class="subtitle">Inicia sesión para ver los productos</p>
 
+        {% if messages %}
+            <div class="messages">
+                {% for message in messages %}
+                    <p class="message {{ message.tags }}">{{ message }}</p>
+                {% endfor %}
+            </div>
+        {% endif %}
+
         <form method="post">
             {% csrf_token %}
             {{ form.as_p }}
             <button type="submit">Ingresar</button>
         </form>
-
-        {% if form.errors %}
-            <p class="error">❌ Usuario o contraseña incorrectos. Intenta de nuevo.</p>
-        {% endif %}
 
         <div class="register-link">
             ¿No tienes cuenta? <a href="{% url 'accounts:register' %}">Regístrate</a>
