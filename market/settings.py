@@ -57,6 +57,7 @@ INSTALLED_APPS = [
     'apps.products',
     'apps.inventory',
     'apps.cart',
+    'apps.orders',       # ← NUEVO
     'apps.audit',
     'apps.utils',
 ]
@@ -169,13 +170,12 @@ AUTHENTICATION_BACKENDS = [
 ]
 
 AXES_FAILURE_LIMIT = 5
-AXES_COOLOFF_TIME = timedelta(minutes=5)         # Desbloquear después de 5 minutos
+AXES_COOLOFF_TIME = timedelta(minutes=5)
 AXES_RESET_ON_SUCCESS = True
 AXES_LOCKOUT_PARAMETERS = ['ip_address', 'username']
-AXES_LOCKOUT_CALLABLE = "apps.accounts.views.axes_lockout_response"  # ← Redirige con mensaje amigable
+AXES_LOCKOUT_CALLABLE = "apps.accounts.views.axes_lockout_response"
 AXES_VERBOSE = False
 
-# Detectar IP real detrás de proxies (Render)
 AXES_IPWARE_META_PRECEDENCE_ORDER = [
     'HTTP_X_FORWARDED_FOR',
     'REMOTE_ADDR',
@@ -196,6 +196,18 @@ if not DEBUG:
         for host in ALLOWED_HOSTS
         if not host.startswith('.') and host not in ('localhost', '127.0.0.1')
     ]
+
+# ============================================================
+# ===== DATOS BANCARIOS PARA PAGOS =====
+# ============================================================
+BANK_INFO = {
+    'bank_name': os.environ.get('BANK_NAME', 'Banco de Venezuela'),
+    'account_number': os.environ.get('BANK_ACCOUNT', '0102-XXXX-XXXX-XXXX'),
+    'account_holder': os.environ.get('BANK_HOLDER', 'Mi Marketplace C.A.'),
+    'rif': os.environ.get('BANK_RIF', 'J-XXXXXXXX-X'),
+    'email': os.environ.get('BANK_EMAIL', 'pagos@marketplace.com'),
+    'phone': os.environ.get('BANK_PHONE', '+58 XXX-XXX-XXXX'),
+}
 
 # ===== LOGGING =====
 LOGGING = {
