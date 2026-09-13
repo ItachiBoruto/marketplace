@@ -182,7 +182,7 @@
                     <a href="/admin/">⚙️ Admin</a>
                 {% endif %}
                 {% if user.is_authenticated %}
-                    <span style="color: rgba(255,255,255,0.7); margin: 0 10px;">👤 {{ user.username }}</span>
+                    <span style="color: rgba(255,255,255,0.7); margin: 0 10px;">👤 {{ user.username}}</span>
                     <form action="{% url 'logout' %}" method="post" style="display: inline;">
                         {% csrf_token %}
                         <button type="submit" style="background: none; border: none; color: rgba(255,255,255,0.85); cursor: pointer; font-size: 0.95rem; padding: 0; margin: 0 10px;">🚪 Cerrar sesión</button>
@@ -211,6 +211,7 @@
                             <div class="cart-item-info">
                                 <h4>{{ item.product.name }}</h4>
                                 <p>Precio unitario: ${{ item.price|floatformat:2 }}</p>
+                                <p style="font-size: 0.85rem; color: #999;">🏪 {{ item.product.store.name }}</p>
                             </div>
                             <div class="cart-item-actions">
                                 <form action="{% url 'cart:update' item.id %}" method="post" style="display: inline;">
@@ -231,7 +232,7 @@
 
                     <div class="cart-actions">
                         <a href="/" class="btn btn-secondary">Seguir comprando</a>
-                        <a href="#" class="btn btn-success" onclick="alert('Checkout en construcción. Próximamente.')">Proceder al pago</a>
+                        <a href="{% url 'orders:checkout' %}" class="btn btn-success">Proceder al pago</a>
                     </div>
                 {% else %}
                     <div class="empty-cart">
@@ -244,4 +245,4 @@
         </div>
     </main>
 </body>
-</html>.
+</html>

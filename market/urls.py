@@ -8,7 +8,7 @@ from apps.accounts.views import CustomLoginView
 urlpatterns = [
     path('admin/', admin.site.urls),
 
-    # Login personalizado (con avisos de intentos)
+    # Login personalizado
     path('accounts/login/', CustomLoginView.as_view(), name='login'),
 
     path('accounts/', include('apps.accounts.urls')),
@@ -16,5 +16,6 @@ urlpatterns = [
 
     path('stores/', include('apps.stores.urls')),
     path('cart/', include('apps.cart.urls')),
+    path('orders/', include('apps.orders.urls')),   # ← NUEVO
     path('', include('apps.products.urls')),
 ]

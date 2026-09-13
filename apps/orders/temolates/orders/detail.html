@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pedido #{{ order.pk }} - Mi Marketplace</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <style>
+        .detail-wrapper {
+            max-width: 700px;
+            margin: 24px auto;
+        }
+        .detail-card {
+            background: white;
+            padding: 24px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            margin-bottom: 16px;
+        }
+        .detail-card h2 {
+            margin: 0 0 16px;
+            font-size: 1.2rem;
+            color: #1a1a2e;
+        }
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            font-size: 0.92rem;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .detail-row:last-child { border-bottom: none; }
+        .detail-row .label { color: #7f8c8d; }
+        .detail-row .value { font-weight: 600; color: #2c3e50; }
+        .item-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 0.92rem;
+        }
+        .item-row:last-child { border-bottom: none; }
+        .item-row .store { font-size: 0.78rem; color: #7f8c8d; display: block; }
+        .total-line {
+            display: flex;
+            justify-content: space-between;
+            padding-top: 12px;
+            margin-top: 8px;
+            border-top: 2px solid #e94560;
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #e94560;
+        }
+        .status-badge {
+            display: inline-block;
+            padding: 4px 14px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+        .status-pending_payment { background: #fff3cd; color: #856404; }
+        .status-payment_submitted { background: #cce5ff; color: #004085; }
+        .status-confirmed { background: #d4edda; color: #155724; }
+        .status-shipped { background: #d1ecf1; color: #0c5460; }
+        .status-completed { background: #d4edda; color: #155724; }
+        .status-cancelled { background: #f8d7da; color: #721c24; }
+        .proof-image {
+            max-width: 100%;
+            max-height: 300px;
+            border-radius: 8px;
+            margin-top: 8px;
+        }
+        .btn-back {
+            display: inline-block;
+            margin-bottom: 12px;
+            color: #6c757d;
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>🛒 Mi Marketplace</h1>
+            <nav>
+                <a href="/">🏠 Inicio</a>
+                <a href="{% url 'orders:list' %}">📋 Mis pedidos</a>
+                <span class="header-user">👤 {{ user.username }}</span>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <div class="container">
+            <div class="detail-wrapper">
+                <a href="{% url 'orders:list' %}" class="btn-back">← Volver a mis pedidos</a>
+
+                <div class="detail-card">
+                    <h2>Pedido #{{ order.pk }}</h2>
+                    <div class="detail-row">
+                        <span class="label">Estado</span>
+                        <span class="status-badge status-{{ order.status }}">
+                            {{ order.get_status_display }}
+                        </span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="label">Fecha</span>
+                        <span class="value">{{ order.created_at|date:"d/m/Y H:i" }}</span>
+                    </div>
+                </div>
+
+                <div class="detail-card">
+                    <h2>📦 Productos</h2>
+                    {% for item in order.items.all %}
+                        <div class="item-row">
+                            <div>
+                                <span>{{ item.quantity }} × {{ item.product_name }}</span>
+                                <span class="store">🏪 {{ item.store.name }}</span>
+                            </div>
+                            <div style="text-align: right;">
+                                <div style="color: #7f8c8d; font-size: 0.82rem;">
+                                    ${{ item.product_price|floatformat:2 }} c/u
+                                </div>
+                                <div style="font-weight: 600;">${{ item.get_subtotal|floatformat:2 }}</div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                    <div class="total-line">
+                        <span>Total</span>
+                        <span>${{ order.total|floatformat:2 }}</span>
+                    </div>
+                </div>
+
+                <div class="detail-card">
+                    <h2>💳 Datos del pago</h2>
+                    <div class="detail-row">
+                        <span class="label">Banco emisor</span>
+                        <span class="value">{{ order.payment_bank|default:"—" }}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="label">Referencia</span>
+                        <span class="value">{{ order.payment_reference|default:"—" }}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="label">Fecha del pago</span>
+                        <span class="value">{{ order.payment_date|date:"d/m/Y"|default:"—" }}</span>
+                    </div>
+                    {% if order.payment_proof %}
+                        <div style="margin-top: 12px;">
+                            <span class="label">Comprobante:</span>
+                            <img src="{{ order.payment_proof.url }}" alt="Comprobante" class="proof-image">
+                        </div>
+                    {% endif %}
+                    {% if order.notes %}
+                        <div class="detail-row" style="margin-top: 8px;">
+                            <span class="label">Notas</span>
+                            <span class="value">{{ order.notes }}</span>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </main>
+</body>
+</html>

@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Finalizar compra - Mi Marketplace</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <style>
+        .checkout-wrapper {
+            max-width: 1000px;
+            margin: 24px auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        .checkout-card {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+        .checkout-card h2 {
+            margin: 0 0 16px;
+            font-size: 1.3rem;
+            color: #1a1a2e;
+        }
+        .checkout-card h3 {
+            margin: 20px 0 10px;
+            font-size: 1rem;
+            color: #444;
+        }
+        .order-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 0.92rem;
+        }
+        .order-item:last-child { border-bottom: none; }
+        .order-item .name { font-weight: 600; color: #2c3e50; }
+        .order-item .store { font-size: 0.78rem; color: #7f8c8d; display: block; }
+        .order-item .qty { color: #7f8c8d; }
+        .order-total {
+            display: flex;
+            justify-content: space-between;
+            padding: 14px 0 0;
+            margin-top: 10px;
+            border-top: 2px solid #e94560;
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #e94560;
+        }
+        .bank-info {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 18px;
+            border-left: 4px solid #e94560;
+        }
+        .bank-info h3 {
+            margin: 0 0 10px !important;
+            font-size: 1rem;
+            color: #1a1a2e;
+        }
+        .bank-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 4px 0;
+            font-size: 0.88rem;
+        }
+        .bank-row strong { color: #2c3e50; }
+        .bank-row span { color: #555; text-align: right; }
+        .form-control {
+            width: 100%;
+            padding: 10px 12px;
+            border: 2px solid #e1e5ea;
+            border-radius: 8px;
+            font-size: 0.92rem;
+            font-family: inherit;
+            transition: border-color 0.3s;
+            margin-bottom: 4px;
+        }
+        .form-control:focus {
+            outline: none;
+            border-color: #e94560;
+        }
+        .form-row { margin-bottom: 14px; }
+        .form-row label {
+            display: block;
+            font-size: 0.83rem;
+            font-weight: 600;
+            color: #444;
+            margin-bottom: 5px;
+        }
+        .form-errors {
+            color: #c0392b;
+            font-size: 0.8rem;
+            margin-top: 3px;
+        }
+        .btn-checkout {
+            width: 100%;
+            padding: 14px;
+            background: #28a745;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s;
+            margin-top: 8px;
+        }
+        .btn-checkout:hover { background: #218838; }
+        .btn-back {
+            display: inline-block;
+            margin-top: 10px;
+            color: #6c757d;
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+        @media (max-width: 768px) {
+            .checkout-wrapper { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>🛒 Mi Marketplace</h1>
+            <nav>
+                <a href="/">🏠 Inicio</a>
+                <a href="{% url 'cart:view' %}">🛒 Carrito</a>
+                <span class="header-user">👤 {{ user.username }}</span>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <div class="container">
+            {% if messages %}
+                <div class="messages" style="margin: 16px 0;">
+                    {% for message in messages %}
+                        <p class="message {{ message.tags }}">{{ message }}</p>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <div class="checkout-wrapper">
+                <!-- COLUMNA IZQUIERDA: Resumen del pedido -->
+                <div class="checkout-card">
+                    <h2>📦 Resumen del pedido</h2>
+
+                    {% for item in items %}
+                        <div class="order-item">
+                            <div>
+                                <span class="name">{{ item.product.name }}</span>
+                                <span class="store">🏪 {{ item.product.store.name }}</span>
+                            </div>
+                            <div style="text-align: right;">
+                                <div class="qty">{{ item.quantity }} × ${{ item.price|floatformat:2 }}</div>
+                                <div style="font-weight: 600;">${{ item.get_total|floatformat:2 }}</div>
+                            </div>
+                        </div>
+                    {% endfor %}
+
+                    <div class="order-total">
+                        <span>Total</span>
+                        <span>${{ cart.get_total|floatformat:2 }}</span>
+                    </div>
+
+                    <a href="{% url 'cart:view' %}" class="btn-back">← Volver al carrito</a>
+                </div>
+
+                <!-- COLUMNA DERECHA: Datos bancarios + formulario -->
+                <div class="checkout-card">
+                    <h2>💳 Registrar tu pago</h2>
+
+                    <div class="bank-info">
+                        <h3>Datos para la transferencia</h3>
+                        <div class="bank-row">
+                            <strong>Banco:</strong>
+                            <span>{{ bank_info.bank_name }}</span>
+                        </div>
+                        <div class="bank-row">
+                            <strong>Cuenta:</strong>
+                            <span>{{ bank_info.account_number }}</span>
+                        </div>
+                        <div class="bank-row">
+                            <strong>Titular:</strong>
+                            <span>{{ bank_info.account_holder }}</span>
+                        </div>
+                        <div class="bank-row">
+                            <strong>RIF:</strong>
+                            <span>{{ bank_info.rif }}</span>
+                        </div>
+                        <div class="bank-row">
+                            <strong>Email:</strong>
+                            <span>{{ bank_info.email }}</span>
+                        </div>
+                    </div>
+
+                    <p style="font-size: 0.85rem; color: #666; margin-bottom: 14px;">
+                        Realiza la transferencia por el monto total y luego completa los datos aquí.
+                    </p>
+
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+
+                        {% for field in form %}
+                            <div class="form-row">
+                                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                                {{ field }}
+                                {% if field.errors %}
+                                    <div class="form-errors">
+                                        {% for error in field.errors %}{{ error }}{% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+
+                        <button type="submit" class="btn-checkout">
+                            ✅ Confirmar pedido
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </main>
+</body>
+</html>
