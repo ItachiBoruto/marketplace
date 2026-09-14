@@ -16,6 +16,7 @@ urlpatterns = [
 
     path('stores/', include('apps.stores.urls')),
     path('cart/', include('apps.cart.urls')),
-    path('orders/', include('apps.orders.urls')),   # ← NUEVO
+    path('orders/', include('apps.orders.urls')),
+    path('notifications/', include('apps.notifications.urls')),   # ← NUEVO
     path('', include('apps.products.urls')),
 ]

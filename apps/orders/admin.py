@@ -1,5 +1,6 @@
 from django.contrib import admin, messages
 
+from apps.notifications.models import notify
 from .models import ExchangeRate, Order, OrderItem
 from .services import release_order_stock
 
@@ -55,6 +56,13 @@ class OrderAdmin(admin.ModelAdmin):
             if order.status == 'payment_submitted':
                 order.status = 'confirmed'
                 order.save(update_fields=['status'])
+                notify(
+                    order.user,
+                    'payment_confirmed',
+                    f'Pago confirmado - Pedido #{order.pk}',
+                    'Verificamos tu pago. Los comercios están preparando tu pedido.',
+                    link=f'/orders/{order.pk}/'
+                )
                 count += 1
         self.message_user(request, f'{count} pedido(s) confirmado(s).', messages.SUCCESS)
 

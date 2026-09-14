@@ -10,8 +10,18 @@ class PaymentForm(forms.ModelForm):
 
     class Meta:
         model = Order
-        fields = ('payment_bank', 'payment_reference', 'payment_date', 'payment_proof', 'notes')
+        fields = (
+            'shipping_method', 'delivery_address',
+            'payment_bank', 'payment_reference', 'payment_date',
+            'payment_proof', 'notes',
+        )
         widgets = {
+            'shipping_method': forms.RadioSelect(attrs={'class': 'shipping-radio'}),
+            'delivery_address': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 2,
+                'placeholder': 'Ej: Av. Principal, Casa 12, sector Centro, frente a la panadería',
+            }),
             'payment_bank': forms.TextInput(attrs={
                 'class': 'form-control',
                 'placeholder': 'Ej: Banco de Venezuela, Banesco, etc.'
@@ -35,12 +45,24 @@ class PaymentForm(forms.ModelForm):
             }),
         }
         labels = {
+            'shipping_method': '¿Cómo quieres recibir tu pedido?',
+            'delivery_address': 'Dirección de entrega',
             'payment_bank': 'Banco emisor',
             'payment_reference': 'Número de referencia',
             'payment_date': 'Fecha del pago',
             'payment_proof': 'Comprobante (imagen)',
             'notes': 'Notas (opcional)',
         }
+
+    def __init__(self, *args, **kwargs):
+        self.delivery_available = kwargs.pop('delivery_available', False)
+        super().__init__(*args, **kwargs)
+
+        # Si no hay delivery disponible, ocultar esa opcion
+        if not self.delivery_available:
+            self.fields['shipping_method'].choices = [('pickup', 'Retiro en tienda')]
+            self.fields['shipping_method'].initial = 'pickup'
+            self.fields['delivery_address'].widget = forms.HiddenInput()
 
     def clean_payment_reference(self):
         ref = self.cleaned_data.get('payment_reference', '').strip()
@@ -53,3 +75,24 @@ class PaymentForm(forms.ModelForm):
         if img and hasattr(img, 'size'):
             validate_image(img)
         return img
+
+    def clean(self):
+        cleaned = super().clean()
+        method = cleaned.get('shipping_method')
+        address = (cleaned.get('delivery_address') or '').strip()
+
+        if method == 'delivery':
+            if not self.delivery_available:
+                raise forms.ValidationError(
+                    'Delivery no está disponible para este pedido.'
+                )
+            if len(address) < 10:
+                self.add_error(
+                    'delivery_address',
+                    'Ingresa una dirección más detallada (mínimo 10 caracteres).'
+                )
+        else:
+            # Si es pickup, vaciar dirección
+            cleaned['delivery_address'] = ''
+
+        return cleaned

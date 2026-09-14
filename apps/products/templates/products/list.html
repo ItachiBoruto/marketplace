@@ -34,38 +34,39 @@
                 {% endif %}
             </nav>
 
-            <div class="header-search-row">
+            <div class="header-actions-row">
                 <div class="search-bar">
                     <input type="text" id="searchInput" placeholder="Buscar productos...">
                     <button id="searchBtn" aria-label="Buscar">🔍</button>
                 </div>
-                <button class="filters-toggle" id="filtersToggle" aria-label="Filtros">🔽 Filtros</button>
-            </div>
 
-            <div class="header-filters" id="headerFilters">
-                <div class="filter">
-                    <select id="storeFilter">
-                        <option value="">Todos los comercios</option>
-                        {% for store in stores %}
-                            <option value="{{ store.id }}">{{ store.name }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <div class="filter">
-                    <select id="categoryFilter">
-                        <option value="">Todas las categorías</option>
-                        {% for category in categories %}
-                            <option value="{{ category }}">{{ category }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <div class="filter">
-                    <select id="sortFilter">
-                        <option value="name">Orden alfabético</option>
-                        <option value="price">Menor precio</option>
-                        <option value="-price">Mayor precio</option>
-                        <option value="-created_at">Más recientes</option>
-                    </select>
+                <button class="filters-toggle" id="filtersToggle" aria-label="Filtros">🔽 Filtros</button>
+
+                <div class="header-filters" id="headerFilters">
+                    <div class="filter">
+                        <select id="storeFilter">
+                            <option value="">Todos los comercios</option>
+                            {% for store in stores %}
+                                <option value="{{ store.id }}">{{ store.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="filter">
+                        <select id="categoryFilter">
+                            <option value="">Todas las categorías</option>
+                            {% for category in categories %}
+                                <option value="{{ category }}">{{ category }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="filter">
+                        <select id="sortFilter">
+                            <option value="name">Orden alfabético</option>
+                            <option value="price">Menor precio</option>
+                            <option value="-price">Mayor precio</option>
+                            <option value="-created_at">Más recientes</option>
+                        </select>
+                    </div>
                 </div>
             </div>
         </div>
@@ -232,5 +233,6 @@
 
         loadProducts(1, '', '', '', 'name');
     </script>
+    <script src="{% static 'js/notifications.js' %}"></script>
 </body>
 </html>

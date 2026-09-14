@@ -32,6 +32,25 @@ class Order(models.Model):
         verbose_name='Tasa BCV al momento del pedido'
     )
 
+    # ===== Envío =====
+    SHIPPING_CHOICES = [
+        ('pickup', 'Retiro en tienda'),
+        ('delivery', 'Delivery a domicilio'),
+    ]
+    shipping_method = models.CharField(
+        max_length=10, choices=SHIPPING_CHOICES, default='pickup',
+        verbose_name='Método de entrega'
+    )
+    shipping_fee = models.DecimalField(
+        max_digits=10, decimal_places=2, default=0,
+        verbose_name='Costo de envío'
+    )
+    delivery_address = models.TextField(
+        blank=True,
+        verbose_name='Dirección de entrega',
+        help_text='Solo aplica cuando el método es delivery.'
+    )
+
     # Datos del pago (los llena el usuario)
     payment_bank = models.CharField(max_length=100, blank=True, verbose_name='Banco emisor')
     payment_reference = models.CharField(max_length=50, blank=True, verbose_name='Referencia')
@@ -64,6 +83,17 @@ class Order(models.Model):
 
     def get_total_items(self):
         return sum(item.quantity for item in self.items.all())
+
+    @property
+    def subtotal(self):
+        """Suma de productos (sin envío)."""
+        return self.total
+
+    @property
+    def grand_total(self):
+        """Total con envío incluido."""
+        from decimal import Decimal
+        return (self.total or Decimal('0')) + (self.shipping_fee or Decimal('0'))
 
     @property
     def is_reservation_active(self):

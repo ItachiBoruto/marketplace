@@ -57,7 +57,8 @@ INSTALLED_APPS = [
     'apps.products',
     'apps.inventory',
     'apps.cart',
-    'apps.orders',       # ← NUEVO
+    'apps.orders',
+    'apps.notifications',       # ← NUEVO
     'apps.audit',
     'apps.utils',
 ]
@@ -92,6 +93,7 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
                 'apps.cart.context_processors.cart_count',
                 'apps.orders.context_processors.bcv_rate',
+                'apps.notifications.context_processors.notifications_count',
             ],
         },
     },

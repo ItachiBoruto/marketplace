@@ -1,0 +1,189 @@
+{% extends "stores/dashboard/base.html" %}
+
+{% block title %}Pedido #{{ order.pk }}{% endblock %}
+
+{% block content %}
+<style>
+    .detail-card {
+        background: white;
+        border-radius: 12px;
+        padding: 20px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        margin-bottom: 16px;
+    }
+    .detail-card h2 {
+        font-size: 1.1rem;
+        margin: 0 0 14px;
+        color: #1a1a2e;
+    }
+    .info-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 8px 0;
+        border-bottom: 1px solid #f5f5f5;
+        font-size: 0.9rem;
+    }
+    .info-row:last-child { border-bottom: none; }
+    .info-row .label { color: #7f8c8d; }
+    .info-row .value { font-weight: 600; color: #2c3e50; }
+    .item-block {
+        padding: 14px;
+        border: 1px solid #e9ecef;
+        border-radius: 10px;
+        margin-bottom: 12px;
+        background: #fafbfc;
+    }
+    .item-block.confirmed { background: #eaf2f8; border-color: #aed6f1; }
+    .item-block.shipped { background: #f4ecf7; border-color: #d2b4de; }
+    .item-block.cancelled { background: #fdedec; border-color: #f5b7b1; opacity: 0.7; }
+    .item-block-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+    .item-block-title { font-weight: 700; color: #2c3e50; font-size: 1rem; }
+    .item-block-meta { font-size: 0.85rem; color: #7f8c8d; margin-top: 2px; }
+    .item-block-status {
+        display: inline-block;
+        padding: 3px 12px;
+        border-radius: 20px;
+        font-size: 0.78rem;
+        font-weight: 600;
+    }
+    .status-pending { background: #fef5e7; color: #b9770e; }
+    .status-confirmed { background: #eaf2f8; color: #21618c; }
+    .status-shipped { background: #f4ecf7; color: #6c3483; }
+    .status-delivered { background: #eafaf1; color: #229954; }
+    .status-cancelled { background: #fdedec; color: #c0392b; }
+    .item-actions {
+        margin-top: 12px;
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+    .btn {
+        padding: 8px 18px;
+        border-radius: 8px;
+        border: none;
+        cursor: pointer;
+        font-size: 0.87rem;
+        font-weight: 600;
+        font-family: inherit;
+        text-decoration: none;
+        display: inline-block;
+        transition: background 0.2s;
+    }
+    .btn-approve { background: #2ecc71; color: white; }
+    .btn-approve:hover { background: #27ae60; }
+    .btn-reject { background: #e74c3c; color: white; }
+    .btn-reject:hover { background: #c0392b; }
+    .btn-ship { background: #6c3483; color: white; }
+    .btn-ship:hover { background: #4a235a; }
+    .btn-back {
+        display: inline-block;
+        margin-bottom: 16px;
+        color: #6c757d;
+        text-decoration: none;
+        font-size: 0.9rem;
+    }
+    .btn-back:hover { color: #2c3e50; }
+    .other-items-note {
+        font-size: 0.85rem;
+        color: #7f8c8d;
+        font-style: italic;
+        text-align: center;
+        padding: 12px;
+        background: #f8f9fa;
+        border-radius: 8px;
+    }
+    .rate-note {
+        font-size: 0.78rem;
+        color: #7f8c8d;
+        margin-top: 4px;
+        text-align: right;
+    }
+</style>
+
+<a href="{% url 'stores:orders' store.id %}" class="btn-back">← Volver a pedidos</a>
+
+<div class="detail-card">
+    <h2>📋 Información del pedido</h2>
+    <div class="info-row">
+        <span class="label">Pedido #</span>
+        <span class="value">{{ order.pk }}</span>
+    </div>
+    <div class="info-row">
+        <span class="label">Fecha</span>
+        <span class="value">{{ order.created_at|date:"d/m/Y H:i" }}</span>
+    </div>
+    <div class="info-row">
+        <span class="label">Cliente</span>
+        <span class="value">{{ order.user.username }}</span>
+    </div>
+    {% if user.is_superuser or user_role == 'owner' %}
+        <div class="info-row">
+            <span class="label">Banco emisor</span>
+            <span class="value">{{ order.payment_bank|default:"—" }}</span>
+        </div>
+        <div class="info-row">
+            <span class="label">Referencia</span>
+            <span class="value">{{ order.payment_reference|default:"—" }}</span>
+        </div>
+        {% if order.payment_proof %}
+            <div class="info-row">
+                <span class="label">Comprobante</span>
+                <span class="value">
+                    <a href="{{ order.payment_proof.url }}" target="_blank">Ver imagen</a>
+                </span>
+            </div>
+        {% endif %}
+    {% endif %}
+</div>
+
+<div class="detail-card">
+    <h2>📦 Tus items en este pedido</h2>
+
+    {% for item in my_items %}
+        <div class="item-block {{ item.status }}">
+            <div class="item-block-header">
+                <div>
+                    <div class="item-block-title">{{ item.quantity }} × {{ item.product_name }}</div>
+                    <div class="item-block-meta">
+                        Precio unitario: ${{ item.product_price|floatformat:2 }}
+                        · Subtotal: <strong>${{ item.get_subtotal|floatformat:2 }}</strong>
+                    </div>
+                </div>
+                <span class="item-block-status status-{{ item.status }}">
+                    {{ item.get_status_display }}
+                </span>
+            </div>
+
+            <div class="item-actions">
+                {% if item.status == 'pending' %}
+                    <form method="post" action="{% url 'stores:order_item_approve' store.id order.pk item.pk %}" style="display: inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-approve">✅ Aprobar</button>
+                    </form>
+                    <form method="post" action="{% url 'stores:order_item_reject' store.id order.pk item.pk %}" style="display: inline;" onsubmit="return confirm('¿Rechazar este item? Se devolverá el stock.');">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-reject">❌ Rechazar</button>
+                    </form>
+                {% elif item.status == 'confirmed' %}
+                    <form method="post" action="{% url 'stores:order_item_ship' store.id order.pk item.pk %}" style="display: inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-ship">🚚 Marcar como enviado</button>
+                    </form>
+                {% endif %}
+            </div>
+        </div>
+    {% endfor %}
+
+    {% if other_items_count %}
+        <div class="other-items-note">
+            Este pedido también incluye {{ other_items_count }} item(s) de otros comercios.
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

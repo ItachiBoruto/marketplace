@@ -884,118 +884,6 @@ header nav a:hover {
 
 
 
-/* ============================================================
-   HEADER RESPONSIVE - NUEVA ESTRUCTURA
-   ============================================================ */
-.header-container {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
-.header-top {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-}
-
-.header-logo {
-    font-size: 1.6rem;
-    font-weight: 700;
-    letter-spacing: -0.5px;
-    margin: 0;
-}
-
-.header-menu-toggle {
-    display: none;
-    background: none;
-    border: 1px solid rgba(255,255,255,0.3);
-    color: white;
-    font-size: 1.3rem;
-    padding: 4px 12px;
-    border-radius: 8px;
-    cursor: pointer;
-}
-
-.header-nav {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 16px;
-    align-items: center;
-}
-
-.header-nav a {
-    color: rgba(255,255,255,0.85);
-    text-decoration: none;
-    font-size: 0.95rem;
-    padding: 4px 0;
-    border-bottom: 2px solid transparent;
-    transition: color 0.3s, border-color 0.3s;
-}
-
-.header-nav a:hover {
-    color: white;
-    border-bottom-color: var(--highlight-color);
-}
-
-.header-user {
-    color: rgba(255,255,255,0.7);
-    font-size: 0.9rem;
-    margin: 0 8px;
-}
-
-.logout-form { display: inline; margin: 0; }
-
-.logout-btn {
-    background: none;
-    border: none;
-    color: rgba(255,255,255,0.85);
-    cursor: pointer;
-    font-size: 0.95rem;
-    padding: 4px 0;
-    font-family: inherit;
-}
-
-.logout-btn:hover { color: white; }
-
-.header-search-row {
-    display: flex;
-    gap: 10px;
-    align-items: center;
-    width: 100%;
-}
-
-.header-search-row .search-bar {
-    flex: 1;
-    max-width: none;
-    min-width: 0;
-}
-
-.filters-toggle {
-    display: none;
-    background: var(--highlight-color);
-    color: white;
-    border: none;
-    border-radius: 50px;
-    padding: 10px 16px;
-    font-size: 0.9rem;
-    cursor: pointer;
-    white-space: nowrap;
-    font-family: inherit;
-}
-
-.header-filters {
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
-}
-
-.page-title {
-    margin: 16px 0;
-    font-size: 1.2rem;
-    color: var(--text-dark);
-}
 
 /* ============================================================
    PRODUCT GRID - RESPONSIVE FLUIDO
@@ -1206,19 +1094,62 @@ header nav a:hover {
 @media (min-width: 1025px) {
     .header-container {
         display: grid;
-        grid-template-columns: auto 1fr;
+        grid-template-columns: 1fr auto;
         grid-template-areas:
-            "top    top"
-            "nav    nav"
-            "search filters";
-        gap: 10px 20px;
+            "logo    nav"
+            "search  filters";
+        gap: 12px 20px;
         align-items: center;
     }
-    .header-top { grid-area: top; }
-    .header-nav { grid-area: nav; }
-    .header-search-row { grid-area: search; }
-    .header-filters { grid-area: filters; flex-wrap: nowrap; }
-    .header-search-row .search-bar { max-width: 420px; }
+
+    /* Fila 1: logo + nav juntos */
+    .header-top {
+        grid-area: logo;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+    }
+    .header-top .header-menu-toggle { display: none; }
+    .header-top .notif-wrapper { margin-left: auto; }
+
+    .header-nav {
+        grid-area: nav;
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 20px;
+        flex-wrap: nowrap;
+    }
+
+    /* Fila 2: buscador + filtros juntos */
+    .header-search-row {
+        grid-area: search;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        min-width: 0;
+    }
+    .header-search-row .search-bar {
+        flex: 1;
+        max-width: none;
+        min-width: 0;
+    }
+    .header-search-row .filters-toggle { display: none; }
+
+    .header-filters {
+        grid-area: filters;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: nowrap;
+    }
+
+    /* Separar la campana del resto cuando este en nav (fallback) */
+    .header-nav .notif-wrapper {
+        margin-left: 8px;
+        padding-left: 12px;
+        border-left: 1px solid rgba(255,255,255,0.18);
+    }
 
     .product-grid {
         grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
@@ -1475,3 +1406,660 @@ header nav a:hover {
     }
 }
 
+/* ============================================================
+   NOTIFICACIONES IN-APP (CAMPANA)
+   ============================================================ */
+.notif-wrapper {
+    position: relative;
+    display: inline-block;
+}
+.notif-bell {
+    background: none;
+    border: none;
+    color: rgba(255,255,255,0.85);
+    font-size: 1.15rem;
+    cursor: pointer;
+    padding: 4px 10px;
+    position: relative;
+    transition: color 0.2s;
+    font-family: inherit;
+}
+.notif-bell:hover {
+    color: white;
+}
+.notif-badge {
+    position: absolute;
+    top: 0;
+    right: 0;
+    background: #e94560;
+    color: white;
+    border-radius: 10px;
+    padding: 1px 6px;
+    font-size: 0.65rem;
+    font-weight: 700;
+    min-width: 16px;
+    text-align: center;
+    line-height: 1.2;
+}
+.notif-badge.bump {
+    animation: notif-bump 0.4s ease;
+}
+@keyframes notif-bump {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.4); }
+    100% { transform: scale(1); }
+}
+
+.notif-dropdown {
+    display: none;
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    width: 340px;
+    max-width: calc(100vw - 30px);
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+    z-index: 9999;
+    overflow: hidden;
+    color: #2c3e50;
+}
+.notif-dropdown.show { display: block; }
+
+.notif-dropdown-header {
+    padding: 12px 16px;
+    border-bottom: 1px solid #f0f0f0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+}
+.notif-dropdown-header strong {
+    color: #1a1a2e;
+    font-size: 0.95rem;
+}
+.notif-mark-all {
+    background: none;
+    border: none;
+    color: #3498db;
+    cursor: pointer;
+    font-size: 0.75rem;
+    font-weight: 600;
+    font-family: inherit;
+}
+.notif-mark-all:hover { text-decoration: underline; }
+
+.notif-list {
+    max-height: 360px;
+    overflow-y: auto;
+}
+.notif-form { display: block; margin: 0; }
+.notif-item {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 11px 16px;
+    border: none;
+    background: white;
+    border-bottom: 1px solid #f5f5f5;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background 0.2s;
+}
+.notif-item:hover { background: #f8f9fa; }
+.notif-item.unread {
+    background: #eaf2f8;
+    border-left: 3px solid #3498db;
+}
+.notif-item-title {
+    font-weight: 600;
+    color: #2c3e50;
+    font-size: 0.87rem;
+    margin-bottom: 2px;
+}
+.notif-item-msg {
+    color: #7f8c8d;
+    font-size: 0.78rem;
+    margin-bottom: 3px;
+    line-height: 1.3;
+}
+.notif-item-time {
+    color: #95a5a6;
+    font-size: 0.7rem;
+}
+
+.notif-dropdown-footer {
+    padding: 10px 16px;
+    text-align: center;
+    border-top: 1px solid #f0f0f0;
+    background: #fafbfc;
+}
+.notif-dropdown-footer a {
+    color: #3498db;
+    text-decoration: none;
+    font-size: 0.82rem;
+    font-weight: 600;
+}
+.notif-dropdown-footer a:hover { text-decoration: underline; }
+
+.notif-empty {
+    text-align: center;
+    padding: 30px 20px;
+    color: #95a5a6;
+    font-size: 0.85rem;
+}
+.notif-empty .icon {
+    font-size: 2rem;
+    display: block;
+    margin-bottom: 6px;
+}
+.notif-empty p { margin: 0; }
+
+.notif-loading {
+    padding: 24px;
+    text-align: center;
+    color: #95a5a6;
+    font-size: 0.85rem;
+}
+
+@media (max-width: 480px) {
+    .notif-dropdown {
+        width: calc(100vw - 20px);
+        right: -10px;
+    }
+}
+
+/* ============================================================
+   HEADER RESPONSIVE - VERSION LIMPIA (override final)
+   ============================================================ */
+.header-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.header-top {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    width: 100%;
+}
+.header-logo {
+    font-size: 1.6rem;
+    font-weight: 700;
+    margin: 0;
+    white-space: nowrap;
+}
+.header-menu-toggle {
+    display: none;
+    background: none;
+    border: 1px solid rgba(255,255,255,0.3);
+    color: white;
+    font-size: 1.3rem;
+    padding: 4px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    margin-left: auto;
+}
+.header-top .notif-wrapper { margin-left: auto; }
+.header-top .notif-wrapper + .header-menu-toggle { margin-left: 8px; }
+
+.header-nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    align-items: center;
+}
+.header-nav a {
+    color: rgba(255,255,255,0.85);
+    text-decoration: none;
+    font-size: 0.95rem;
+    padding: 4px 0;
+    border-bottom: 2px solid transparent;
+    transition: color 0.3s, border-color 0.3s;
+}
+.header-nav a:hover {
+    color: white;
+    border-bottom-color: var(--highlight-color);
+}
+.header-user {
+    color: rgba(255,255,255,0.7);
+    font-size: 0.9rem;
+}
+.logout-form { display: inline; margin: 0; }
+.logout-btn {
+    background: none;
+    border: none;
+    color: rgba(255,255,255,0.85);
+    cursor: pointer;
+    font-size: 0.95rem;
+    padding: 4px 0;
+    font-family: inherit;
+}
+.logout-btn:hover { color: white; }
+
+.header-search-row {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    width: 100%;
+}
+.header-search-row .search-bar {
+    flex: 1;
+    max-width: none;
+    min-width: 0;
+}
+
+.filters-toggle {
+    display: none;
+    background: var(--highlight-color);
+    color: white;
+    border: none;
+    border-radius: 50px;
+    padding: 10px 16px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    white-space: nowrap;
+    font-family: inherit;
+}
+
+.header-filters {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+/* ============ TABLET Y MOBILE (hasta 1024px) ============ */
+@media (max-width: 1024px) {
+    .header-menu-toggle { display: block; }
+    .header-top .notif-wrapper { margin-left: auto; }
+
+    .header-nav {
+        display: none;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 8px;
+        padding: 10px 0;
+        border-top: 1px solid rgba(255,255,255,0.15);
+        margin-top: 6px;
+    }
+    .header-nav.open { display: flex; }
+    .header-nav a {
+        padding: 8px 0;
+        border-bottom: none;
+        font-size: 0.9rem;
+    }
+    .header-user { margin: 0; font-size: 0.85rem; }
+
+    .filters-toggle { display: block; padding: 9px 14px; font-size: 0.85rem; }
+
+    .header-filters {
+        display: none;
+        flex-direction: column;
+        gap: 8px;
+        padding: 10px 0;
+        border-top: 1px solid rgba(255,255,255,0.15);
+        width: 100%;
+    }
+    .header-filters.open { display: flex; }
+    .header-filters .filter { width: 100%; }
+    .header-filters .filter select { width: 100%; }
+}
+
+/* ============ DESKTOP (1025px+) ============ */
+@media (min-width: 1025px) {
+    .header-container {
+        display: grid;
+        grid-template-columns: auto 1fr;
+        grid-template-areas:
+            "top     nav"
+            "search  filters";
+        gap: 12px 24px;
+        align-items: center;
+    }
+
+    .header-top {
+        grid-area: top;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+    .header-top .header-menu-toggle { display: none; }
+    .header-top .notif-wrapper { margin-left: 0; }
+
+    .header-nav {
+        grid-area: nav;
+        display: flex;
+        flex-wrap: nowrap;
+        justify-content: flex-end;
+        gap: 20px;
+    }
+
+    .header-search-row {
+        grid-area: search;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        min-width: 0;
+    }
+    .header-search-row .search-bar {
+        flex: 1;
+        max-width: none;
+        min-width: 0;
+    }
+    .header-search-row .filters-toggle { display: none; }
+
+    .header-filters {
+        grid-area: filters;
+        display: flex;
+        flex-wrap: nowrap;
+        align-items: center;
+        gap: 10px;
+        justify-content: flex-end;
+    }
+    .header-filters .filter select {
+        padding: 9px 14px;
+        font-size: 0.88rem;
+        min-width: 130px;
+    }
+}
+
+/* ============ MOBILE PEQUENO (hasta 380px) ============ */
+@media (max-width: 380px) {
+    .header-logo { font-size: 1.05rem; }
+    .search-bar input { padding: 8px 12px; font-size: 0.85rem; }
+    .filters-toggle { padding: 8px 12px; font-size: 0.8rem; }
+}
+
+/* ============================================================
+   HEADER GRID - OVERRIDE FORZADO (mayor especificidad)
+   ============================================================ */
+@media (min-width: 1025px) {
+    header .container.header-container {
+        display: grid !important;
+        grid-template-columns: auto 1fr !important;
+        grid-template-areas:
+            "top     nav"
+            "search  filters" !important;
+        gap: 12px 24px !important;
+        align-items: center !important;
+    }
+
+    header .container.header-container .header-top {
+        grid-area: top !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: flex-start !important;
+        flex-wrap: nowrap !important;
+        gap: 12px !important;
+        width: auto !important;
+    }
+
+    header .container.header-container .header-nav {
+        grid-area: nav !important;
+        display: flex !important;
+        flex-wrap: nowrap !important;
+        justify-content: flex-end !important;
+        align-items: center !important;
+        gap: 20px !important;
+    }
+
+    header .container.header-container .header-search-row {
+        grid-area: search !important;
+        display: flex !important;
+        align-items: center !important;
+        gap: 10px !important;
+        min-width: 0 !important;
+        width: 100% !important;
+    }
+
+    header .container.header-container .header-search-row .search-bar {
+        flex: 1 1 auto !important;
+        max-width: none !important;
+        min-width: 0 !important;
+        width: auto !important;
+    }
+
+    header .container.header-container .header-search-row .filters-toggle {
+        display: none !important;
+    }
+
+    header .container.header-container .header-filters {
+        grid-area: filters !important;
+        display: flex !important;
+        flex-wrap: nowrap !important;
+        align-items: center !important;
+        justify-content: flex-end !important;
+        gap: 10px !important;
+        width: auto !important;
+    }
+
+    header .container.header-container .header-filters .filter {
+        display: inline-block !important;
+        width: auto !important;
+    }
+
+    header .container.header-container .header-filters .filter select {
+        width: auto !important;
+        padding: 9px 14px !important;
+        font-size: 0.88rem !important;
+        min-width: 130px !important;
+    }
+}
+
+/* ============================================================
+   HEADER ACTIONS ROW - 4 BOTONES EN FILA
+   ============================================================ */
+.header-actions-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+}
+
+/* Buscador: flexible pero acotado */
+.header-actions-row .search-bar {
+    display: flex;
+    align-items: center;
+    flex: 1 1 auto;
+    max-width: 320px;
+    min-width: 180px;
+    height: 40px;
+    border-radius: 50px;
+    overflow: hidden;
+    background: white;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+.header-actions-row .search-bar input {
+    flex: 1;
+    border: none;
+    outline: none;
+    padding: 0 16px;
+    height: 100%;
+    font-size: 0.88rem;
+    font-family: inherit;
+    background: transparent;
+    color: #2c3e50;
+}
+.header-actions-row .search-bar input::placeholder {
+    color: #95a5a6;
+}
+.header-actions-row .search-bar button {
+    background: var(--highlight-color);
+    color: white;
+    border: none;
+    padding: 0 16px;
+    height: 100%;
+    cursor: pointer;
+    font-size: 0.95rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+}
+.header-actions-row .search-bar button:hover {
+    background: #c0392b;
+}
+
+/* Filtros: mismo tamaño que el buscador */
+.header-actions-row .header-filters {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: nowrap;
+}
+.header-actions-row .header-filters .filter {
+    display: inline-block;
+}
+.header-actions-row .header-filters .filter select {
+    height: 40px;
+    padding: 0 14px;
+    border: none;
+    border-radius: 50px;
+    font-size: 0.88rem;
+    font-family: inherit;
+    background: white;
+    color: #2c3e50;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    min-width: 140px;
+    transition: box-shadow 0.2s;
+}
+.header-actions-row .header-filters .filter select:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+}
+
+/* Boton toggle de filtros en mobile */
+.header-actions-row .filters-toggle {
+    display: none;
+    background: var(--highlight-color);
+    color: white;
+    border: none;
+    border-radius: 50px;
+    padding: 10px 16px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    white-space: nowrap;
+    font-family: inherit;
+}
+
+/* ============ DESKTOP (1025px+) ============ */
+@media (min-width: 1025px) {
+    header .container.header-container {
+        display: grid !important;
+        grid-template-columns: auto 1fr !important;
+        grid-template-areas:
+            "top   nav"
+            "search search" !important;
+        gap: 12px 24px !important;
+        align-items: center !important;
+    }
+
+    header .container.header-container .header-top {
+        grid-area: top !important;
+        display: flex !important;
+        align-items: center !important;
+        gap: 12px !important;
+        width: auto !important;
+    }
+
+    header .container.header-container .header-nav {
+        grid-area: nav !important;
+        display: flex !important;
+        flex-wrap: nowrap !important;
+        justify-content: flex-end !important;
+        gap: 20px !important;
+    }
+
+    /* La fila de acciones ocupa todo el ancho */
+    header .container.header-container .header-actions-row {
+        grid-area: search !important;
+        justify-content: flex-end !important;
+        gap: 10px !important;
+    }
+
+    /* El buscador no se estira demasiado */
+    header .container.header-container .header-actions-row .search-bar {
+        flex: 0 1 320px !important;
+        max-width: 320px !important;
+    }
+
+    /* Filtros: los 3 juntos */
+    header .container.header-container .header-actions-row .header-filters {
+        display: flex !important;
+        gap: 10px !important;
+    }
+}
+
+/* ============ TABLET Y MOBILE (hasta 1024px) ============ */
+@media (max-width: 1024px) {
+    .header-actions-row {
+        flex-wrap: wrap;
+    }
+    .header-actions-row .search-bar {
+        flex: 1 1 auto;
+        min-width: 0;
+        max-width: none;
+    }
+    .header-actions-row .filters-toggle {
+        display: block;
+        flex-shrink: 0;
+    }
+    .header-actions-row .header-filters {
+        display: none;
+        flex-direction: column;
+        width: 100%;
+        gap: 8px;
+        padding: 10px 0;
+        border-top: 1px solid rgba(255,255,255,0.15);
+        margin-top: 6px;
+    }
+    .header-actions-row .header-filters.open {
+        display: flex;
+    }
+    .header-actions-row .header-filters .filter,
+    .header-actions-row .header-filters .filter select {
+        width: 100%;
+    }
+    .header-actions-row .header-filters .filter select {
+        height: 40px;
+        border-radius: 8px;
+    }
+}
+
+/* ============================================================
+   HEADER SEARCH MATCH FILTERS (override final)
+   ============================================================ */
+@media (min-width: 1025px) {
+    /* El buscador y su caja interna: mismo width que un filtro */
+    header .container.header-container .header-actions-row .search-bar,
+    header .container.header-container .header-actions-row .header-filters .filter select {
+        height: 40px !important;
+        min-width: 160px !important;
+        max-width: 160px !important;
+        flex: 0 0 160px !important;
+        box-sizing: border-box !important;
+        border-radius: 50px !important;
+        font-size: 0.88rem !important;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08) !important;
+    }
+
+    /* Input y boton interno: altura 100% */
+    header .container.header-container .header-actions-row .search-bar input {
+        height: 100% !important;
+        padding: 0 14px !important;
+        font-size: 0.85rem !important;
+        min-width: 0 !important;
+    }
+    header .container.header-container .header-actions-row .search-bar button {
+        height: 100% !important;
+        padding: 0 12px !important;
+        font-size: 0.9rem !important;
+    }
+
+    /* Filtros: mismo ancho */
+    header .container.header-container .header-actions-row .header-filters .filter select {
+        padding: 0 14px !important;
+    }
+}

@@ -11,6 +11,19 @@ class Store(models.Model):
     logo = models.ImageField(upload_to='stores/logos/', blank=True, null=True, verbose_name="Logo")
     description = models.TextField(blank=True, verbose_name="Descripción")
     is_active = models.BooleanField(default=True, verbose_name="¿Activo?")
+
+    # ===== Delivery =====
+    offers_delivery = models.BooleanField(
+        default=False,
+        verbose_name="¿Ofrece delivery?",
+        help_text="Activa para permitir a los clientes pedir envío a domicilio."
+    )
+    delivery_fee = models.DecimalField(
+        max_digits=10, decimal_places=2, default=0,
+        verbose_name="Tarifa de delivery",
+        help_text="Monto en dólares que se cobrará por el envío."
+    )
+
     created_at = models.DateTimeField(auto_now_add=True)
     
     users = models.ManyToManyField(

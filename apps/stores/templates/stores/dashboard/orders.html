@@ -1,0 +1,199 @@
+{% extends "stores/dashboard/base.html" %}
+
+{% block title %}Pedidos{% endblock %}
+
+{% block content %}
+<style>
+    .orders-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-bottom: 16px;
+    }
+    .filters-bar {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin-bottom: 20px;
+    }
+    .filter-btn {
+        padding: 8px 16px;
+        border-radius: 50px;
+        background: #f0f2f5;
+        color: #444;
+        text-decoration: none;
+        font-size: 0.88rem;
+        font-weight: 600;
+        transition: background 0.2s;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+    .filter-btn:hover { background: #e2e6ea; }
+    .filter-btn.active { background: #1a1a2e; color: white; }
+    .filter-btn .count {
+        background: rgba(255,255,255,0.25);
+        border-radius: 10px;
+        padding: 1px 7px;
+        font-size: 0.75rem;
+    }
+    .filter-btn:not(.active) .count {
+        background: #1a1a2e;
+        color: white;
+    }
+    .order-card {
+        background: white;
+        border-radius: 12px;
+        padding: 16px 20px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        margin-bottom: 12px;
+        border-left: 4px solid #e9ecef;
+        transition: box-shadow 0.2s;
+    }
+    .order-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.1); }
+    .order-card.pending { border-left-color: #f39c12; }
+    .order-card.confirmed { border-left-color: #3498db; }
+    .order-card.shipped { border-left-color: #9b59b6; }
+    .order-card.cancelled { border-left-color: #e74c3c; opacity: 0.8; }
+    .order-card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 8px;
+    }
+    .order-id {
+        font-weight: 700;
+        color: #1a1a2e;
+        font-size: 1.05rem;
+    }
+    .order-meta {
+        font-size: 0.82rem;
+        color: #7f8c8d;
+    }
+    .order-items-preview {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        margin: 8px 0;
+    }
+    .order-item-line {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.88rem;
+        padding: 4px 0;
+        border-bottom: 1px solid #f5f5f5;
+    }
+    .order-item-line:last-child { border-bottom: none; }
+    .order-item-line .status-mini {
+        font-size: 0.72rem;
+        padding: 1px 8px;
+        border-radius: 10px;
+        font-weight: 600;
+    }
+    .status-mini.pending { background: #fef5e7; color: #b9770e; }
+    .status-mini.confirmed { background: #eaf2f8; color: #21618c; }
+    .status-mini.shipped { background: #f4ecf7; color: #6c3483; }
+    .status-mini.delivered { background: #eafaf1; color: #229954; }
+    .status-mini.cancelled { background: #fdedec; color: #c0392b; }
+    .order-actions {
+        margin-top: 8px;
+        text-align: right;
+    }
+    .btn-view {
+        display: inline-block;
+        padding: 6px 16px;
+        background: #1a1a2e;
+        color: white;
+        text-decoration: none;
+        border-radius: 6px;
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+    .btn-view:hover { background: #0f3460; }
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: #7f8c8d;
+        background: white;
+        border-radius: 12px;
+    }
+    .empty-state h3 { margin-bottom: 8px; color: #2c3e50; }
+    .empty-icon { font-size: 3rem; margin-bottom: 12px; }
+</style>
+
+<div class="orders-header">
+    <h1 style="margin: 0;">📦 Pedidos de {{ store.name }}</h1>
+</div>
+
+<div class="filters-bar">
+    <a href="?status=pending" class="filter-btn {% if current_status == 'pending' %}active{% endif %}">
+        Pendientes <span class="count">{{ count_pending }}</span>
+    </a>
+    <a href="?status=confirmed" class="filter-btn {% if current_status == 'confirmed' %}active{% endif %}">
+        Confirmados <span class="count">{{ count_confirmed }}</span>
+    </a>
+    <a href="?status=shipped" class="filter-btn {% if current_status == 'shipped' %}active{% endif %}">
+        Enviados <span class="count">{{ count_shipped }}</span>
+    </a>
+    <a href="?status=cancelled" class="filter-btn {% if current_status == 'cancelled' %}active{% endif %}">
+        Rechazados <span class="count">{{ count_cancelled }}</span>
+    </a>
+    <a href="?status=all" class="filter-btn {% if current_status == 'all' %}active{% endif %}">
+        Todos
+    </a>
+</div>
+
+{% for order in orders %}
+    <div class="order-card {{ order.status }}">
+        <div class="order-card-header">
+            <div>
+                <span class="order-id">Pedido #{{ order.pk }}</span>
+                <span class="order-meta"> · {{ order.created_at|date:"d/m/Y H:i" }}</span>
+            </div>
+            <span class="order-meta">Cliente: <strong>{{ order.user.username }}</strong></span>
+        </div>
+
+        <div class="order-items-preview">
+            {% for item in order.items.all %}
+                {% if item.store == store %}
+                    <div class="order-item-line">
+                        <span>{{ item.quantity }} × {{ item.product_name }}</span>
+                        <span>
+                            ${{ item.get_subtotal|floatformat:2 }}
+                            <span class="status-mini {{ item.status }}">{{ item.get_status_display }}</span>
+                        </span>
+                    </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+
+        <div class="order-actions">
+            <a href="{% url 'stores:order_detail' store.id order.pk %}" class="btn-view">
+                Ver detalle →
+            </a>
+        </div>
+    </div>
+{% empty %}
+    <div class="empty-state">
+        <div class="empty-icon">📭</div>
+        <h3>No hay pedidos {{ current_status }}</h3>
+        <p>Cuando recibas pedidos aparecerán aquí.</p>
+    </div>
+{% endfor %}
+
+{% if is_paginated %}
+    <div style="text-align: center; margin-top: 20px;">
+        {% if page_obj.has_previous %}
+            <a href="?status={{ current_status }}&page={{ page_obj.previous_page_number }}">← Anterior</a>
+        {% endif %}
+        <span style="margin: 0 12px;">Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+        {% if page_obj.has_next %}
+            <a href="?status={{ current_status }}&page={{ page_obj.next_page_number }}">Siguiente →</a>
+        {% endif %}
+    </div>
+{% endif %}
+{% endblock %}

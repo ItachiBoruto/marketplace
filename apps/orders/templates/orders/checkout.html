@@ -26,6 +26,11 @@
             font-size: 1.3rem;
             color: #1a1a2e;
         }
+        .checkout-card h3 {
+            margin: 20px 0 10px;
+            font-size: 1rem;
+            color: #444;
+        }
         .order-item {
             display: flex;
             justify-content: space-between;
@@ -37,6 +42,13 @@
         .order-item .name { font-weight: 600; color: #2c3e50; }
         .order-item .store { font-size: 0.78rem; color: #7f8c8d; display: block; }
         .order-item .qty { color: #7f8c8d; }
+        .summary-line {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            font-size: 0.92rem;
+            color: #555;
+        }
         .order-total {
             display: flex;
             justify-content: space-between;
@@ -47,6 +59,19 @@
             font-weight: 700;
             color: #e94560;
         }
+        .order-total-bs {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px 0 0;
+            font-size: 1rem;
+            color: #2c3e50;
+        }
+        .rate-note {
+            font-size: 0.78rem;
+            color: #7f8c8d;
+            margin: 4px 0 0;
+            text-align: right;
+        }
         .bank-info {
             background: #f8f9fa;
             border-radius: 8px;
@@ -55,71 +80,10 @@
             border-left: 4px solid #e94560;
         }
         .bank-info h3 {
-            margin: 0 0 10px;
+            margin: 0 0 10px !important;
             font-size: 1rem;
             color: #1a1a2e;
         }
-        .bank-row {
-            display: flex;
-            justify-content: space-between;
-            padding: 4px 0;
-            font-size: 0.88rem;
-        }
-        .bank-row strong { color: #2c3e50; }
-        .bank-row span { color: #555; text-align: right; }
-        .form-control {
-            width: 100%;
-            padding: 10px 12px;
-            border: 2px solid #e1e5ea;
-            border-radius: 8px;
-            font-size: 0.92rem;
-            font-family: inherit;
-            transition: border-color 0.3s;
-            margin-bottom: 4px;
-            box-sizing: border-box;
-        }
-        .form-control:focus {
-            outline: none;
-            border-color: #e94560;
-        }
-        .form-row { margin-bottom: 14px; }
-        .form-row label {
-            display: block;
-            font-size: 0.83rem;
-            font-weight: 600;
-            color: #444;
-            margin-bottom: 5px;
-        }
-        .form-errors {
-            color: #c0392b;
-            font-size: 0.8rem;
-            margin-top: 3px;
-        }
-        .btn-checkout {
-            width: 100%;
-            padding: 14px;
-            background: #28a745;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: background 0.3s;
-            margin-top: 8px;
-        }
-        .btn-checkout:hover { background: #218838; }
-        .btn-back {
-            display: inline-block;
-            margin-top: 10px;
-            color: #6c757d;
-            text-decoration: none;
-            font-size: 0.9rem;
-        }
-        @media (max-width: 768px) {
-            .checkout-wrapper { grid-template-columns: 1fr; }
-        }
-    
         .bank-row-copy {
             display: flex;
             align-items: center;
@@ -130,9 +94,12 @@
         }
         .bank-row-copy .bank-row {
             flex: 1;
-            border-bottom: none;
+            display: flex;
+            justify-content: space-between;
             padding: 0;
         }
+        .bank-row strong { color: #2c3e50; }
+        .bank-row span { color: #555; }
         .btn-copy {
             background: #f0f2f5;
             border: 1px solid #dee2e6;
@@ -140,7 +107,6 @@
             padding: 4px 10px;
             font-size: 0.85rem;
             cursor: pointer;
-            transition: background 0.2s;
             flex-shrink: 0;
         }
         .btn-copy:hover { background: #e2e6ea; }
@@ -170,24 +136,128 @@
             font-size: 0.9rem;
             font-weight: 600;
             cursor: pointer;
-            transition: background 0.3s;
             margin-top: 6px;
         }
         .btn-copy-all:hover { background: #16213e; }
 
-        .order-total-bs {
-            display: flex;
-            justify-content: space-between;
-            padding: 8px 0 0;
-            font-size: 1.15rem;
-            font-weight: 600;
-            color: #2c3e50;
+        /* ===== ENVIO ===== */
+        .shipping-options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 16px;
         }
-        .rate-note {
+        .shipping-option {
+            display: block;
+            cursor: pointer;
+            position: relative;
+        }
+        .shipping-option input[type="radio"] {
+            position: absolute;
+            opacity: 0;
+            pointer-events: none;
+        }
+        .shipping-option .box {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            padding: 14px;
+            border: 2px solid #e1e5ea;
+            border-radius: 10px;
+            background: white;
+            transition: all 0.2s;
+        }
+        .shipping-option .box:hover {
+            border-color: #c8d1da;
+        }
+        .shipping-option .icon-title {
+            font-weight: 700;
+            color: #2c3e50;
+            font-size: 0.95rem;
+        }
+        .shipping-option .subtitle {
             font-size: 0.78rem;
             color: #7f8c8d;
-            margin: 4px 0 0;
-            text-align: right;
+        }
+        .shipping-option .fee {
+            font-size: 0.88rem;
+            font-weight: 600;
+            color: #e94560;
+            margin-top: 4px;
+        }
+        .shipping-option .fee.free {
+            color: #2ecc71;
+        }
+        .shipping-option input[type="radio"]:checked + .box {
+            border-color: #e94560;
+            background: #fff5f7;
+        }
+
+        .form-row { margin-bottom: 14px; }
+        .form-row label {
+            display: block;
+            font-size: 0.83rem;
+            font-weight: 600;
+            color: #444;
+            margin-bottom: 5px;
+        }
+        .form-control {
+            width: 100%;
+            padding: 10px 12px;
+            border: 2px solid #e1e5ea;
+            border-radius: 8px;
+            font-size: 0.92rem;
+            font-family: inherit;
+            box-sizing: border-box;
+        }
+        .form-control:focus {
+            outline: none;
+            border-color: #e94560;
+        }
+        .form-errors {
+            color: #c0392b;
+            font-size: 0.8rem;
+            margin-top: 3px;
+        }
+        .delivery-address-block {
+            display: none;
+            margin: 12px 0 16px;
+        }
+        .delivery-address-block.show { display: block; }
+
+        .btn-checkout {
+            width: 100%;
+            padding: 14px;
+            background: #28a745;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 8px;
+        }
+        .btn-checkout:hover { background: #218838; }
+        .btn-back {
+            display: inline-block;
+            margin-top: 10px;
+            color: #6c757d;
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+        .notice {
+            background: #fef5e7;
+            color: #856404;
+            padding: 10px 14px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            margin-bottom: 14px;
+            border-left: 4px solid #f39c12;
+        }
+
+        @media (max-width: 768px) {
+            .checkout-wrapper { grid-template-columns: 1fr; }
+            .shipping-options { grid-template-columns: 1fr; }
         }
     </style>
 </head>
@@ -197,7 +267,7 @@
             <h1>🛒 Mi Marketplace</h1>
             <nav>
                 <a href="/">🏠 Inicio</a>
-                <a href="{% url 'cart:view' %}">🛒 Carrito{% if cart_count %} <span class="cart-count-badge">{{ cart_count }}</span>{% endif %}</a>
+                <a href="{% url 'cart:view' %}">🛒 Carrito</a>
                 <span style="color: rgba(255,255,255,0.7); margin: 0 10px;">👤 {{ user.username }}</span>
             </nav>
         </div>
@@ -214,6 +284,7 @@
             {% endif %}
 
             <div class="checkout-wrapper">
+                <!-- RESUMEN -->
                 <div class="checkout-card">
                     <h2>📦 Resumen del pedido</h2>
 
@@ -230,83 +301,72 @@
                         </div>
                     {% endfor %}
 
+                    <div class="summary-line" style="border-top: 1px solid #eee; padding-top: 12px; margin-top: 12px;">
+                        <span>Subtotal</span>
+                        <span>${{ cart.get_total|floatformat:2 }}</span>
+                    </div>
+
+                    <div class="summary-line" id="shippingLine" style="display:none;">
+                        <span>Envío</span>
+                        <span id="shippingFee">$0.00</span>
+                    </div>
+
                     <div class="order-total">
                         <span>Total USD</span>
-                        <span>${{ cart.get_total|floatformat:2 }}</span>
+                        <span id="totalUsd">${{ cart.get_total|floatformat:2 }}</span>
                     </div>
 
                     {% if bcv_rate %}
                     <div class="order-total-bs">
                         <span>Total Bs</span>
-                        <span>Bs. {{ cart.get_total|to_bs:bcv_rate }}</span>
+                        <span id="totalBs">Bs. {{ cart.get_total|to_bs:bcv_rate }}</span>
                     </div>
                     <p class="rate-note">
-                        Tasa BCV aplicada: <strong>{{ bcv_rate|floatformat:2 }} Bs/USD</strong>
+                        Tasa BCV: <strong>{{ bcv_rate|floatformat:2 }} Bs/USD</strong>
                     </p>
                     {% endif %}
 
                     <a href="{% url 'cart:view' %}" class="btn-back">← Volver al carrito</a>
                 </div>
 
+                <!-- FORMULARIO -->
                 <div class="checkout-card">
                     <h2>💳 Registrar tu pago</h2>
 
                     <div class="bank-info">
                         <h3>Datos para la transferencia</h3>
-
                         <div class="bank-row-copy">
-                            <div class="bank-row">
-                                <strong>Banco:</strong>
-                                <span>{{ bank_info.bank_name }}</span>
-                            </div>
+                            <div class="bank-row"><strong>Banco:</strong><span>{{ bank_info.bank_name }}</span></div>
                             <button type="button" class="btn-copy" onclick="copyToClipboard('{{ bank_info.bank_name }}', this)">📋</button>
                         </div>
-
                         <div class="bank-row-copy">
-                            <div class="bank-row">
-                                <strong>Titular:</strong>
-                                <span>{{ bank_info.account_holder }}</span>
-                            </div>
+                            <div class="bank-row"><strong>Titular:</strong><span>{{ bank_info.account_holder }}</span></div>
                             <button type="button" class="btn-copy" onclick="copyToClipboard('{{ bank_info.account_holder }}', this)">📋</button>
                         </div>
-
                         {% if bank_info.document %}
                         <div class="bank-row-copy">
-                            <div class="bank-row">
-                                <strong>Cédula / RIF:</strong>
-                                <span>{{ bank_info.document }}</span>
-                            </div>
+                            <div class="bank-row"><strong>Cédula / RIF:</strong><span>{{ bank_info.document }}</span></div>
                             <button type="button" class="btn-copy" onclick="copyToClipboard('{{ bank_info.document }}', this)">📋</button>
                         </div>
                         {% endif %}
-
                         <div class="bank-row-copy">
-                            <div class="bank-row">
-                                <strong>Cuenta:</strong>
-                                <span>{{ bank_info.account_number }}</span>
-                            </div>
+                            <div class="bank-row"><strong>Cuenta:</strong><span>{{ bank_info.account_number }}</span></div>
                             <button type="button" class="btn-copy" onclick="copyToClipboard('{{ bank_info.account_number }}', this)">📋</button>
                         </div>
-
                         {% if bank_info.phone %}
                         <div class="bank-row-copy">
-                            <div class="bank-row">
-                                <strong>Teléfono:</strong>
-                                <span>{{ bank_info.phone }}</span>
-                            </div>
+                            <div class="bank-row"><strong>Teléfono:</strong><span>{{ bank_info.phone }}</span></div>
                             <button type="button" class="btn-copy" onclick="copyToClipboard('{{ bank_info.phone }}', this)">📋</button>
                         </div>
                         {% endif %}
-
                         {% if bank_info.email %}
                         <div class="bank-row">
-                            <strong>Email:</strong>
-                            <span>{{ bank_info.email }}</span>
+                            <strong>Email:</strong><span>{{ bank_info.email }}</span>
                         </div>
                         {% endif %}
 
                         <div class="qr-section">
-                            <img src="{% url 'orders:payment_qr' %}" alt="Código QR con los datos de pago" class="qr-image">
+                            <img src="{% url 'orders:payment_qr' %}" alt="QR" class="qr-image">
                             <p class="qr-hint">Escanea para copiar los datos</p>
                         </div>
 
@@ -315,60 +375,142 @@
                         </button>
                     </div>
 
-                    <p style="font-size: 0.85rem; color: #666; margin-bottom: 14px;">
-                        Realiza la transferencia por el monto total y luego completa los datos aquí.
-                    </p>
-
-                    <form method="post" enctype="multipart/form-data">
+                    <form method="post" enctype="multipart/form-data" id="checkoutForm">
                         {% csrf_token %}
 
-                        {% for field in form %}
+                        <!-- METODO DE ENVIO -->
+                        <h3 style="margin-top:0;">🚚 ¿Cómo quieres recibir tu pedido?</h3>
+
+                        {% if not delivery_available %}
+                            <div class="notice">
+                                ⚠️ Uno o más productos no ofrecen delivery. Solo puedes retirar en tienda.
+                            </div>
+                        {% endif %}
+
+                        <div class="shipping-options">
+                            <label class="shipping-option">
+                                <input type="radio" name="shipping_method" value="pickup"
+                                       {% if form.shipping_method.value != 'delivery' %}checked{% endif %}>
+                                <div class="box">
+                                    <span class="icon-title">🏪 Retiro en tienda</span>
+                                    <span class="subtitle">Retiras tú mismo</span>
+                                    <span class="fee free">Gratis</span>
+                                </div>
+                            </label>
+
+                            {% if delivery_available %}
+                            <label class="shipping-option">
+                                <input type="radio" name="shipping_method" value="delivery"
+                                       {% if form.shipping_method.value == 'delivery' %}checked{% endif %}>
+                                <div class="box">
+                                    <span class="icon-title">🛵 Delivery a domicilio</span>
+                                    <span class="subtitle">Te lo llevamos</span>
+                                    <span class="fee">+${{ total_delivery_fee|floatformat:2 }}</span>
+                                </div>
+                            </label>
+                            {% endif %}
+                        </div>
+
+                        {% if form.shipping_method.errors %}
+                            <div class="form-errors">{{ form.shipping_method.errors }}</div>
+                        {% endif %}
+
+                        <!-- DIRECCION -->
+                        <div class="delivery-address-block" id="deliveryAddressBlock">
                             <div class="form-row">
-                                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
-                                {{ field }}
-                                {% if field.errors %}
-                                    <div class="form-errors">
-                                        {% for error in field.errors %}{{ error }}{% endfor %}
-                                    </div>
+                                <label for="{{ form.delivery_address.id_for_label }}">
+                                    {{ form.delivery_address.label }}
+                                </label>
+                                {{ form.delivery_address }}
+                                {% if form.delivery_address.errors %}
+                                    <div class="form-errors">{{ form.delivery_address.errors }}</div>
                                 {% endif %}
                             </div>
+                        </div>
+
+                        <!-- PAGO -->
+                        <h3>💳 Datos del pago</h3>
+
+                        {% for field in form %}
+                            {% if field.name != 'shipping_method' and field.name != 'delivery_address' %}
+                                <div class="form-row">
+                                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                                    {{ field }}
+                                    {% if field.errors %}
+                                        <div class="form-errors">
+                                            {% for e in field.errors %}{{ e }}{% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            {% endif %}
                         {% endfor %}
 
-                        <button type="submit" class="btn-checkout">
-                            ✅ Confirmar pedido
-                        </button>
+                        <button type="submit" class="btn-checkout">✅ Confirmar pedido</button>
                     </form>
                 </div>
             </div>
         </div>
     </main>
 
+    {{ cart.get_total|stringformat:"f"|json_script:"data-subtotal" }}
+    {{ total_delivery_fee|stringformat:"f"|json_script:"data-shipping" }}
+    {{ bcv_rate|default_if_none:""|stringformat:"s"|json_script:"data-rate" }}
     <script>
+        // Datos inyectados como JSON (evita problema de coma/punto)
+        const SUBTOTAL_USD = parseFloat(JSON.parse(document.getElementById('data-subtotal').textContent)) || 0;
+        const SHIPPING_FEE = parseFloat(JSON.parse(document.getElementById('data-shipping').textContent)) || 0;
+        const BCV_RATE_RAW = JSON.parse(document.getElementById('data-rate').textContent);
+        const BCV_RATE = BCV_RATE_RAW ? parseFloat(BCV_RATE_RAW) : null;
+        const DELIVERY_AVAILABLE = {% if delivery_available %}true{% else %}false{% endif %};
+
+        // Debug (puedes borrar estas 3 líneas después)
+        console.log('SUBTOTAL_USD:', SUBTOTAL_USD);
+        console.log('SHIPPING_FEE:', SHIPPING_FEE);
+        console.log('BCV_RATE:', BCV_RATE);
+
+        function formatUsd(v) { return '$' + v.toFixed(2); }
+        function formatBs(v) { return 'Bs. ' + v.toLocaleString('es-VE', {minimumFractionDigits: 2, maximumFractionDigits: 2}); }
+
+        function updateTotals() {
+            const method = document.querySelector('input[name="shipping_method"]:checked')?.value || 'pickup';
+            const isDelivery = method === 'delivery' && DELIVERY_AVAILABLE;
+            const fee = isDelivery ? SHIPPING_FEE : 0;
+            const totalUsd = SUBTOTAL_USD + fee;
+
+            document.getElementById('shippingLine').style.display = isDelivery ? 'flex' : 'none';
+            document.getElementById('shippingFee').textContent = formatUsd(fee);
+            document.getElementById('totalUsd').textContent = formatUsd(totalUsd);
+
+            if (BCV_RATE) {
+                document.getElementById('totalBs').textContent = formatBs(totalUsd * BCV_RATE);
+            }
+
+            document.getElementById('deliveryAddressBlock').classList.toggle('show', isDelivery);
+        }
+
+        document.querySelectorAll('input[name="shipping_method"]').forEach(r => {
+            r.addEventListener('change', updateTotals);
+        });
+
+        updateTotals();
+
+        // Copiar al portapapeles
         function copyToClipboard(text, btn) {
             const done = () => {
                 if (btn) {
-                    const original = btn.textContent;
+                    const orig = btn.textContent;
                     btn.textContent = '✅';
-                    setTimeout(() => { btn.textContent = original; }, 1500);
+                    setTimeout(() => { btn.textContent = orig; }, 1500);
                 }
             };
             if (navigator.clipboard && window.isSecureContext) {
-                navigator.clipboard.writeText(text).then(done).catch(() => {
-                    fallbackCopy(text);
-                    done();
-                });
-            } else {
-                fallbackCopy(text);
-                done();
-            }
+                navigator.clipboard.writeText(text).then(done).catch(() => { fallbackCopy(text); done(); });
+            } else { fallbackCopy(text); done(); }
         }
         function fallbackCopy(text) {
             const ta = document.createElement('textarea');
-            ta.value = text;
-            ta.style.position = 'fixed';
-            ta.style.opacity = '0';
-            document.body.appendChild(ta);
-            ta.select();
+            ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+            document.body.appendChild(ta); ta.select();
             try { document.execCommand('copy'); } catch (e) {}
             document.body.removeChild(ta);
         }
@@ -381,7 +523,7 @@
                 'Teléfono: {{ bank_info.phone }}'
             ].join('\n');
             copyToClipboard(data, null);
-            alert('Datos copiados al portapapeles');
+            alert('Datos copiados');
         }
     </script>
 </body>

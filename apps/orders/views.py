@@ -19,8 +19,7 @@ from .services import (
 
 @login_required(login_url='login')
 def checkout(request):
-    """Checkout: resumen del pedido + datos bancarios + formulario de pago."""
-    # Expira reservas vencidas antes de procesar
+    """Checkout: resumen + datos bancarios + formulario con opción de envío."""
     expire_old_reservations()
 
     try:
@@ -29,13 +28,13 @@ def checkout(request):
         messages.warning(request, 'Tu carrito está vacío.')
         return redirect('cart:view')
 
-    items = cart.items.select_related('product', 'product__store').all()
+    items = list(cart.items.select_related('product', 'product__store').all())
 
     if not items:
         messages.warning(request, 'Tu carrito está vacío.')
         return redirect('cart:view')
 
-    # Validación previa de stock (solo para mostrar aviso rápido)
+    # Validación previa de stock
     for item in items:
         if item.quantity > item.product.stock:
             messages.error(
@@ -45,10 +44,34 @@ def checkout(request):
             )
             return redirect('cart:view')
 
+    # Calcular envío: 1 tarifa por comercio distinto
+    store_fees = {}
+    for item in items:
+        store = item.product.store
+        if store.id not in store_fees:
+            store_fees[store.id] = {
+                'store': store,
+                'fee': store.delivery_fee if store.offers_delivery else 0,
+                'offers_delivery': store.offers_delivery,
+            }
+
+    # Delivery disponible solo si TODOS los comercios lo ofrecen
+    delivery_available = all(s['offers_delivery'] for s in store_fees.values())
+    total_delivery_fee = sum(s['fee'] for s in store_fees.values()) if delivery_available else 0
+
     if request.method == 'POST':
-        form = PaymentForm(request.POST, request.FILES)
+        form = PaymentForm(
+            request.POST, request.FILES,
+            delivery_available=delivery_available
+        )
         if form.is_valid():
+            method = form.cleaned_data['shipping_method']
+            shipping_fee = total_delivery_fee if method == 'delivery' else 0
+
             payment_data = {
+                'shipping_method': method,
+                'delivery_address': form.cleaned_data.get('delivery_address', ''),
+                'shipping_fee': shipping_fee,
                 'payment_bank': form.cleaned_data['payment_bank'],
                 'payment_reference': form.cleaned_data['payment_reference'],
                 'payment_date': form.cleaned_data['payment_date'],
@@ -73,13 +96,16 @@ def checkout(request):
                 messages.warning(request, 'Tu carrito está vacío.')
                 return redirect('cart:view')
     else:
-        form = PaymentForm()
+        form = PaymentForm(delivery_available=delivery_available)
 
     return render(request, 'orders/checkout.html', {
         'cart': cart,
         'items': items,
         'form': form,
         'bank_info': settings.BANK_INFO,
+        'delivery_available': delivery_available,
+        'total_delivery_fee': total_delivery_fee,
+        'store_fees': list(store_fees.values()),
     })
 
 

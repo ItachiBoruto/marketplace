@@ -39,12 +39,49 @@ class DashboardView(RoleContextMixin, StoreOwnerRequiredMixin, ListView):
         return Product.objects.filter(store=store, is_available=True)[:5]
 
     def get_context_data(self, **kwargs):
+        from django.db.models import Sum
+        from django.utils import timezone
+        from datetime import timedelta
+
         context = super().get_context_data(**kwargs)
         store = self.get_store()
         context['store'] = store
-        context['total_products'] = Product.objects.filter(store=store).count()
-        context['low_stock'] = Product.objects.filter(store=store, stock__lt=5).count()
-        context['recent_movements'] = StockMovement.objects.filter(store=store)[:10]
+
+        products = Product.objects.filter(store=store)
+        context['total_products'] = products.count()
+        context['low_stock'] = products.filter(stock__lt=5, is_available=True).count()
+
+        # Movimientos separados
+        base = StockMovement.objects.filter(store=store).select_related('product')
+        context['recent_sales'] = base.filter(movement_type='SALE')[:8]
+        context['recent_returns'] = base.filter(movement_type='RETURN')[:8]
+
+        # Resumen de ventas
+        today = timezone.now().date()
+        start_of_day = timezone.make_aware(
+            timezone.datetime.combine(today, timezone.datetime.min.time())
+        )
+        start_of_month = start_of_day.replace(day=1)
+
+        sales_today = base.filter(
+            movement_type='SALE', created_at__gte=start_of_day
+        )
+        sales_month = base.filter(
+            movement_type='SALE', created_at__gte=start_of_month
+        )
+
+        context['sales_today_count'] = abs(
+            sales_today.aggregate(s=Sum('quantity_change'))['s'] or 0
+        )
+        context['sales_month_count'] = abs(
+            sales_month.aggregate(s=Sum('quantity_change'))['s'] or 0
+        )
+        context['returns_month_count'] = abs(
+            base.filter(
+                movement_type='RETURN', created_at__gte=start_of_month
+            ).aggregate(s=Sum('quantity_change'))['s'] or 0
+        )
+
         return context
 
 class ProductListView(RoleContextMixin, ManagerRequiredMixin, ListView):

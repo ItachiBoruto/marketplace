@@ -66,8 +66,19 @@ class OwnerRequiredMixin(StoreOwnerRequiredMixin):
 
 
 class RoleContextMixin:
-    """Inyecta `user_role` en el contexto del template."""
+    """Inyecta `user_role` y contadores utiles en el contexto del template."""
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["user_role"] = self.get_user_role()
+
+        # Contadores para el dashboard (solo si hay store)
+        store_id = getattr(self, "store_id", None)
+        if store_id:
+            from apps.orders.models import OrderItem
+            context["pending_orders_count"] = OrderItem.objects.filter(
+                store_id=store_id, status="pending"
+            ).count()
+        else:
+            context["pending_orders_count"] = 0
+
         return context

@@ -1,0 +1,158 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notificaciones - Mi Marketplace</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <style>
+        .notif-page {
+            max-width: 720px;
+            margin: 24px auto;
+            padding: 0 16px;
+        }
+        .notif-page h1 {
+            font-size: 1.4rem;
+            margin-bottom: 16px;
+            color: #1a1a2e;
+        }
+        .notif-toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 14px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .notif-toolbar .filters {
+            display: flex;
+            gap: 8px;
+        }
+        .notif-toolbar a {
+            padding: 6px 14px;
+            border-radius: 50px;
+            background: #f0f2f5;
+            color: #444;
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+        .notif-toolbar a.active { background: #1a1a2e; color: white; }
+        .notif-toolbar .btn-mark-all {
+            background: none;
+            border: none;
+            color: #3498db;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 600;
+            font-family: inherit;
+        }
+        .notif-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            overflow: hidden;
+        }
+        .notif-form { display: block; }
+        .notif-row {
+            display: block;
+            width: 100%;
+            text-align: left;
+            padding: 14px 18px;
+            border: none;
+            border-bottom: 1px solid #f5f5f5;
+            background: white;
+            cursor: pointer;
+            font-family: inherit;
+            transition: background 0.2s;
+        }
+        .notif-row:hover { background: #f8f9fa; }
+        .notif-row.unread {
+            background: #eaf2f8;
+            border-left: 4px solid #3498db;
+        }
+        .notif-row-title {
+            font-weight: 700;
+            color: #1a1a2e;
+            font-size: 0.95rem;
+            margin-bottom: 3px;
+        }
+        .notif-row-msg {
+            color: #555;
+            font-size: 0.88rem;
+            margin-bottom: 4px;
+        }
+        .notif-row-time {
+            color: #95a5a6;
+            font-size: 0.75rem;
+        }
+        .notif-empty-page {
+            text-align: center;
+            padding: 60px 20px;
+            background: white;
+            border-radius: 12px;
+            color: #95a5a6;
+        }
+        .notif-empty-page .icon { font-size: 3rem; display: block; margin-bottom: 10px; }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>🛒 Mi Marketplace</h1>
+            <nav>
+                <a href="/">🏠 Inicio</a>
+                <a href="/stores/">📦 Comercios</a>
+                <a href="{% url 'cart:view' %}">🛒 Carrito</a>
+                {% if user.is_authenticated and user.is_staff %}
+                    <a href="/admin/">⚙️ Admin</a>
+                {% endif %}
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <div class="notif-page">
+            <h1>🔔 Notificaciones</h1>
+
+            <div class="notif-toolbar">
+                <div class="filters">
+                    <a href="{% url 'notifications:list' %}" class="{% if not unread_only %}active{% endif %}">Todas</a>
+                    <a href="?unread=1" class="{% if unread_only %}active{% endif %}">No leídas ({{ unread_count }})</a>
+                </div>
+                {% if unread_count %}
+                    <form method="post" action="{% url 'notifications:mark_all_read' %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn-mark-all">Marcar todas como leídas</button>
+                    </form>
+                {% endif %}
+            </div>
+
+            {% if notifications %}
+                <div class="notif-card">
+                    {% for n in notifications %}
+                        <form method="post" action="{% url 'notifications:mark_read' n.id %}" class="notif-form">
+                            {% csrf_token %}
+                            <button type="submit" class="notif-row {% if not n.is_read %}unread{% endif %}">
+                                <div class="notif-row-title">{{ n.title }}</div>
+                                {% if n.message %}
+                                    <div class="notif-row-msg">{{ n.message }}</div>
+                                {% endif %}
+                                <div class="notif-row-time">{{ n.created_at|date:"d/m/Y H:i" }} · {{ n.created_at|timesince }} atrás</div>
+                            </button>
+                        </form>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="notif-empty-page">
+                    <span class="icon">🔔</span>
+                    <p>No tienes notificaciones</p>
+                    <a href="/" style="color: #3498db; text-decoration: none; font-weight: 600;">Volver al inicio</a>
+                </div>
+            {% endif %}
+        </div>
+    </main>
+    <script src="{% static 'js/notifications.js' %}"></script>
+</body>
+</html>

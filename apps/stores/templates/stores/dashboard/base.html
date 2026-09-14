@@ -56,6 +56,16 @@
             .dashboard-nav { flex-direction: column; align-items: stretch; text-align: center; }
             .dashboard-nav div { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; }
         }
+
+        .nav-badge {
+            background: #e94560;
+            color: white;
+            border-radius: 10px;
+            padding: 1px 8px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            margin-left: 4px;
+        }
     </style>
 </head>
 <body>
@@ -67,6 +77,9 @@
 
             <!-- Opciones según el rol -->
             {% if user.is_superuser or user_role == 'owner' or user_role == 'manager' %}
+                <a href="{% url 'stores:orders' store.id %}">
+                    🧾 Pedidos{% if pending_orders_count %} <span class="nav-badge">{{ pending_orders_count }}</span>{% endif %}
+                </a>
                 <a href="{% url 'stores:product_list' store.id %}">📦 Productos</a>
                 <a href="{% url 'stores:product_create' store.id %}">➕ Agregar</a>
             {% endif %}

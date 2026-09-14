@@ -3,33 +3,233 @@
 {% block title %}Dashboard{% endblock %}
 
 {% block content %}
+<style>
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+        gap: 16px;
+        margin-bottom: 24px;
+    }
+    .stat-card {
+        padding: 18px 20px;
+        border-radius: 12px;
+        background: #f8f9fa;
+        border-left: 4px solid #ccc;
+    }
+    .stat-card h3 {
+        margin: 0 0 6px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: #7f8c8d;
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
+    }
+    .stat-card .stat-value {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: #1a1a2e;
+        line-height: 1.1;
+    }
+    .stat-card .stat-sub {
+        font-size: 0.78rem;
+        color: #7f8c8d;
+        margin-top: 2px;
+    }
+    .stat-products { border-left-color: #3498db; }
+    .stat-lowstock { border-left-color: #f39c12; }
+    .stat-sales-today { border-left-color: #2ecc71; }
+    .stat-sales-month { border-left-color: #27ae60; }
+
+    .movements-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+        margin-top: 24px;
+    }
+    @media (max-width: 768px) {
+        .movements-grid { grid-template-columns: 1fr; }
+    }
+    .movements-panel {
+        background: white;
+        border-radius: 12px;
+        padding: 16px 18px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        border-top: 3px solid #ccc;
+    }
+    .movements-panel.sales { border-top-color: #2ecc71; }
+    .movements-panel.returns { border-top-color: #e74c3c; }
+    .movements-panel h2 {
+        font-size: 1rem;
+        margin: 0 0 12px;
+        color: #1a1a2e;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .movements-panel .panel-count {
+        background: #f0f2f5;
+        color: #444;
+        border-radius: 10px;
+        padding: 1px 10px;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+    .movements-panel.sales .panel-count { background: #eafaf1; color: #229954; }
+    .movements-panel.returns .panel-count { background: #fdedec; color: #c0392b; }
+
+    .movement-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px 0;
+        border-bottom: 1px solid #f5f5f5;
+        font-size: 0.88rem;
+        gap: 10px;
+    }
+    .movement-row:last-child { border-bottom: none; }
+    .movement-info {
+        flex: 1;
+        min-width: 0;
+    }
+    .movement-info .product {
+        font-weight: 600;
+        color: #2c3e50;
+        display: block;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .movement-info .meta {
+        font-size: 0.75rem;
+        color: #95a5a6;
+        display: block;
+    }
+    .movement-qty {
+        font-weight: 700;
+        font-size: 0.95rem;
+        white-space: nowrap;
+    }
+    .movement-qty.sale { color: #229954; }
+    .movement-qty.return { color: #c0392b; }
+    .movement-empty {
+        text-align: center;
+        padding: 24px 10px;
+        color: #bdc3c7;
+        font-size: 0.85rem;
+    }
+    .movement-empty .icon {
+        font-size: 2rem;
+        display: block;
+        margin-bottom: 6px;
+    }
+
+    .quick-links {
+        margin-top: 20px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+    .quick-links a {
+        display: inline-block;
+        padding: 8px 16px;
+        background: #f0f2f5;
+        color: #2c3e50;
+        text-decoration: none;
+        border-radius: 8px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        transition: background 0.2s;
+    }
+    .quick-links a:hover { background: #e2e6ea; }
+</style>
+
 <h1>Bienvenido, {{ request.user.username }}</h1>
-<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
-    <div style="background: #f8f9fa; padding: 20px; border-radius: 10px;">
+
+<div class="stats-grid">
+    <div class="stat-card stat-products">
         <h3>Total productos</h3>
-        <p style="font-size: 2rem;">{{ total_products }}</p>
+        <div class="stat-value">{{ total_products }}</div>
     </div>
-    <div style="background: #fff3cd; padding: 20px; border-radius: 10px;">
-        <h3>Bajo stock (< 5)</h3>
-        <p style="font-size: 2rem;">{{ low_stock }}</p>
+    <div class="stat-card stat-lowstock">
+        <h3>Bajo stock (&lt;5)</h3>
+        <div class="stat-value">{{ low_stock }}</div>
+    </div>
+    <div class="stat-card stat-sales-today">
+        <h3>Vendidos hoy</h3>
+        <div class="stat-value">{{ sales_today_count }}</div>
+        <div class="stat-sub">unidades</div>
+    </div>
+    <div class="stat-card stat-sales-month">
+        <h3>Vendidos este mes</h3>
+        <div class="stat-value">{{ sales_month_count }}</div>
+        <div class="stat-sub">{{ returns_month_count }} devueltas</div>
     </div>
 </div>
 
-<h2 style="margin-top: 30px;">Últimos productos</h2>
+<div class="quick-links">
+    <a href="{% url 'stores:orders' store.id %}">🧾 Ver pedidos pendientes</a>
+    <a href="{% url 'stores:product_list' store.id %}">📦 Gestionar productos</a>
+    <a href="{% url 'stores:product_create' store.id %}">➕ Agregar producto</a>
+</div>
+
+<div class="movements-grid">
+    <!-- Ventas concretadas -->
+    <div class="movements-panel sales">
+        <h2>
+            ✅ Ventas concretadas
+            <span class="panel-count">{{ recent_sales|length }}</span>
+        </h2>
+        {% for m in recent_sales %}
+            <div class="movement-row">
+                <div class="movement-info">
+                    <span class="product">{{ m.product.name }}</span>
+                    <span class="meta">
+                        {{ m.created_at|date:"d/m H:i" }}
+                        {% if m.order_reference %} · {{ m.order_reference }}{% endif %}
+                    </span>
+                </div>
+                <span class="movement-qty sale">{{ m.quantity_change }}</span>
+            </div>
+        {% empty %}
+            <div class="movement-empty">
+                <span class="icon">📭</span>
+                Sin ventas registradas todavía
+            </div>
+        {% endfor %}
+    </div>
+
+    <!-- Devoluciones -->
+    <div class="movements-panel returns">
+        <h2>
+            ↩️ Devoluciones
+            <span class="panel-count">{{ recent_returns|length }}</span>
+        </h2>
+        {% for m in recent_returns %}
+            <div class="movement-row">
+                <div class="movement-info">
+                    <span class="product">{{ m.product.name }}</span>
+                    <span class="meta">
+                        {{ m.created_at|date:"d/m H:i" }}
+                        {% if m.order_reference %} · {{ m.order_reference }}{% endif %}
+                    </span>
+                </div>
+                <span class="movement-qty return">+{{ m.quantity_change }}</span>
+            </div>
+        {% empty %}
+            <div class="movement-empty">
+                <span class="icon">✨</span>
+                Sin devoluciones — ¡todo va bien!
+            </div>
+        {% endfor %}
+    </div>
+</div>
+
+<h2 style="margin-top: 30px;">Productos recientes</h2>
 <ul>
     {% for product in products %}
-        <li>{{ product.name }} - Stock: {{ product.stock }}</li>
+        <li>{{ product.name }} — Stock: {{ product.stock }}</li>
     {% empty %}
         <li>No tienes productos. <a href="{% url 'stores:product_create' store.id %}">Crear uno</a></li>
-    {% endfor %}
-</ul>
-
-<h2>Últimos movimientos</h2>
-<ul>
-    {% for movement in recent_movements %}
-        <li>{{ movement.product.name }}: {{ movement.quantity_change }} ({{ movement.get_movement_type_display }}) - {{ movement.created_at|date:"d/m/Y H:i" }}</li>
-    {% empty %}
-        <li>Sin movimientos registrados.</li>
     {% endfor %}
 </ul>
 {% endblock %}

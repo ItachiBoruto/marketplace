@@ -7,6 +7,8 @@ from django.utils import timezone
 from apps.inventory.models import StockMovement
 from apps.products.models import Product
 
+from apps.notifications.models import notify, notify_superusers
+
 from .exchange import get_bcv_rate
 from .models import Order, OrderItem
 
@@ -98,6 +100,24 @@ def create_order_from_cart(user, payment_data, cart):
 
     # Vaciar el carrito
     cart.items.all().delete()
+
+    # ===== Notificaciones =====
+    # Al admin (superusers): nuevo pedido recibido
+    notify_superusers(
+        "order_created",
+        f"Nuevo pedido #{order.pk}",
+        f"{user.username} hizo un pedido por ${order.total}.",
+        link=f"/admin/orders/order/{order.pk}/change/"
+    )
+
+    # Al cliente: pedido registrado
+    notify(
+        user,
+        "order_created",
+        f"Pedido #{order.pk} registrado",
+        "Estamos verificando tu pago. Te avisaremos cuando se confirme.",
+        link=f"/orders/{order.pk}/"
+    )
 
     return order
 
