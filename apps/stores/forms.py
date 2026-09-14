@@ -1,5 +1,7 @@
 from django import forms
 
+from apps.utils.validators import validate_image
+
 from .models import Store
 
 
@@ -14,7 +16,7 @@ class StoreProfileForm(forms.ModelForm):
         ]
         widgets = {
             "name": forms.TextInput(attrs={"class": "form-control"}),
-            "logo": forms.ClearableFileInput(attrs={"class": "form-control"}),
+            "logo": forms.ClearableFileInput(attrs={"class": "form-control", "accept": "image/*"}),
             "description": forms.Textarea(attrs={"rows": 3, "class": "form-control"}),
             "legal_name": forms.TextInput(attrs={"class": "form-control"}),
             "rif": forms.TextInput(attrs={"class": "form-control"}),
@@ -33,3 +35,9 @@ class StoreProfileForm(forms.ModelForm):
             "phone": "Teléfono (opcional)",
             "email": "Correo electrónico (opcional)",
         }
+
+    def clean_logo(self):
+        img = self.cleaned_data.get('logo')
+        if img and hasattr(img, 'size'):
+            validate_image(img)
+        return img

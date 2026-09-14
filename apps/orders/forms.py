@@ -1,5 +1,7 @@
 from django import forms
 
+from apps.utils.validators import validate_image
+
 from .models import Order
 
 
@@ -45,3 +47,9 @@ class PaymentForm(forms.ModelForm):
         if len(ref) < 4:
             raise forms.ValidationError('La referencia debe tener al menos 4 caracteres.')
         return ref
+
+    def clean_payment_proof(self):
+        img = self.cleaned_data.get('payment_proof')
+        if img and hasattr(img, 'size'):
+            validate_image(img)
+        return img

@@ -1,5 +1,7 @@
 from django import forms
 
+from apps.utils.validators import validate_image
+
 from .models import Product
 
 
@@ -17,7 +19,7 @@ class ProductForm(forms.ModelForm):
             "price": forms.NumberInput(attrs={"class": "form-control", "step": "0.01"}),
             "description": forms.Textarea(attrs={"rows": 3, "class": "form-control"}),
             "additional_info": forms.Textarea(attrs={"rows": 3, "class": "form-control"}),
-            "image": forms.ClearableFileInput(attrs={"class": "form-control"}),
+            "image": forms.ClearableFileInput(attrs={"class": "form-control", "accept": "image/*"}),
             "stock": forms.NumberInput(attrs={"class": "form-control"}),
             "keywords": forms.TextInput(attrs={"class": "form-control"}),
         }
@@ -31,3 +33,10 @@ class ProductForm(forms.ModelForm):
             "keywords": "Palabras clave (separadas por comas)",
             "is_available": "Disponible",
         }
+
+    def clean_image(self):
+        img = self.cleaned_data.get('image')
+        # Si es un archivo nuevo (no un string del storage)
+        if img and hasattr(img, 'size'):
+            validate_image(img)
+        return img

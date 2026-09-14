@@ -120,6 +120,16 @@ AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
 ]
 
+# ===== HASHERS DE CONTRASEÑAS =====
+# Argon2 es el recomendado por OWASP (2024+) por su resistencia a GPU/ASIC
+PASSWORD_HASHERS = [
+    'django.contrib.auth.hashers.Argon2PasswordHasher',       # Primero = nuevos
+    'django.contrib.auth.hashers.PBKDF2PasswordHasher',        # Fallback
+    'django.contrib.auth.hashers.PBKDF2SHA1PasswordHasher',
+    'django.contrib.auth.hashers.BCryptSHA256PasswordHasher',
+    'django.contrib.auth.hashers.ScryptPasswordHasher',
+]
+
 # ===== INTERNACIONALIZACIÓN =====
 LANGUAGE_CODE = 'es-es'
 TIME_ZONE = 'America/Caracas'
@@ -224,13 +234,38 @@ CRON_SECRET_TOKEN = os.environ.get('CRON_SECRET_TOKEN', '')
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
+    'filters': {
+        'redact_pii': {
+            '()': 'apps.utils.logging_filters.PIIRedactionFilter',
+        },
+    },
+    'formatters': {
+        'verbose': {
+            'format': '[{asctime}] {levelname} {name}: {message}',
+            'style': '{',
+        },
+    },
     'handlers': {
-        'console': {'class': 'logging.StreamHandler'},
+        'console': {
+            'class': 'logging.StreamHandler',
+            'filters': ['redact_pii'],
+            'formatter': 'verbose',
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'INFO',
     },
     'loggers': {
         'django.security': {
             'handlers': ['console'],
             'level': 'INFO',
+            'propagate': False,
+        },
+        'django.request': {
+            'handlers': ['console'],
+            'level': 'WARNING',
+            'propagate': False,
         },
     },
 }
