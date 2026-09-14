@@ -63,7 +63,7 @@
             <h1>🛒 Mi Marketplace</h1>
             <nav>
                 <a href="/">🏠 Inicio</a>
-                <a href="{% url 'cart:view' %}">🛒 Carrito</a>
+                <a href="{% url 'cart:view' %}">🛒 Carrito{% if cart_count %} <span class="cart-count-badge">{{ cart_count }}</span>{% endif %}</a>
             </nav>
         </div>
     </header>

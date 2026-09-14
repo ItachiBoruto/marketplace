@@ -177,7 +177,7 @@
             <nav>
                 <a href="/">🏠 Inicio</a>
                 <a href="/stores/">📦 Comercios</a>
-                <a href="{% url 'cart:view' %}">🛒 Carrito</a>
+                <a href="{% url 'cart:view' %}">🛒 Carrito{% if cart_count %} <span class="cart-count-badge">{{ cart_count }}</span>{% endif %}</a>
                 {% if user.is_authenticated and user.is_staff %}
                     <a href="/admin/">⚙️ Admin</a>
                 {% endif %}
