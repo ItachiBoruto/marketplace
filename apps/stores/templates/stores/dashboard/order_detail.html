@@ -5,52 +5,65 @@
 {% block content %}
 <style>
     .detail-card {
-        background: white;
-        border-radius: 12px;
-        padding: 20px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-        margin-bottom: 16px;
+        background: white; border-radius: 12px; padding: 20px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.06); margin-bottom: 16px;
     }
     .detail-card h2 {
-        font-size: 1.1rem;
-        margin: 0 0 14px;
-        color: #1a1a2e;
+        font-size: 1.1rem; margin: 0 0 14px; color: #1a1a2e;
     }
     .info-row {
-        display: flex;
-        justify-content: space-between;
-        padding: 8px 0;
-        border-bottom: 1px solid #f5f5f5;
-        font-size: 0.9rem;
+        display: flex; justify-content: space-between; padding: 8px 0;
+        border-bottom: 1px solid #f5f5f5; font-size: 0.9rem;
     }
     .info-row:last-child { border-bottom: none; }
     .info-row .label { color: #7f8c8d; }
-    .info-row .value { font-weight: 600; color: #2c3e50; }
-    .item-block {
-        padding: 14px;
-        border: 1px solid #e9ecef;
+    .info-row .value { font-weight: 600; color: #2c3e50; text-align: right; max-width: 60%; }
+
+    .shipping-banner {
+        padding: 14px 16px;
         border-radius: 10px;
-        margin-bottom: 12px;
-        background: #fafbfc;
+        margin-bottom: 14px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+    .shipping-banner.pickup {
+        background: #eaf2f8; border-left: 4px solid #3498db;
+    }
+    .shipping-banner.delivery {
+        background: #fef5e7; border-left: 4px solid #f39c12;
+    }
+    .shipping-banner .icon {
+        font-size: 1.8rem; line-height: 1;
+    }
+    .shipping-banner .info-title {
+        font-weight: 700; color: #1a1a2e; font-size: 0.95rem;
+    }
+    .shipping-banner .info-sub {
+        font-size: 0.83rem; color: #555; margin-top: 3px;
+    }
+    .address-box {
+        background: #fafbfc; padding: 12px 14px; border-radius: 8px;
+        font-size: 0.9rem; color: #2c3e50; line-height: 1.5;
+        margin-top: 10px; border: 1px solid #e9ecef;
+    }
+
+    .item-block {
+        padding: 14px; border: 1px solid #e9ecef; border-radius: 10px;
+        margin-bottom: 12px; background: #fafbfc;
     }
     .item-block.confirmed { background: #eaf2f8; border-color: #aed6f1; }
     .item-block.shipped { background: #f4ecf7; border-color: #d2b4de; }
     .item-block.cancelled { background: #fdedec; border-color: #f5b7b1; opacity: 0.7; }
     .item-block-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: flex-start;
-        gap: 12px;
-        flex-wrap: wrap;
+        display: flex; justify-content: space-between; align-items: flex-start;
+        gap: 12px; flex-wrap: wrap;
     }
     .item-block-title { font-weight: 700; color: #2c3e50; font-size: 1rem; }
     .item-block-meta { font-size: 0.85rem; color: #7f8c8d; margin-top: 2px; }
     .item-block-status {
-        display: inline-block;
-        padding: 3px 12px;
-        border-radius: 20px;
-        font-size: 0.78rem;
-        font-weight: 600;
+        display: inline-block; padding: 3px 12px; border-radius: 20px;
+        font-size: 0.78rem; font-weight: 600;
     }
     .status-pending { background: #fef5e7; color: #b9770e; }
     .status-confirmed { background: #eaf2f8; color: #21618c; }
@@ -58,22 +71,12 @@
     .status-delivered { background: #eafaf1; color: #229954; }
     .status-cancelled { background: #fdedec; color: #c0392b; }
     .item-actions {
-        margin-top: 12px;
-        display: flex;
-        gap: 8px;
-        flex-wrap: wrap;
+        margin-top: 12px; display: flex; gap: 8px; flex-wrap: wrap;
     }
     .btn {
-        padding: 8px 18px;
-        border-radius: 8px;
-        border: none;
-        cursor: pointer;
-        font-size: 0.87rem;
-        font-weight: 600;
-        font-family: inherit;
-        text-decoration: none;
-        display: inline-block;
-        transition: background 0.2s;
+        padding: 8px 18px; border-radius: 8px; border: none; cursor: pointer;
+        font-size: 0.87rem; font-weight: 600; font-family: inherit;
+        text-decoration: none; display: inline-block;
     }
     .btn-approve { background: #2ecc71; color: white; }
     .btn-approve:hover { background: #27ae60; }
@@ -82,32 +85,18 @@
     .btn-ship { background: #6c3483; color: white; }
     .btn-ship:hover { background: #4a235a; }
     .btn-back {
-        display: inline-block;
-        margin-bottom: 16px;
-        color: #6c757d;
-        text-decoration: none;
-        font-size: 0.9rem;
+        display: inline-block; margin-bottom: 16px; color: #6c757d;
+        text-decoration: none; font-size: 0.9rem;
     }
-    .btn-back:hover { color: #2c3e50; }
     .other-items-note {
-        font-size: 0.85rem;
-        color: #7f8c8d;
-        font-style: italic;
-        text-align: center;
-        padding: 12px;
-        background: #f8f9fa;
-        border-radius: 8px;
-    }
-    .rate-note {
-        font-size: 0.78rem;
-        color: #7f8c8d;
-        margin-top: 4px;
-        text-align: right;
+        font-size: 0.85rem; color: #7f8c8d; font-style: italic;
+        text-align: center; padding: 12px; background: #f8f9fa; border-radius: 8px;
     }
 </style>
 
 <a href="{% url 'stores:orders' store.id %}" class="btn-back">← Volver a pedidos</a>
 
+<!-- Info general -->
 <div class="detail-card">
     <h2>📋 Información del pedido</h2>
     <div class="info-row">
@@ -142,6 +131,48 @@
     {% endif %}
 </div>
 
+<!-- Envío -->
+<div class="detail-card">
+    <h2>🚚 Entrega</h2>
+
+    {% if order.shipping_method == 'delivery' %}
+        <div class="shipping-banner delivery">
+            <span class="icon">🛵</span>
+            <div>
+                <div class="info-title">Delivery a domicilio</div>
+                <div class="info-sub">
+                    Costo de envío cobrado al cliente: <strong>${{ order.shipping_fee|floatformat:2 }}</strong>
+                </div>
+            </div>
+        </div>
+
+        {% if order.delivery_address %}
+            <div class="address-box">
+                <strong>📍 Dirección de entrega:</strong><br>
+                {{ order.delivery_address|linebreaksbr }}
+            </div>
+        {% endif %}
+
+    {% else %}
+        <div class="shipping-banner pickup">
+            <span class="icon">🏪</span>
+            <div>
+                <div class="info-title">Retiro en tienda</div>
+                <div class="info-sub">El cliente retirará el pedido en tu comercio.</div>
+            </div>
+        </div>
+
+        {% if store.address %}
+            <div class="address-box">
+                <strong>📍 Dirección del comercio:</strong><br>
+                {{ store.address|linebreaksbr }}
+                {% if store.phone %}<br><strong>📞</strong> {{ store.phone }}{% endif %}
+            </div>
+        {% endif %}
+    {% endif %}
+</div>
+
+<!-- Items -->
 <div class="detail-card">
     <h2>📦 Tus items en este pedido</h2>
 

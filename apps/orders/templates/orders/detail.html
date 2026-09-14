@@ -8,57 +8,46 @@
     {% load exchange_filters %}
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
     <style>
-        .detail-wrapper {
-            max-width: 700px;
-            margin: 24px auto;
-        }
+        .detail-wrapper { max-width: 700px; margin: 24px auto; padding: 0 16px; }
         .detail-card {
-            background: white;
-            padding: 24px;
-            border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-            margin-bottom: 16px;
+            background: white; padding: 20px; border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08); margin-bottom: 16px;
         }
         .detail-card h2 {
-            margin: 0 0 16px;
-            font-size: 1.2rem;
-            color: #1a1a2e;
+            margin: 0 0 14px; font-size: 1.1rem; color: #1a1a2e;
+            display: flex; align-items: center; gap: 8px;
         }
         .detail-row {
-            display: flex;
-            justify-content: space-between;
-            padding: 8px 0;
-            font-size: 0.92rem;
-            border-bottom: 1px solid #f0f0f0;
+            display: flex; justify-content: space-between; padding: 8px 0;
+            font-size: 0.92rem; border-bottom: 1px solid #f0f0f0;
         }
         .detail-row:last-child { border-bottom: none; }
         .detail-row .label { color: #7f8c8d; }
-        .detail-row .value { font-weight: 600; color: #2c3e50; }
+        .detail-row .value { font-weight: 600; color: #2c3e50; text-align: right; }
         .item-row {
-            display: flex;
-            justify-content: space-between;
-            padding: 10px 0;
-            border-bottom: 1px solid #f0f0f0;
-            font-size: 0.92rem;
+            display: flex; justify-content: space-between; padding: 10px 0;
+            border-bottom: 1px solid #f0f0f0; font-size: 0.92rem;
         }
         .item-row:last-child { border-bottom: none; }
         .item-row .store { font-size: 0.78rem; color: #7f8c8d; display: block; }
+        .totals-block { margin-top: 12px; padding-top: 12px; border-top: 2px solid #e94560; }
         .total-line {
-            display: flex;
-            justify-content: space-between;
-            padding-top: 12px;
-            margin-top: 8px;
-            border-top: 2px solid #e94560;
-            font-size: 1.3rem;
-            font-weight: 700;
-            color: #e94560;
+            display: flex; justify-content: space-between; padding: 4px 0;
+            font-size: 1.1rem; font-weight: 700; color: #e94560;
+        }
+        .subtotal-line {
+            display: flex; justify-content: space-between; padding: 4px 0;
+            font-size: 0.92rem; color: #555;
+        }
+        .subtotal-line.total-bs {
+            font-size: 0.9rem; color: #2c3e50; font-weight: 600;
+        }
+        .rate-note-detail {
+            font-size: 0.75rem; color: #7f8c8d; text-align: right; margin: 4px 0 0;
         }
         .status-badge {
-            display: inline-block;
-            padding: 4px 14px;
-            border-radius: 20px;
-            font-size: 0.85rem;
-            font-weight: 600;
+            display: inline-block; padding: 4px 14px; border-radius: 20px;
+            font-size: 0.85rem; font-weight: 600;
         }
         .status-pending_payment { background: #fff3cd; color: #856404; }
         .status-payment_submitted { background: #cce5ff; color: #004085; }
@@ -66,33 +55,26 @@
         .status-shipped { background: #d1ecf1; color: #0c5460; }
         .status-completed { background: #d4edda; color: #155724; }
         .status-cancelled { background: #f8d7da; color: #721c24; }
+        .status-expired { background: #e2e3e5; color: #383d41; }
         .proof-image {
-            max-width: 100%;
-            max-height: 300px;
-            border-radius: 8px;
-            margin-top: 8px;
+            max-width: 100%; max-height: 300px; border-radius: 8px; margin-top: 8px;
         }
         .btn-back {
-            display: inline-block;
-            margin-bottom: 12px;
-            color: #6c757d;
-            text-decoration: none;
-            font-size: 0.9rem;
+            display: inline-block; margin-bottom: 12px; color: #6c757d;
+            text-decoration: none; font-size: 0.9rem;
         }
-
-        .total-line-bs {
-            display: flex;
-            justify-content: space-between;
-            padding-top: 6px;
-            font-size: 1.1rem;
-            font-weight: 600;
-            color: #2c3e50;
+        /* Delivery badge */
+        .shipping-badge {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 6px 14px; border-radius: 20px;
+            font-size: 0.85rem; font-weight: 600; margin-bottom: 12px;
         }
-        .rate-note-detail {
-            font-size: 0.75rem;
-            color: #7f8c8d;
-            text-align: right;
-            margin: 4px 0 0;
+        .shipping-pickup { background: #eaf2f8; color: #21618c; }
+        .shipping-delivery { background: #fef5e7; color: #b9770e; }
+        .address-box {
+            background: #f8f9fa; padding: 12px 14px; border-radius: 8px;
+            font-size: 0.9rem; color: #2c3e50; line-height: 1.5;
+            border-left: 3px solid #f39c12;
         }
     </style>
 </head>
@@ -113,6 +95,7 @@
             <div class="detail-wrapper">
                 <a href="{% url 'orders:list' %}" class="btn-back">← Volver a mis pedidos</a>
 
+                <!-- Estado general -->
                 <div class="detail-card">
                     <h2>Pedido #{{ order.pk }}</h2>
                     <div class="detail-row">
@@ -127,8 +110,43 @@
                     </div>
                 </div>
 
+                <!-- Envío -->
+                <div class="detail-card">
+                    <h2>🚚 Entrega</h2>
+
+                    {% if order.shipping_method == 'delivery' %}
+                        <div class="shipping-badge shipping-delivery">
+                            🛵 Delivery a domicilio
+                        </div>
+
+                        {% if order.delivery_address %}
+                            <div class="address-box">
+                                <strong>Dirección:</strong><br>
+                                {{ order.delivery_address|linebreaksbr }}
+                            </div>
+                        {% endif %}
+
+                        {% if order.shipping_fee and order.shipping_fee > 0 %}
+                            <div class="detail-row" style="margin-top: 12px;">
+                                <span class="label">Costo de envío</span>
+                                <span class="value">${{ order.shipping_fee|floatformat:2 }}</span>
+                            </div>
+                        {% endif %}
+
+                    {% else %}
+                        <div class="shipping-badge shipping-pickup">
+                            🏪 Retiro en tienda
+                        </div>
+                        <p style="font-size: 0.88rem; color: #666; margin: 0;">
+                            Coordina con cada comercio para retirar tu pedido.
+                        </p>
+                    {% endif %}
+                </div>
+
+                <!-- Productos + Totales -->
                 <div class="detail-card">
                     <h2>📦 Productos</h2>
+
                     {% for item in order.items.all %}
                         <div class="item-row">
                             <div>
@@ -143,22 +161,38 @@
                             </div>
                         </div>
                     {% endfor %}
-                    <div class="total-line">
-                        <span>Total USD</span>
-                        <span>${{ order.total|floatformat:2 }}</span>
-                    </div>
 
-                    {% if order.exchange_rate %}
-                    <div class="total-line-bs">
-                        <span>Total Bs</span>
-                        <span>Bs. {{ order.total|to_bs:order.exchange_rate }}</span>
+                    <div class="totals-block">
+                        <div class="subtotal-line">
+                            <span>Subtotal</span>
+                            <span>${{ order.total|floatformat:2 }}</span>
+                        </div>
+
+                        {% if order.shipping_fee and order.shipping_fee > 0 %}
+                            <div class="subtotal-line">
+                                <span>Envío</span>
+                                <span>${{ order.shipping_fee|floatformat:2 }}</span>
+                            </div>
+                        {% endif %}
+
+                        <div class="total-line">
+                            <span>Total USD</span>
+                            <span>${{ order.grand_total|floatformat:2 }}</span>
+                        </div>
+
+                        {% if order.exchange_rate %}
+                            <div class="subtotal-line total-bs">
+                                <span>Total Bs</span>
+                                <span>Bs. {{ order.grand_total|to_bs:order.exchange_rate }}</span>
+                            </div>
+                            <p class="rate-note-detail">
+                                Tasa BCV del pedido: <strong>{{ order.exchange_rate|floatformat:2 }} Bs/USD</strong>
+                            </p>
+                        {% endif %}
                     </div>
-                    <p class="rate-note-detail">
-                        Tasa BCV del pedido: <strong>{{ order.exchange_rate|floatformat:2 }} Bs/USD</strong>
-                    </p>
-                    {% endif %}
                 </div>
 
+                <!-- Datos del pago -->
                 <div class="detail-card">
                     <h2>💳 Datos del pago</h2>
                     <div class="detail-row">
@@ -189,6 +223,5 @@
             </div>
         </div>
     </main>
-    <script src="{% static 'js/notifications.js' %}"></script>
 </body>
 </html>

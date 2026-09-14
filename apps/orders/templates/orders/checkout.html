@@ -14,6 +14,7 @@
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 20px;
+            align-items: start;
         }
         .checkout-card {
             background: white;
@@ -140,12 +141,23 @@
         }
         .btn-copy-all:hover { background: #16213e; }
 
-        /* ===== ENVIO ===== */
+        /* ===== SELECTOR DE ENVIO (arriba del total) ===== */
+        .shipping-section {
+            margin: 20px 0;
+            padding: 16px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border: 1px solid #e9ecef;
+        }
+        .shipping-section h3 {
+            margin: 0 0 12px !important;
+            font-size: 0.95rem;
+            color: #1a1a2e;
+        }
         .shipping-options {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 10px;
-            margin-bottom: 16px;
         }
         .shipping-option {
             display: block;
@@ -160,8 +172,8 @@
         .shipping-option .box {
             display: flex;
             flex-direction: column;
-            gap: 4px;
-            padding: 14px;
+            gap: 3px;
+            padding: 12px;
             border: 2px solid #e1e5ea;
             border-radius: 10px;
             background: white;
@@ -173,17 +185,17 @@
         .shipping-option .icon-title {
             font-weight: 700;
             color: #2c3e50;
-            font-size: 0.95rem;
+            font-size: 0.88rem;
         }
         .shipping-option .subtitle {
-            font-size: 0.78rem;
+            font-size: 0.72rem;
             color: #7f8c8d;
         }
         .shipping-option .fee {
-            font-size: 0.88rem;
-            font-weight: 600;
+            font-size: 0.85rem;
+            font-weight: 700;
             color: #e94560;
-            margin-top: 4px;
+            margin-top: 3px;
         }
         .shipping-option .fee.free {
             color: #2ecc71;
@@ -193,6 +205,23 @@
             background: #fff5f7;
         }
 
+        .notice {
+            background: #fef5e7;
+            color: #856404;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 0.78rem;
+            margin-bottom: 10px;
+            border-left: 3px solid #f39c12;
+        }
+
+        .delivery-address-block {
+            display: none;
+            margin-top: 12px;
+        }
+        .delivery-address-block.show { display: block; }
+
+        /* ===== FORMULARIO DE PAGO ===== */
         .form-row { margin-bottom: 14px; }
         .form-row label {
             display: block;
@@ -219,12 +248,6 @@
             font-size: 0.8rem;
             margin-top: 3px;
         }
-        .delivery-address-block {
-            display: none;
-            margin: 12px 0 16px;
-        }
-        .delivery-address-block.show { display: block; }
-
         .btn-checkout {
             width: 100%;
             padding: 14px;
@@ -244,15 +267,6 @@
             color: #6c757d;
             text-decoration: none;
             font-size: 0.9rem;
-        }
-        .notice {
-            background: #fef5e7;
-            color: #856404;
-            padding: 10px 14px;
-            border-radius: 8px;
-            font-size: 0.85rem;
-            margin-bottom: 14px;
-            border-left: 4px solid #f39c12;
         }
 
         @media (max-width: 768px) {
@@ -283,152 +297,149 @@
                 </div>
             {% endif %}
 
-            <div class="checkout-wrapper">
-                <!-- RESUMEN -->
-                <div class="checkout-card">
-                    <h2>📦 Resumen del pedido</h2>
+            <!-- FORM GLOBAL QUE ENVUELVE AMBAS COLUMNAS -->
+            <form method="post" enctype="multipart/form-data" id="checkoutForm">
+                {% csrf_token %}
 
-                    {% for item in items %}
-                        <div class="order-item">
-                            <div>
-                                <span class="name">{{ item.product.name }}</span>
-                                <span class="store">🏪 {{ item.product.store.name }}</span>
-                            </div>
-                            <div style="text-align: right;">
-                                <div class="qty">{{ item.quantity }} × ${{ item.price|floatformat:2 }}</div>
-                                <div style="font-weight: 600;">${{ item.get_total|floatformat:2 }}</div>
-                            </div>
-                        </div>
-                    {% endfor %}
+                <div class="checkout-wrapper">
+                    <!-- ============ COLUMNA IZQUIERDA: RESUMEN + ENVIO + TOTAL ============ -->
+                    <div class="checkout-card">
+                        <h2>📦 Resumen del pedido</h2>
 
-                    <div class="summary-line" style="border-top: 1px solid #eee; padding-top: 12px; margin-top: 12px;">
-                        <span>Subtotal</span>
-                        <span>${{ cart.get_total|floatformat:2 }}</span>
-                    </div>
-
-                    <div class="summary-line" id="shippingLine" style="display:none;">
-                        <span>Envío</span>
-                        <span id="shippingFee">$0.00</span>
-                    </div>
-
-                    <div class="order-total">
-                        <span>Total USD</span>
-                        <span id="totalUsd">${{ cart.get_total|floatformat:2 }}</span>
-                    </div>
-
-                    {% if bcv_rate %}
-                    <div class="order-total-bs">
-                        <span>Total Bs</span>
-                        <span id="totalBs">Bs. {{ cart.get_total|to_bs:bcv_rate }}</span>
-                    </div>
-                    <p class="rate-note">
-                        Tasa BCV: <strong>{{ bcv_rate|floatformat:2 }} Bs/USD</strong>
-                    </p>
-                    {% endif %}
-
-                    <a href="{% url 'cart:view' %}" class="btn-back">← Volver al carrito</a>
-                </div>
-
-                <!-- FORMULARIO -->
-                <div class="checkout-card">
-                    <h2>💳 Registrar tu pago</h2>
-
-                    <div class="bank-info">
-                        <h3>Datos para la transferencia</h3>
-                        <div class="bank-row-copy">
-                            <div class="bank-row"><strong>Banco:</strong><span>{{ bank_info.bank_name }}</span></div>
-                            <button type="button" class="btn-copy" onclick="copyToClipboard('{{ bank_info.bank_name }}', this)">📋</button>
-                        </div>
-                        <div class="bank-row-copy">
-                            <div class="bank-row"><strong>Titular:</strong><span>{{ bank_info.account_holder }}</span></div>
-                            <button type="button" class="btn-copy" onclick="copyToClipboard('{{ bank_info.account_holder }}', this)">📋</button>
-                        </div>
-                        {% if bank_info.document %}
-                        <div class="bank-row-copy">
-                            <div class="bank-row"><strong>Cédula / RIF:</strong><span>{{ bank_info.document }}</span></div>
-                            <button type="button" class="btn-copy" onclick="copyToClipboard('{{ bank_info.document }}', this)">📋</button>
-                        </div>
-                        {% endif %}
-                        <div class="bank-row-copy">
-                            <div class="bank-row"><strong>Cuenta:</strong><span>{{ bank_info.account_number }}</span></div>
-                            <button type="button" class="btn-copy" onclick="copyToClipboard('{{ bank_info.account_number }}', this)">📋</button>
-                        </div>
-                        {% if bank_info.phone %}
-                        <div class="bank-row-copy">
-                            <div class="bank-row"><strong>Teléfono:</strong><span>{{ bank_info.phone }}</span></div>
-                            <button type="button" class="btn-copy" onclick="copyToClipboard('{{ bank_info.phone }}', this)">📋</button>
-                        </div>
-                        {% endif %}
-                        {% if bank_info.email %}
-                        <div class="bank-row">
-                            <strong>Email:</strong><span>{{ bank_info.email }}</span>
-                        </div>
-                        {% endif %}
-
-                        <div class="qr-section">
-                            <img src="{% url 'orders:payment_qr' %}" alt="QR" class="qr-image">
-                            <p class="qr-hint">Escanea para copiar los datos</p>
-                        </div>
-
-                        <button type="button" class="btn-copy-all" onclick="copyAllBankData()">
-                            📋 Copiar todos los datos
-                        </button>
-                    </div>
-
-                    <form method="post" enctype="multipart/form-data" id="checkoutForm">
-                        {% csrf_token %}
-
-                        <!-- METODO DE ENVIO -->
-                        <h3 style="margin-top:0;">🚚 ¿Cómo quieres recibir tu pedido?</h3>
-
-                        {% if not delivery_available %}
-                            <div class="notice">
-                                ⚠️ Uno o más productos no ofrecen delivery. Solo puedes retirar en tienda.
-                            </div>
-                        {% endif %}
-
-                        <div class="shipping-options">
-                            <label class="shipping-option">
-                                <input type="radio" name="shipping_method" value="pickup"
-                                       {% if form.shipping_method.value != 'delivery' %}checked{% endif %}>
-                                <div class="box">
-                                    <span class="icon-title">🏪 Retiro en tienda</span>
-                                    <span class="subtitle">Retiras tú mismo</span>
-                                    <span class="fee free">Gratis</span>
+                        {% for item in items %}
+                            <div class="order-item">
+                                <div>
+                                    <span class="name">{{ item.product.name }}</span>
+                                    <span class="store">🏪 {{ item.product.store.name }}</span>
                                 </div>
-                            </label>
-
-                            {% if delivery_available %}
-                            <label class="shipping-option">
-                                <input type="radio" name="shipping_method" value="delivery"
-                                       {% if form.shipping_method.value == 'delivery' %}checked{% endif %}>
-                                <div class="box">
-                                    <span class="icon-title">🛵 Delivery a domicilio</span>
-                                    <span class="subtitle">Te lo llevamos</span>
-                                    <span class="fee">+${{ total_delivery_fee|floatformat:2 }}</span>
+                                <div style="text-align: right;">
+                                    <div class="qty">{{ item.quantity }} × ${{ item.price|floatformat:2 }}</div>
+                                    <div style="font-weight: 600;">${{ item.get_total|floatformat:2 }}</div>
                                 </div>
-                            </label>
+                            </div>
+                        {% endfor %}
+
+                        <!-- SELECTOR DE ENVIO (arriba del total) -->
+                        <div class="shipping-section">
+                            <h3>🚚 ¿Cómo quieres recibir tu pedido?</h3>
+
+                            {% if not delivery_available %}
+                                <div class="notice">
+                                    ⚠️ Uno o más productos no ofrecen delivery. Solo puedes retirar en tienda.
+                                </div>
                             {% endif %}
-                        </div>
 
-                        {% if form.shipping_method.errors %}
-                            <div class="form-errors">{{ form.shipping_method.errors }}</div>
-                        {% endif %}
-
-                        <!-- DIRECCION -->
-                        <div class="delivery-address-block" id="deliveryAddressBlock">
-                            <div class="form-row">
-                                <label for="{{ form.delivery_address.id_for_label }}">
-                                    {{ form.delivery_address.label }}
+                            <div class="shipping-options">
+                                <label class="shipping-option">
+                                    <input type="radio" name="shipping_method" value="pickup"
+                                           {% if form.shipping_method.value != 'delivery' %}checked{% endif %}>
+                                    <div class="box">
+                                        <span class="icon-title">🏪 Retiro en tienda</span>
+                                        <span class="subtitle">Retiras tú mismo</span>
+                                        <span class="fee free">Gratis</span>
+                                    </div>
                                 </label>
-                                {{ form.delivery_address }}
-                                {% if form.delivery_address.errors %}
-                                    <div class="form-errors">{{ form.delivery_address.errors }}</div>
+
+                                {% if delivery_available %}
+                                <label class="shipping-option">
+                                    <input type="radio" name="shipping_method" value="delivery"
+                                           {% if form.shipping_method.value == 'delivery' %}checked{% endif %}>
+                                    <div class="box">
+                                        <span class="icon-title">🛵 Delivery</span>
+                                        <span class="subtitle">Te lo llevamos</span>
+                                        <span class="fee">+${{ total_delivery_fee|floatformat:2 }}</span>
+                                    </div>
+                                </label>
                                 {% endif %}
                             </div>
+
+                            {% if form.shipping_method.errors %}
+                                <div class="form-errors" style="margin-top:8px;">{{ form.shipping_method.errors }}</div>
+                            {% endif %}
+
+                            <div class="delivery-address-block" id="deliveryAddressBlock">
+                                <div class="form-row" style="margin-bottom:0;">
+                                    <label for="{{ form.delivery_address.id_for_label }}">
+                                        📍 {{ form.delivery_address.label }}
+                                    </label>
+                                    {{ form.delivery_address }}
+                                    {% if form.delivery_address.errors %}
+                                        <div class="form-errors">{{ form.delivery_address.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
                         </div>
 
-                        <!-- PAGO -->
+                        <!-- TOTALES (dinámicos) -->
+                        <div class="summary-line" style="border-top: 1px solid #eee; padding-top: 12px;">
+                            <span>Subtotal</span>
+                            <span>${{ cart.get_total|floatformat:2 }}</span>
+                        </div>
+
+                        <div class="summary-line" id="shippingLine" style="display:none;">
+                            <span>Envío</span>
+                            <span id="shippingFee">$0.00</span>
+                        </div>
+
+                        <div class="order-total">
+                            <span>Total USD</span>
+                            <span id="totalUsd">${{ cart.get_total|floatformat:2 }}</span>
+                        </div>
+
+                        {% if bcv_rate %}
+                        <div class="order-total-bs">
+                            <span>Total Bs</span>
+                            <span id="totalBs">Bs. {{ cart.get_total|to_bs:bcv_rate }}</span>
+                        </div>
+                        <p class="rate-note">
+                            Tasa BCV: <strong>{{ bcv_rate|floatformat:2 }} Bs/USD</strong>
+                        </p>
+                        {% endif %}
+
+                        <a href="{% url 'cart:view' %}" class="btn-back">← Volver al carrito</a>
+                    </div>
+
+                    <!-- ============ COLUMNA DERECHA: DATOS BANCARIOS + PAGO ============ -->
+                    <div class="checkout-card">
+                        <h2>💳 Registrar tu pago</h2>
+
+                        <div class="bank-info">
+                            <h3>Datos para la transferencia</h3>
+                            <div class="bank-row-copy">
+                                <div class="bank-row"><strong>Banco:</strong><span>{{ bank_info.bank_name }}</span></div>
+                                <button type="button" class="btn-copy" onclick="copyToClipboard('{{ bank_info.bank_name }}', this)">📋</button>
+                            </div>
+                            <div class="bank-row-copy">
+                                <div class="bank-row"><strong>Titular:</strong><span>{{ bank_info.account_holder }}</span></div>
+                                <button type="button" class="btn-copy" onclick="copyToClipboard('{{ bank_info.account_holder }}', this)">📋</button>
+                            </div>
+                            {% if bank_info.document %}
+                            <div class="bank-row-copy">
+                                <div class="bank-row"><strong>Cédula / RIF:</strong><span>{{ bank_info.document }}</span></div>
+                                <button type="button" class="btn-copy" onclick="copyToClipboard('{{ bank_info.document }}', this)">📋</button>
+                            </div>
+                            {% endif %}
+                            <div class="bank-row-copy">
+                                <div class="bank-row"><strong>Cuenta:</strong><span>{{ bank_info.account_number }}</span></div>
+                                <button type="button" class="btn-copy" onclick="copyToClipboard('{{ bank_info.account_number }}', this)">📋</button>
+                            </div>
+                            {% if bank_info.phone %}
+                            <div class="bank-row-copy">
+                                <div class="bank-row"><strong>Teléfono:</strong><span>{{ bank_info.phone }}</span></div>
+                                <button type="button" class="btn-copy" onclick="copyToClipboard('{{ bank_info.phone }}', this)">📋</button>
+                            </div>
+                            {% endif %}
+
+                            <div class="qr-section">
+                                <img src="{% url 'orders:payment_qr' %}" alt="QR" class="qr-image">
+                                <p class="qr-hint">Escanea para copiar los datos</p>
+                            </div>
+
+                            <button type="button" class="btn-copy-all" onclick="copyAllBankData()">
+                                📋 Copiar todos los datos
+                            </button>
+                        </div>
+
                         <h3>💳 Datos del pago</h3>
 
                         {% for field in form %}
@@ -446,9 +457,9 @@
                         {% endfor %}
 
                         <button type="submit" class="btn-checkout">✅ Confirmar pedido</button>
-                    </form>
+                    </div>
                 </div>
-            </div>
+            </form>
         </div>
     </main>
 
@@ -456,17 +467,11 @@
     {{ total_delivery_fee|stringformat:"f"|json_script:"data-shipping" }}
     {{ bcv_rate|default_if_none:""|stringformat:"s"|json_script:"data-rate" }}
     <script>
-        // Datos inyectados como JSON (evita problema de coma/punto)
         const SUBTOTAL_USD = parseFloat(JSON.parse(document.getElementById('data-subtotal').textContent)) || 0;
         const SHIPPING_FEE = parseFloat(JSON.parse(document.getElementById('data-shipping').textContent)) || 0;
         const BCV_RATE_RAW = JSON.parse(document.getElementById('data-rate').textContent);
         const BCV_RATE = BCV_RATE_RAW ? parseFloat(BCV_RATE_RAW) : null;
         const DELIVERY_AVAILABLE = {% if delivery_available %}true{% else %}false{% endif %};
-
-        // Debug (puedes borrar estas 3 líneas después)
-        console.log('SUBTOTAL_USD:', SUBTOTAL_USD);
-        console.log('SHIPPING_FEE:', SHIPPING_FEE);
-        console.log('BCV_RATE:', BCV_RATE);
 
         function formatUsd(v) { return '$' + v.toFixed(2); }
         function formatBs(v) { return 'Bs. ' + v.toLocaleString('es-VE', {minimumFractionDigits: 2, maximumFractionDigits: 2}); }
@@ -494,7 +499,6 @@
 
         updateTotals();
 
-        // Copiar al portapapeles
         function copyToClipboard(text, btn) {
             const done = () => {
                 if (btn) {
