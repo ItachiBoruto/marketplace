@@ -56,9 +56,39 @@ def product_list(request):
 # ===== DETALLE DE PRODUCTO (PROTEGIDO) =====
 @login_required(login_url='login')
 def product_detail(request, product_id):
-    """Muestra el detalle de un producto específico."""
+    """Muestra el detalle del producto + productos similares."""
     product = get_object_or_404(Product, id=product_id, is_available=True)
-    return render(request, 'products/detail.html', {'product': product})
+
+    # 1. Primero: productos de la misma tienda
+    same_store = list(
+        Product.objects.filter(store=product.store, is_available=True)
+        .exclude(id=product.id)
+        .select_related('store')
+        .order_by('-created_at')[:6]
+    )
+    related = same_store
+
+    # 2. Si hay menos de 6, completar con productos de keywords similares
+    if len(related) < 6:
+        needed = 6 - len(related)
+        keywords = [k.strip() for k in (product.keywords or '').split(',') if k.strip()]
+        if keywords:
+            q = Q()
+            for kw in keywords:
+                q |= Q(keywords__icontains=kw)
+            exclude_ids = [product.id] + [p.id for p in related]
+            extra = list(
+                Product.objects.filter(q, is_available=True)
+                .exclude(id__in=exclude_ids)
+                .select_related('store')
+                .order_by('-created_at')[:needed]
+            )
+            related = related + extra
+
+    return render(request, 'products/detail.html', {
+        'product': product,
+        'related_products': related,
+    })
 
 
 # ===== API PARA SCROLL INFINITO =====

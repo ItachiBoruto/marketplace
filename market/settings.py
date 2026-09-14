@@ -209,6 +209,15 @@ BANK_INFO = {
     'phone': os.environ.get('BANK_PHONE', '+58 XXX-XXX-XXXX'),
 }
 
+# ============================================================
+# ===== RESERVA DE STOCK EN PEDIDOS =====
+# ============================================================
+ORDER_RESERVATION_MINUTES = int(os.environ.get('ORDER_RESERVATION_MINUTES', 30))
+
+# Token para el endpoint cron de expiración de reservas
+CRON_SECRET_TOKEN = os.environ.get('CRON_SECRET_TOKEN', '')
+
+
 # ===== LOGGING =====
 LOGGING = {
     'version': 1,

@@ -19,7 +19,7 @@
                 </div>
             {% endif %}
             <div class="product-actions">
-                <button class="btn-add-cart" onclick="alert('Carrito en construcción. Próximamente podrás agregar productos.')">
+                <button type="button" class="btn-add-cart" data-add-cart data-product-id="{{ product.id }}" data-product-name="{{ product.name }}">
                     🛒 Agregar al carrito
                 </button>
             </div>

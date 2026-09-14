@@ -118,6 +118,61 @@
         @media (max-width: 768px) {
             .checkout-wrapper { grid-template-columns: 1fr; }
         }
+    
+        .bank-row-copy {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            border-bottom: 1px solid #e9ecef;
+            padding: 6px 0;
+        }
+        .bank-row-copy .bank-row {
+            flex: 1;
+            border-bottom: none;
+            padding: 0;
+        }
+        .btn-copy {
+            background: #f0f2f5;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            padding: 4px 10px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: background 0.2s;
+            flex-shrink: 0;
+        }
+        .btn-copy:hover { background: #e2e6ea; }
+        .qr-section {
+            text-align: center;
+            margin: 16px 0 10px;
+        }
+        .qr-image {
+            max-width: 180px;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 6px;
+            background: white;
+        }
+        .qr-hint {
+            font-size: 0.78rem;
+            color: #7f8c8d;
+            margin: 6px 0 0;
+        }
+        .btn-copy-all {
+            width: 100%;
+            padding: 10px;
+            background: #0f3460;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s;
+            margin-top: 6px;
+        }
+        .btn-copy-all:hover { background: #16213e; }
     </style>
 </head>
 <body>
@@ -172,26 +227,66 @@
 
                     <div class="bank-info">
                         <h3>Datos para la transferencia</h3>
-                        <div class="bank-row">
-                            <strong>Banco:</strong>
-                            <span>{{ bank_info.bank_name }}</span>
+
+                        <div class="bank-row-copy">
+                            <div class="bank-row">
+                                <strong>Banco:</strong>
+                                <span>{{ bank_info.bank_name }}</span>
+                            </div>
+                            <button type="button" class="btn-copy" onclick="copyToClipboard('{{ bank_info.bank_name }}', this)">📋</button>
                         </div>
-                        <div class="bank-row">
-                            <strong>Cuenta:</strong>
-                            <span>{{ bank_info.account_number }}</span>
+
+                        <div class="bank-row-copy">
+                            <div class="bank-row">
+                                <strong>Titular:</strong>
+                                <span>{{ bank_info.account_holder }}</span>
+                            </div>
+                            <button type="button" class="btn-copy" onclick="copyToClipboard('{{ bank_info.account_holder }}', this)">📋</button>
                         </div>
-                        <div class="bank-row">
-                            <strong>Titular:</strong>
-                            <span>{{ bank_info.account_holder }}</span>
+
+                        {% if bank_info.document %}
+                        <div class="bank-row-copy">
+                            <div class="bank-row">
+                                <strong>Cédula / RIF:</strong>
+                                <span>{{ bank_info.document }}</span>
+                            </div>
+                            <button type="button" class="btn-copy" onclick="copyToClipboard('{{ bank_info.document }}', this)">📋</button>
                         </div>
-                        <div class="bank-row">
-                            <strong>Cédula / RIF:</strong>
-                            <span>{{ bank_info.document|default:"—" }}</span>
+                        {% endif %}
+
+                        <div class="bank-row-copy">
+                            <div class="bank-row">
+                                <strong>Cuenta:</strong>
+                                <span>{{ bank_info.account_number }}</span>
+                            </div>
+                            <button type="button" class="btn-copy" onclick="copyToClipboard('{{ bank_info.account_number }}', this)">📋</button>
                         </div>
+
+                        {% if bank_info.phone %}
+                        <div class="bank-row-copy">
+                            <div class="bank-row">
+                                <strong>Teléfono:</strong>
+                                <span>{{ bank_info.phone }}</span>
+                            </div>
+                            <button type="button" class="btn-copy" onclick="copyToClipboard('{{ bank_info.phone }}', this)">📋</button>
+                        </div>
+                        {% endif %}
+
+                        {% if bank_info.email %}
                         <div class="bank-row">
                             <strong>Email:</strong>
                             <span>{{ bank_info.email }}</span>
                         </div>
+                        {% endif %}
+
+                        <div class="qr-section">
+                            <img src="{% url 'orders:payment_qr' %}" alt="Código QR con los datos de pago" class="qr-image">
+                            <p class="qr-hint">Escanea para copiar los datos</p>
+                        </div>
+
+                        <button type="button" class="btn-copy-all" onclick="copyAllBankData()">
+                            📋 Copiar todos los datos
+                        </button>
                     </div>
 
                     <p style="font-size: 0.85rem; color: #666; margin-bottom: 14px;">
@@ -221,5 +316,47 @@
             </div>
         </div>
     </main>
+
+    <script>
+        function copyToClipboard(text, btn) {
+            const done = () => {
+                if (btn) {
+                    const original = btn.textContent;
+                    btn.textContent = '✅';
+                    setTimeout(() => { btn.textContent = original; }, 1500);
+                }
+            };
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(text).then(done).catch(() => {
+                    fallbackCopy(text);
+                    done();
+                });
+            } else {
+                fallbackCopy(text);
+                done();
+            }
+        }
+        function fallbackCopy(text) {
+            const ta = document.createElement('textarea');
+            ta.value = text;
+            ta.style.position = 'fixed';
+            ta.style.opacity = '0';
+            document.body.appendChild(ta);
+            ta.select();
+            try { document.execCommand('copy'); } catch (e) {}
+            document.body.removeChild(ta);
+        }
+        function copyAllBankData() {
+            const data = [
+                'Banco: {{ bank_info.bank_name }}',
+                'Titular: {{ bank_info.account_holder }}',
+                'Cédula: {{ bank_info.document }}',
+                'Cuenta: {{ bank_info.account_number }}',
+                'Teléfono: {{ bank_info.phone }}'
+            ].join('\n');
+            copyToClipboard(data, null);
+            alert('Datos copiados al portapapeles');
+        }
+    </script>
 </body>
 </html>

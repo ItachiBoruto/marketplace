@@ -1,3 +1,4 @@
+from django.http import JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -30,10 +31,22 @@ def get_or_create_cart(request):
 
 
 def add_to_cart(request, product_id):
+    is_ajax = (
+        request.headers.get('X-Requested-With') == 'XMLHttpRequest'
+        or 'application/json' in request.headers.get('Accept', '')
+    )
+
     product = get_object_or_404(Product, id=product_id, is_available=True)
     cart = get_or_create_cart(request)
 
+    # --- Sin stock ---
     if product.stock <= 0:
+        if is_ajax:
+            return JsonResponse({
+                'success': False,
+                'message': f'"{product.name}" no tiene stock.',
+                'cart_count': cart.get_total_items(),
+            }, status=400)
         messages.error(request, f'"{product.name}" no está disponible en stock.')
         return redirect(request.META.get('HTTP_REFERER', '/'))
 
@@ -43,16 +56,29 @@ def add_to_cart(request, product_id):
         defaults={'price': product.price, 'quantity': 1}
     )
 
+    # --- Ya estaba en el carrito ---
     if not created:
         if cart_item.quantity + 1 > product.stock:
+            if is_ajax:
+                return JsonResponse({
+                    'success': False,
+                    'message': f'No hay suficiente stock. Disponibles: {product.stock}.',
+                    'cart_count': cart.get_total_items(),
+                }, status=400)
             messages.warning(request, f'No hay suficiente stock de "{product.name}". Disponibles: {product.stock}.')
             return redirect(request.META.get('HTTP_REFERER', '/'))
         cart_item.quantity += 1
         cart_item.save()
-    else:
-        if product.stock < 1:
-            messages.error(request, f'"{product.name}" no está disponible.')
-            return redirect(request.META.get('HTTP_REFERER', '/'))
+
+    cart_count = cart.get_total_items()
+
+    if is_ajax:
+        return JsonResponse({
+            'success': True,
+            'product_name': product.name,
+            'cart_count': cart_count,
+            'message': f'"{product.name}" agregado',
+        })
 
     messages.success(request, f'"{product.name}" agregado al carrito.')
     return redirect(request.META.get('HTTP_REFERER', '/'))

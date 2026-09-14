@@ -15,6 +15,7 @@ class Order(models.Model):
         ('shipped', 'Enviado'),
         ('completed', 'Completado'),
         ('cancelled', 'Cancelado'),
+        ('expired', 'Reserva expirada'),
     ]
 
     user = models.ForeignKey(
@@ -38,6 +39,14 @@ class Order(models.Model):
 
     notes = models.TextField(blank=True, verbose_name='Notas del cliente')
 
+    # ===== Reserva de stock =====
+    reservation_expires_at = models.DateTimeField(
+        null=True, blank=True, verbose_name='Reserva vence el'
+    )
+    stock_released = models.BooleanField(
+        default=False, verbose_name='Stock liberado'
+    )
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -51,6 +60,24 @@ class Order(models.Model):
 
     def get_total_items(self):
         return sum(item.quantity for item in self.items.all())
+
+    @property
+    def is_reservation_active(self):
+        """True si la reserva sigue activa (no expirada y no liberada)."""
+        from django.utils import timezone
+        if self.stock_released:
+            return False
+        if not self.reservation_expires_at:
+            return False
+        return timezone.now() < self.reservation_expires_at
+
+    def minutes_until_expiry(self):
+        """Devuelve los minutos restantes de la reserva (0 si expiró)."""
+        from django.utils import timezone
+        if not self.reservation_expires_at:
+            return 0
+        delta = self.reservation_expires_at - timezone.now()
+        return max(0, int(delta.total_seconds() // 60))
 
 
 class OrderItem(models.Model):

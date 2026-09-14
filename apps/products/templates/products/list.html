@@ -143,22 +143,42 @@
                 if (page === 1) productGrid.innerHTML = '';
 
                 data.results.forEach(product => {
+                    const stock = parseInt(product.stock) || 0;
+                    const outOfStock = stock <= 0;
+                    const lowStock = stock > 0 && stock <= 5;
+
                     const card = document.createElement('div');
                     card.className = 'product-card';
+                    if (outOfStock) card.classList.add('out-of-stock');
+                    if (lowStock) card.classList.add('low-stock');
                     card.dataset.store = product.store_id;
-                    card.onclick = () => { window.location.href = `/product/${product.id}/`; };
+
+                    // Solo navega si hay stock
+                    if (!outOfStock) {
+                        card.onclick = () => { window.location.href = `/product/${product.id}/`; };
+                    }
 
                     const imgHtml = product.image
                         ? `<img src="${escapeHtml(product.image)}" alt="${escapeHtml(product.name)}" loading="lazy">`
                         : '<div class="no-image">Sin imagen</div>';
 
+                    const badge = outOfStock
+                        ? '<span class="stock-badge badge-out">AGOTADO</span>'
+                        : (lowStock ? `<span class="stock-badge badge-low">¡Quedan ${stock}!</span>` : '');
+
+                    const stockClass = outOfStock ? 'stock-zero' : (lowStock ? 'stock-low' : '');
+                    const stockLabel = outOfStock ? 'Sin stock' : `Stock: ${stock}`;
+
                     card.innerHTML = `
-                        <div class="product-image">${imgHtml}</div>
+                        <div class="product-image">
+                            ${imgHtml}
+                            ${badge}
+                        </div>
                         <div class="product-info">
                             <h3 class="product-name">${escapeHtml(product.name)}</h3>
                             <p class="store-name">${escapeHtml(product.store_name || 'Sin comercio')}</p>
                             <p class="price">$${escapeHtml(product.price)}</p>
-                            <p class="stock-counter">📦 <span>${escapeHtml(product.stock)}</span></p>
+                            <p class="stock-counter ${stockClass}">📦 <span>${escapeHtml(stockLabel)}</span></p>
                         </div>
                     `;
                     productGrid.appendChild(card);

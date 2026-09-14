@@ -11,9 +11,10 @@ class StockMovement(models.Model):
         ('INIT', 'Carga inicial'),
         ('REST', 'Reposición'),
         ('SALE', 'Venta'),
+        ('RETURN', 'Devolución'),
         ('ADJ', 'Ajuste manual'),
     ]
-    movement_type = models.CharField(max_length=4, choices=MOVEMENT_CHOICES, verbose_name="Tipo de movimiento")
+    movement_type = models.CharField(max_length=8, choices=MOVEMENT_CHOICES, verbose_name="Tipo de movimiento")
     created_by = models.CharField(max_length=100, blank=True, verbose_name="Responsable")
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Fecha y hora")
     order_reference = models.CharField(max_length=50, blank=True, null=True, verbose_name="Referencia de pedido")
