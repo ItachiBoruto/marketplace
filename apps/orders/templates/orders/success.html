@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pedido registrado - Mi Marketplace</title>
     {% load static %}
+    {% load exchange_filters %}
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
     <style>
         .success-box {
@@ -55,6 +56,20 @@
         .btn-primary:hover { background: #c0392b; }
         .btn-secondary { background: #6c757d; color: white; }
         .btn-secondary:hover { background: #5a6268; }
+
+        .order-number-bs {
+            background: #f0f7ff;
+            padding: 12px;
+            border-radius: 8px;
+            margin: 8px 0 20px;
+            font-size: 1.05rem;
+            color: #1a1a2e;
+        }
+        .rate-hint-success {
+            font-size: 0.75rem;
+            color: #7f8c8d;
+            margin-top: 4px;
+        }
     </style>
 </head>
 <body>
@@ -79,8 +94,15 @@
                 </p>
 
                 <div class="order-number">
-                    Pedido #{{ order.pk }} · Total: ${{ order.total|floatformat:2 }}
+                    Pedido #{{ order.pk }} · Total USD: ${{ order.total|floatformat:2 }}
                 </div>
+
+                {% if order.exchange_rate %}
+                <div class="order-number-bs">
+                    Total Bs: <strong>Bs. {{ order.total|to_bs:order.exchange_rate }}</strong>
+                    <div class="rate-hint-success">Tasa BCV al momento del pedido: {{ order.exchange_rate|floatformat:2 }} Bs/USD</div>
+                </div>
+                {% endif %}
 
                 <p style="font-size: 0.9rem;">
                     Número de referencia: <strong>{{ order.payment_reference }}</strong>

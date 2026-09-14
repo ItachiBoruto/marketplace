@@ -7,6 +7,7 @@ from django.utils import timezone
 from apps.inventory.models import StockMovement
 from apps.products.models import Product
 
+from .exchange import get_bcv_rate
 from .models import Order, OrderItem
 
 
@@ -59,9 +60,12 @@ def create_order_from_cart(user, payment_data, cart):
     now = timezone.now()
     reservation_minutes = getattr(settings, 'ORDER_RESERVATION_MINUTES', 30)
 
+    rate = get_bcv_rate()
+
     order = Order.objects.create(
         user=user,
         total=cart.get_total(),
+        exchange_rate=rate,
         status='payment_submitted',
         reservation_expires_at=now + timedelta(minutes=reservation_minutes),
         **payment_data

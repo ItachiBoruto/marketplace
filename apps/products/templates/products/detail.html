@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ product.name }} - Mi Marketplace</title>
     {% load static %}
+    {% load exchange_filters %}
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
     <style>
         .product-page-wrap {
@@ -253,6 +254,20 @@
             .related-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
             .related-section h2 { font-size: 1rem; }
         }
+
+        .product-hero-price-bs {
+            font-size: 1.15rem;
+            font-weight: 600;
+            color: #2c3e50;
+            margin: 4px 0 12px;
+        }
+        .product-hero-price-bs .rate-hint {
+            font-size: 0.75rem;
+            color: #7f8c8d;
+            font-weight: 400;
+            display: block;
+            margin-top: 2px;
+        }
     </style>
 </head>
 <body>
@@ -295,6 +310,12 @@
                             🏪 Vendido por <a href="{% url 'stores:detail' product.store.id %}">{{ product.store.name }}</a>
                         </p>
                         <p class="product-hero-price">${{ product.price }}</p>
+                        {% if bcv_rate %}
+                        <p class="product-hero-price-bs">
+                            Bs. {{ product.price|to_bs:bcv_rate }}
+                            <span class="rate-hint">Tasa BCV: {{ bcv_rate|floatformat:2 }} Bs/USD</span>
+                        </p>
+                        {% endif %}
 
                         {% if product.stock <= 0 %}
                             <p class="product-hero-stock stock-out">📦 Sin stock</p>

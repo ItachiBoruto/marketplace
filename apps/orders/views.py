@@ -7,6 +7,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from apps.cart.models import Cart
 
 from .forms import PaymentForm
+from .exchange import get_bcv_rate, invalidate_cache
 from .models import Order
 from .services import (
     EmptyCartError,
@@ -139,3 +140,14 @@ def cron_expire_reservations(request):
 
     count = expire_old_reservations()
     return JsonResponse({'expired': count, 'ok': True})
+
+
+def cron_update_bcv(request):
+    token = request.GET.get('token', '')
+    expected = getattr(settings, 'CRON_SECRET_TOKEN', '')
+    if not expected or token != expected:
+        return JsonResponse({'error': 'unauthorized'}, status=401)
+    invalidate_cache()
+    rate = get_bcv_rate()
+    return JsonResponse({'rate': rate, 'ok': rate is not None})
+

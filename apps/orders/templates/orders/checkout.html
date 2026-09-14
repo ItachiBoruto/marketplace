@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Finalizar compra - Mi Marketplace</title>
     {% load static %}
+    {% load exchange_filters %}
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
     <style>
         .checkout-wrapper {
@@ -173,6 +174,21 @@
             margin-top: 6px;
         }
         .btn-copy-all:hover { background: #16213e; }
+
+        .order-total-bs {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0 0;
+            font-size: 1.15rem;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        .rate-note {
+            font-size: 0.78rem;
+            color: #7f8c8d;
+            margin: 4px 0 0;
+            text-align: right;
+        }
     </style>
 </head>
 <body>
@@ -215,9 +231,19 @@
                     {% endfor %}
 
                     <div class="order-total">
-                        <span>Total</span>
+                        <span>Total USD</span>
                         <span>${{ cart.get_total|floatformat:2 }}</span>
                     </div>
+
+                    {% if bcv_rate %}
+                    <div class="order-total-bs">
+                        <span>Total Bs</span>
+                        <span>Bs. {{ cart.get_total|to_bs:bcv_rate }}</span>
+                    </div>
+                    <p class="rate-note">
+                        Tasa BCV aplicada: <strong>{{ bcv_rate|floatformat:2 }} Bs/USD</strong>
+                    </p>
+                    {% endif %}
 
                     <a href="{% url 'cart:view' %}" class="btn-back">← Volver al carrito</a>
                 </div>

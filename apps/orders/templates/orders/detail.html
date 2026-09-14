@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pedido #{{ order.pk }} - Mi Marketplace</title>
     {% load static %}
+    {% load exchange_filters %}
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
     <style>
         .detail-wrapper {
@@ -78,6 +79,21 @@
             text-decoration: none;
             font-size: 0.9rem;
         }
+
+        .total-line-bs {
+            display: flex;
+            justify-content: space-between;
+            padding-top: 6px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        .rate-note-detail {
+            font-size: 0.75rem;
+            color: #7f8c8d;
+            text-align: right;
+            margin: 4px 0 0;
+        }
     </style>
 </head>
 <body>
@@ -128,9 +144,19 @@
                         </div>
                     {% endfor %}
                     <div class="total-line">
-                        <span>Total</span>
+                        <span>Total USD</span>
                         <span>${{ order.total|floatformat:2 }}</span>
                     </div>
+
+                    {% if order.exchange_rate %}
+                    <div class="total-line-bs">
+                        <span>Total Bs</span>
+                        <span>Bs. {{ order.total|to_bs:order.exchange_rate }}</span>
+                    </div>
+                    <p class="rate-note-detail">
+                        Tasa BCV del pedido: <strong>{{ order.exchange_rate|floatformat:2 }} Bs/USD</strong>
+                    </p>
+                    {% endif %}
                 </div>
 
                 <div class="detail-card">

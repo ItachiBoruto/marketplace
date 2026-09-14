@@ -11,4 +11,5 @@ urlpatterns = [
     path('<int:order_id>/', views.order_detail, name='detail'),
     path('payment-qr/', views.payment_qr, name='payment_qr'),
     path('cron/expire/', views.cron_expire_reservations, name='cron_expire'),
+    path('cron/bcv/', views.cron_update_bcv, name='cron_bcv'),
 ]

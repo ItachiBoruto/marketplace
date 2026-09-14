@@ -27,6 +27,10 @@ class Order(models.Model):
         verbose_name='Estado'
     )
     total = models.DecimalField(max_digits=12, decimal_places=2, verbose_name='Total')
+    exchange_rate = models.DecimalField(
+        max_digits=12, decimal_places=4, null=True, blank=True,
+        verbose_name='Tasa BCV al momento del pedido'
+    )
 
     # Datos del pago (los llena el usuario)
     payment_bank = models.CharField(max_length=100, blank=True, verbose_name='Banco emisor')
@@ -121,3 +125,39 @@ class OrderItem(models.Model):
 
     def get_subtotal(self):
         return self.product_price * self.quantity
+
+
+class ExchangeRate(models.Model):
+    """Tasa de cambio USD -> Bs del BCV (automatica o manual)."""
+
+    FUENTE_CHOICES = [
+        ('AUTO', 'Automatica (BCV)'),
+        ('MANUAL', 'Manual'),
+    ]
+
+    fecha = models.DateField(verbose_name='Fecha')
+    valor = models.DecimalField(max_digits=12, decimal_places=4, verbose_name='Bs por USD')
+    fuente = models.CharField(
+        max_length=10, choices=FUENTE_CHOICES, default='AUTO',
+        verbose_name='Fuente'
+    )
+    is_active = models.BooleanField(
+        default=False,
+        verbose_name='Usar esta tasa',
+        help_text='Si esta activa, esta tasa se usara hasta que crees otra o la desactives.'
+    )
+    notas = models.CharField(max_length=200, blank=True, verbose_name='Notas')
+    actualizado_en = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-fecha', '-actualizado_en']
+        verbose_name = 'Tasa de cambio'
+        verbose_name_plural = 'Tasas de cambio'
+
+    def __str__(self):
+        return f"{self.fecha} | {self.valor} Bs/USD | {self.get_fuente_display()}"
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        if self.is_active:
+            ExchangeRate.objects.exclude(pk=self.pk).update(is_active=False)
