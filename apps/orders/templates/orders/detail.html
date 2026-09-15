@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pedido #{{ order.pk }} - Mi Marketplace</title>
+    <title>Pedido {{ order.reference_code }} - Mi Marketplace</title>
     {% load static %}
     {% load exchange_filters %}
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
@@ -97,7 +97,7 @@
 
                 <!-- Estado general -->
                 <div class="detail-card">
-                    <h2>Pedido #{{ order.pk }}</h2>
+                    <h2>Pedido {{ order.reference_code }}</h2>
                     <div class="detail-row">
                         <span class="label">Estado</span>
                         <span class="status-badge status-{{ order.status }}">

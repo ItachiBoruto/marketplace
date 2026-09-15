@@ -5,6 +5,7 @@ from django.http import Http404, HttpResponseBadRequest
 from django.shortcuts import get_object_or_404, redirect
 from django.views.generic import DetailView, ListView
 
+from apps.notifications.email_service import send_order_item_rejected
 from apps.notifications.models import notify
 from apps.orders.models import Order, OrderItem
 from apps.orders.services import reject_order_item
@@ -132,7 +133,7 @@ def approve_order_item(request, store_id, order_id, item_id):
         item.order.user,
         'order_confirmed',
         f'Producto aprobado: {item.product_name}',
-        f'Tu pedido #{item.order_id} fue aprobado por {store.name}. Pronto se enviará.',
+        f'Tu pedido {item.order.reference_code} fue aprobado por {store.name}. Pronto se enviará.',
         link=f'/orders/{item.order_id}/'
     )
 
@@ -166,8 +167,16 @@ def reject_order_item_view(request, store_id, order_id, item_id):
         item.order.user,
         'order_rejected',
         f'Producto rechazado: {item.product_name}',
-        f'{store.name} no pudo completar este item de tu pedido #{item.order_id}.',
+        f'{store.name} no pudo completar este item de tu pedido {item.order.reference_code}.',
         link=f'/orders/{item.order_id}/'
+    )
+
+    # Email al cliente (no bloquea si falla)
+    send_order_item_rejected(
+        order=item.order,
+        item=item,
+        store_name=store.name,
+        request=request,
     )
 
     messages.success(request, f'Item "{item.product_name}" rechazado. Stock devuelto.')
@@ -197,7 +206,7 @@ def mark_item_shipped(request, store_id, order_id, item_id):
         item.order.user,
         'order_shipped',
         f'Producto enviado: {item.product_name}',
-        f'{store.name} envió tu pedido #{item.order_id}.',
+        f'{store.name} envió tu pedido {item.order.reference_code}.',
         link=f'/orders/{item.order_id}/'
     )
 

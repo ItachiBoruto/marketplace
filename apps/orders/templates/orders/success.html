@@ -94,7 +94,7 @@
                 </p>
 
                 <div class="order-number">
-                    Pedido #{{ order.pk }} · Total USD: ${{ order.total|floatformat:2 }}
+                    Pedido {{ order.reference_code }} · Total USD: ${{ order.total|floatformat:2 }}
                 </div>
 
                 {% if order.exchange_rate %}

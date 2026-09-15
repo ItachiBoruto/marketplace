@@ -70,6 +70,13 @@ class Order(models.Model):
         default=False, verbose_name='Stock liberado'
     )
 
+    # Codigo publico visible al usuario (diferente del pk interno)
+    reference_code = models.CharField(
+        max_length=20, unique=True, blank=True, null=True,
+        verbose_name='Código de pedido',
+        help_text='Se genera automáticamente. Ej: ORD-2609-A7B3'
+    )
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -78,8 +85,30 @@ class Order(models.Model):
         verbose_name = 'Pedido'
         verbose_name_plural = 'Pedidos'
 
+    def _generate_reference_code(self):
+        """Genera un codigo unico tipo ORD-2609-A7B3."""
+        import secrets
+        import string
+        from django.utils import timezone
+
+        now = timezone.now()
+        for _ in range(10):
+            suffix = ''.join(
+                secrets.choice(string.ascii_uppercase + string.digits)
+                for _ in range(4)
+            )
+            code = f"ORD-{now.strftime('%y%m')}-{suffix}"
+            if not Order.objects.filter(reference_code=code).exists():
+                return code
+        raise ValueError('No se pudo generar un codigo unico para el pedido')
+
+    def save(self, *args, **kwargs):
+        if not self.reference_code:
+            self.reference_code = self._generate_reference_code()
+        super().save(*args, **kwargs)
+
     def __str__(self):
-        return f"Pedido #{self.pk} - {self.user.username} (${self.total})"
+        return f"Pedido {self.reference_code or self.pk} - {self.user.username} (${self.total})"
 
     def get_total_items(self):
         return sum(item.quantity for item in self.items.all())

@@ -16,14 +16,14 @@ class OrderItemInline(admin.TabularInline):
 @admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
     list_display = (
-        'id', 'user', 'status', 'total', 'exchange_rate', 'get_items_count',
+        'reference_code', 'user', 'status', 'total', 'exchange_rate', 'get_items_count',
         'payment_bank', 'payment_reference',
         'reservation_expires_at', 'stock_released', 'created_at'
     )
     list_filter = ('status', 'payment_bank', 'stock_released', 'created_at')
-    search_fields = ('user__username', 'payment_reference')
+    search_fields = ('reference_code', 'user__username', 'payment_reference')
     readonly_fields = (
-        'created_at', 'updated_at', 'total', 'exchange_rate',
+        'reference_code', 'created_at', 'updated_at', 'total', 'exchange_rate',
         'reservation_expires_at', 'stock_released'
     )
     inlines = [OrderItemInline]
@@ -32,7 +32,7 @@ class OrderAdmin(admin.ModelAdmin):
 
     fieldsets = (
         ('Informacion general', {
-            'fields': ('user', 'status', 'total', 'exchange_rate', 'notes')
+            'fields': ('reference_code', 'user', 'status', 'total', 'exchange_rate', 'notes')
         }),
         ('Pago', {
             'fields': ('payment_bank', 'payment_reference', 'payment_date', 'payment_proof')
@@ -59,7 +59,7 @@ class OrderAdmin(admin.ModelAdmin):
                 notify(
                     order.user,
                     'payment_confirmed',
-                    f'Pago confirmado - Pedido #{order.pk}',
+                    f'Pago confirmado - Pedido {order.reference_code}',
                     'Verificamos tu pago. Los comercios están preparando tu pedido.',
                     link=f'/orders/{order.pk}/'
                 )

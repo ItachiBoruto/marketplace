@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head><meta charset="UTF-8"></head>
+<body style="margin: 0; padding: 0; background: #f0f2f5; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+    <div style="max-width: 600px; margin: 20px auto; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.1);">
+        {% include "emails/_base_header.html" %}
+
+        <div style="padding: 30px 28px;">
+            <h2 style="color: #1a1a2e; margin: 0 0 8px; font-size: 20px;">Actualización de tu pedido</h2>
+            <p style="color: #7f8c8d; margin: 0 0 24px; font-size: 14px;">
+                Hola {{ order.user.username }}, tenemos novedades sobre tu pedido {{ order.reference_code }}.
+            </p>
+
+            <div style="background: #fef5e7; border-left: 4px solid #f39c12; border-radius: 8px; padding: 16px 18px; margin-bottom: 20px;">
+                <p style="margin: 0 0 8px; color: #856404; font-weight: 600; font-size: 14px;">
+                    ⚠️ Un producto de tu pedido fue rechazado
+                </p>
+                <p style="margin: 0; color: #856404; font-size: 13px; line-height: 1.5;">
+                    El comercio <strong>{{ store_name }}</strong> no pudo completar el siguiente producto:
+                </p>
+            </div>
+
+            <div style="background: #f8f9fa; border-radius: 8px; padding: 14px 16px; margin-bottom: 20px;">
+                <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
+                    <tr>
+                        <td style="padding: 4px 0; color: #2c3e50;">
+                            {{ item.quantity }} × {{ item.product_name }}
+                        </td>
+                        <td style="padding: 4px 0; text-align: right; font-weight: 600; color: #e94560;">
+                            ${{ item.get_subtotal|floatformat:2 }}
+                        </td>
+                    </tr>
+                </table>
+            </div>
+
+            <p style="color: #555; font-size: 14px; line-height: 1.6;">
+                El monto correspondiente a este producto será gestionado por nuestro equipo.
+                Si tienes dudas sobre el reembolso, responde a este correo o contáctanos.
+            </p>
+
+            <div style="text-align: center; margin-top: 28px;">
+                <a href="{{ order_url }}" style="display: inline-block; padding: 12px 28px; background: #e94560; color: white; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 14px;">
+                    Ver mi pedido
+                </a>
+            </div>
+        </div>
+
+        {% include "emails/_base_footer.html" %}
+    </div>
+</body>
+</html>

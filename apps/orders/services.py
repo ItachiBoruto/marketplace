@@ -7,6 +7,7 @@ from django.utils import timezone
 from apps.inventory.models import StockMovement
 from apps.products.models import Product
 
+from apps.notifications.email_service import send_new_order_to_admin
 from apps.notifications.models import notify, notify_superusers
 
 from .exchange import get_bcv_rate
@@ -105,7 +106,7 @@ def create_order_from_cart(user, payment_data, cart):
     # Al admin (superusers): nuevo pedido recibido
     notify_superusers(
         "order_created",
-        f"Nuevo pedido #{order.pk}",
+        f"Nuevo pedido {order.reference_code}",
         f"{user.username} hizo un pedido por ${order.total}.",
         link=f"/admin/orders/order/{order.pk}/change/"
     )
@@ -114,10 +115,13 @@ def create_order_from_cart(user, payment_data, cart):
     notify(
         user,
         "order_created",
-        f"Pedido #{order.pk} registrado",
+        f"Pedido {order.reference_code} registrado",
         "Estamos verificando tu pago. Te avisaremos cuando se confirme.",
         link=f"/orders/{order.pk}/"
     )
+
+    # Email al admin (no bloquea si falla)
+    send_new_order_to_admin(order)
 
     return order
 

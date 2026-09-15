@@ -1,6 +1,6 @@
 {% extends "stores/dashboard/base.html" %}
 
-{% block title %}Pedido #{{ order.pk }}{% endblock %}
+{% block title %}Pedido {{ order.reference_code }}{% endblock %}
 
 {% block content %}
 <style>
@@ -100,8 +100,8 @@
 <div class="detail-card">
     <h2>📋 Información del pedido</h2>
     <div class="info-row">
-        <span class="label">Pedido #</span>
-        <span class="value">{{ order.pk }}</span>
+        <span class="label">Pedido</span>
+        <span class="value">{{ order.reference_code }}</span>
     </div>
     <div class="info-row">
         <span class="label">Fecha</span>

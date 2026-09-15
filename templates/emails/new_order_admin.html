@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head><meta charset="UTF-8"></head>
+<body style="margin: 0; padding: 0; background: #f0f2f5; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+    <div style="max-width: 600px; margin: 20px auto; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.1);">
+        {% include "emails/_base_header.html" %}
+
+        <div style="padding: 30px 28px;">
+            <h2 style="color: #1a1a2e; margin: 0 0 8px; font-size: 20px;">🎉 ¡Nuevo pedido recibido!</h2>
+            <p style="color: #7f8c8d; margin: 0 0 24px; font-size: 14px;">
+                Se ha registrado un nuevo pedido que requiere tu atención.
+            </p>
+
+            <div style="background: #f8f9fa; border-radius: 8px; padding: 16px 18px; margin-bottom: 20px;">
+                <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
+                    <tr>
+                        <td style="padding: 6px 0; color: #7f8c8d;">Pedido:</td>
+                        <td style="padding: 6px 0; text-align: right; font-weight: 700; color: #1a1a2e;">{{ order.reference_code }}</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 6px 0; color: #7f8c8d;">Cliente:</td>
+                        <td style="padding: 6px 0; text-align: right; color: #2c3e50; font-weight: 600;">{{ order.user.username }}</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 6px 0; color: #7f8c8d;">Email del cliente:</td>
+                        <td style="padding: 6px 0; text-align: right; color: #2c3e50;">{{ order.user.email }}</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 6px 0; color: #7f8c8d;">Método de entrega:</td>
+                        <td style="padding: 6px 0; text-align: right; color: #2c3e50;">
+                            {% if order.shipping_method == 'delivery' %}🛵 Delivery{% else %}🏪 Retiro en tienda{% endif %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 6px 0; color: #7f8c8d;">Total:</td>
+                        <td style="padding: 6px 0; text-align: right; font-weight: 700; color: #e94560; font-size: 16px;">
+                            ${{ order.grand_total|floatformat:2 }}
+                        </td>
+                    </tr>
+                </table>
+            </div>
+
+            <h3 style="color: #1a1a2e; font-size: 15px; margin: 20px 0 10px;">📦 Productos</h3>
+            <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
+                {% for item in order.items.all %}
+                    <tr style="border-bottom: 1px solid #f0f0f0;">
+                        <td style="padding: 8px 0; color: #2c3e50;">
+                            {{ item.quantity }} × {{ item.product_name }}
+                            <div style="font-size: 11px; color: #95a5a6;">🏪 {{ item.store.name }}</div>
+                        </td>
+                        <td style="padding: 8px 0; text-align: right; font-weight: 600; color: #2c3e50;">
+                            ${{ item.get_subtotal|floatformat:2 }}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </table>
+
+            <div style="margin-top: 20px; padding: 14px 16px; background: #eaf2f8; border-left: 4px solid #3498db; border-radius: 6px; font-size: 13px; color: #21618c;">
+                <strong>Referencia de pago declarada:</strong> {{ order.payment_reference|default:"No especificada" }}
+                <br>
+                <strong>Banco emisor:</strong> {{ order.payment_bank|default:"No especificado" }}
+            </div>
+
+            <div style="text-align: center; margin-top: 28px;">
+                <a href="{{ admin_url }}" style="display: inline-block; padding: 12px 28px; background: #e94560; color: white; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 14px;">
+                    Ver pedido en el admin →
+                </a>
+            </div>
+        </div>
+
+        {% include "emails/_base_footer.html" %}
+    </div>
+</body>
+</html>

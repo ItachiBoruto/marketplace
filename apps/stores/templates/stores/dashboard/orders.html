@@ -151,7 +151,7 @@
     <div class="order-card {{ order.status }}">
         <div class="order-card-header">
             <div>
-                <span class="order-id">Pedido #{{ order.pk }}</span>
+                <span class="order-id">Pedido {{ order.reference_code }}</span>
                 <span class="order-meta"> · {{ order.created_at|date:"d/m/Y H:i" }}</span>
             </div>
             <span class="order-meta">Cliente: <strong>{{ order.user.username }}</strong></span>
