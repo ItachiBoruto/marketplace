@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ store.name }} - Mi Marketplace</title>
     {% load static %}
-    <link rel="stylesheet" href="{% static 'css/style.css' %}?v=7">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}?v=8">
 </head>
 <body>
     <header>
@@ -14,11 +14,14 @@
             <nav>
                 <a href="/">🏠 Inicio</a>
                 <a href="/stores/">📦 Comercios</a>
+                {% if user.is_authenticated %}
+                    <a href="{% url 'cart:view' %}">🛒 Carrito{% if cart_count %} <span class="cart-count-badge">{{ cart_count }}</span>{% endif %}</a>
+                {% endif %}
                 {% if user.is_authenticated and user.is_staff %}
                     <a href="/admin/">⚙️ Admin</a>
                 {% endif %}
                 {% if user.is_authenticated %}
-                    <span style="color: rgba(255,255,255,0.7); margin: 0 10px;">👤 {{ user.username }}</span>
+                    <span style="color: rgba(255,255,255,0.7); margin: 0 10px;">👤 {{ user.username}}</span>
                     <form action="{% url 'logout' %}" method="post" style="display: inline;">
                         {% csrf_token %}
                         <button type="submit" style="background: none; border: none; color: rgba(255,255,255,0.85); cursor: pointer; font-size: 0.95rem; padding: 0; margin: 0 10px;">🚪 Cerrar sesión</button>
@@ -46,12 +49,14 @@
                         <div class="profile-meta">
                             <span>📦 {{ products|length }} productos</span>
                             <span>📅 Desde {{ store.created_at|date:"M Y" }}</span>
+                            {% if store.offers_delivery %}
+                                <span>🛵 Delivery disponible (${{ store.delivery_fee }})</span>
+                            {% endif %}
                         </div>
                     </div>
                     <div class="profile-actions">
                         <a href="/stores/" class="btn-back">← Volver</a>
 
-                        <!-- ===== BOTÓN GESTIONAR ===== -->
                         {% if user.is_authenticated %}
                             {% if user.is_superuser %}
                                 <a href="{% url 'stores:dashboard' store.id %}" class="btn-dashboard">⚙️ Gestionar</a>
@@ -63,7 +68,6 @@
                                 {% endfor %}
                             {% endif %}
                         {% endif %}
-                        <!-- ===== FIN BOTÓN GESTIONAR ===== -->
                     </div>
                 </div>
                 <div class="profile-nav">
@@ -86,6 +90,9 @@
                 </div>
             </div>
 
+            <!-- Detalle del producto seleccionado (ARRIBA del grid) -->
+            <div id="product-detail-container" style="display: none; margin-bottom: 24px;"></div>
+
             <div id="storeProductGrid" class="variant-grid">
                 {% for product in products %}
                     <div class="variant-card" data-product-id="{{ product.id }}">
@@ -107,15 +114,15 @@
                 {% endfor %}
             </div>
 
-            <div id="product-detail-container" style="display: none; margin-top: 30px; border-top: 2px solid #eee; padding-top: 20px;"></div>
             <div id="storeLoading" style="display: none; text-align: center; padding: 20px; color: #777;">
                 Cargando más productos...
             </div>
         </div>
     </main>
 
-    <script src="{% static 'js/store_detail.js' %}?v=5"></script>
-    <script src="{% static 'js/cart-toast.js' %}"></script>
+    <script src="{% static 'js/store_detail.js' %}?v=6"></script>
+    <script src="{% static 'js/cart-toast.js' %}?v=2"></script>
     <script src="{% static 'js/notifications.js' %}"></script>
+    <script src="/static/js/email-verify-banner.js"></script>
 </body>
 </html>

@@ -10,6 +10,28 @@ class UserProfile(models.Model):
     )
     phone = models.CharField(max_length=20, blank=True, null=True, verbose_name="Teléfono")
 
+    # ===== Verificación de email =====
+    email_verified = models.BooleanField(
+        default=False,
+        verbose_name="Email verificado"
+    )
+    email_verified_at = models.DateTimeField(
+        null=True, blank=True,
+        verbose_name="Verificado el"
+    )
+    last_verification_sent_at = models.DateTimeField(
+        null=True, blank=True,
+        verbose_name="Último envío de verificación"
+    )
+    verification_attempts_today = models.PositiveIntegerField(
+        default=0,
+        verbose_name="Reenvíos hoy"
+    )
+    verification_attempts_date = models.DateField(
+        null=True, blank=True,
+        verbose_name="Fecha de reenvíos"
+    )
+
     class Meta:
         db_table = "stores_userprofile"
         verbose_name = "Perfil de usuario"

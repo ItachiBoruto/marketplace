@@ -2063,3 +2063,66 @@ header nav a:hover {
         padding: 0 14px !important;
     }
 }
+
+/* ============================================================
+   BANNER VERIFICAR EMAIL
+   ============================================================ */
+.verify-email-banner {
+    background: linear-gradient(90deg, #fff3cd, #ffe8a1);
+    color: #856404;
+    padding: 10px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    font-size: 0.88rem;
+    border-bottom: 1px solid #ffeeba;
+    flex-wrap: wrap;
+}
+.verify-email-banner .ve-icon {
+    font-size: 1.1rem;
+}
+.verify-email-banner .ve-text {
+    font-weight: 500;
+}
+.verify-email-banner .ve-form {
+    display: inline;
+    margin: 0;
+}
+.verify-email-banner .ve-btn {
+    background: #856404;
+    color: white;
+    border: none;
+    padding: 5px 14px;
+    border-radius: 6px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background 0.2s;
+}
+.verify-email-banner .ve-btn:hover {
+    background: #6c5004;
+}
+.verify-email-banner .ve-close {
+    background: none;
+    border: none;
+    color: #856404;
+    cursor: pointer;
+    font-size: 1rem;
+    padding: 0 4px;
+    margin-left: auto;
+}
+.verify-email-banner .ve-close:hover {
+    color: #6c5004;
+}
+
+@media (max-width: 480px) {
+    .verify-email-banner {
+        font-size: 0.8rem;
+        padding: 8px 12px;
+        gap: 8px;
+    }
+    .verify-email-banner .ve-close { margin-left: 0; }
+}
+

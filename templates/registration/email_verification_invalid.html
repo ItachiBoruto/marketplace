@@ -1,0 +1,54 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enlace inválido</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <style>
+        .invalid-page { max-width: 460px; margin: 60px auto; padding: 20px; }
+        .invalid-card {
+            background: white; border-radius: 12px; padding: 32px 28px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1); text-align: center;
+        }
+        .invalid-icon { font-size: 4rem; margin-bottom: 10px; }
+        .invalid-card h1 { font-size: 1.4rem; color: #e74c3c; margin: 0 0 12px; }
+        .invalid-card p { color: #555; font-size: 0.95rem; line-height: 1.6; margin: 0 0 12px; }
+        .invalid-card a.btn {
+            display: inline-block; margin-top: 8px; padding: 12px 28px;
+            background: #e94560; color: white; text-decoration: none;
+            border-radius: 8px; font-weight: 600; font-size: 0.95rem;
+        }
+        .invalid-card a.btn:hover { background: #c0392b; }
+        .invalid-card a.btn.secondary {
+            background: #f0f2f5; color: #2c3e50; margin-left: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="invalid-page">
+        <div class="invalid-card">
+            <div class="invalid-icon">⚠️</div>
+            <h1>Enlace inválido o expirado</h1>
+
+            {% if error == "expired" %}
+                <p>Este enlace expiró. Los enlaces de verificación duran 24 horas por seguridad.</p>
+            {% elif error == "user_not_found" %}
+                <p>El usuario de este enlace no existe o fue eliminado.</p>
+            {% else %}
+                <p>El enlace no es válido. Puede que ya lo hayas usado o esté incompleto.</p>
+            {% endif %}
+
+            <p style="font-size: 0.85rem; color: #95a5a6;">
+                Si aún necesitas verificar tu correo, inicia sesión y pide un nuevo enlace.
+            </p>
+
+            <div style="margin-top: 16px;">
+                <a href="{% url 'login' %}" class="btn">Iniciar sesión</a>
+                <a href="/" class="btn secondary">Ir al inicio</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
