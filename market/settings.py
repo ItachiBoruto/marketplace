@@ -232,6 +232,13 @@ ORDER_RESERVATION_MINUTES = int(os.environ.get('ORDER_RESERVATION_MINUTES', 30))
 CRON_SECRET_TOKEN = os.environ.get('CRON_SECRET_TOKEN', '')
 
 
+# ===== VISTA PERSONALIZADA DE CSRF FAILURE =====
+def csrf_failure_view(request, reason=""):
+    from django.shortcuts import render
+    return render(request, "403.html", status=403)
+
+CSRF_FAILURE_VIEW = "market.settings.csrf_failure_view"
+
 # ===== LOGGING =====
 LOGGING = {
     'version': 1,

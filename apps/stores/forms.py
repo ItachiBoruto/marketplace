@@ -14,6 +14,8 @@ class StoreProfileForm(forms.ModelForm):
             "name", "logo", "description", "is_active",
             "legal_name", "rif", "address", "phone", "email",
             "offers_delivery", "delivery_fee",
+            "bank_name", "account_number", "account_holder",
+            "document", "payment_phone", "payment_email", "payment_notes",
         ]
         widgets = {
             "name": forms.TextInput(attrs={"class": "form-control"}),
@@ -26,6 +28,13 @@ class StoreProfileForm(forms.ModelForm):
             "email": forms.EmailInput(attrs={"class": "form-control"}),
             "offers_delivery": forms.CheckboxInput(attrs={"class": "form-check-input"}),
             "delivery_fee": forms.NumberInput(attrs={"class": "form-control", "step": "0.01", "min": "0"}),
+            "bank_name": forms.TextInput(attrs={"class": "form-control", "placeholder": "Ej: Banesco"}),
+            "account_number": forms.TextInput(attrs={"class": "form-control", "placeholder": "Ej: 0134-1234-56-78901234"}),
+            "account_holder": forms.TextInput(attrs={"class": "form-control", "placeholder": "Nombre completo"}),
+            "document": forms.TextInput(attrs={"class": "form-control", "placeholder": "V-12345678 o J-12345678-9"}),
+            "payment_phone": forms.TextInput(attrs={"class": "form-control", "placeholder": "0414-1234567"}),
+            "payment_email": forms.EmailInput(attrs={"class": "form-control"}),
+            "payment_notes": forms.Textarea(attrs={"rows": 2, "class": "form-control"}),
         }
         labels = {
             "name": "Nombre comercial",
@@ -39,9 +48,13 @@ class StoreProfileForm(forms.ModelForm):
             "email": "Correo electrónico (opcional)",
             "offers_delivery": "Ofrecer delivery a domicilio",
             "delivery_fee": "Tarifa de delivery (USD)",
-        }
-        help_texts = {
-            "delivery_fee": "Monto en dólares que se cobrará por el envío. Solo aplica si activas delivery.",
+            "bank_name": "Banco",
+            "account_number": "Número de cuenta",
+            "account_holder": "Titular de la cuenta",
+            "document": "Cédula o RIF",
+            "payment_phone": "Teléfono para pago móvil",
+            "payment_email": "Email para notificaciones de pago",
+            "payment_notes": "Notas adicionales",
         }
 
     def clean_logo(self):

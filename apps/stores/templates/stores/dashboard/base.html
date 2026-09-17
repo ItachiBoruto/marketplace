@@ -89,6 +89,10 @@
                 <a href="{% url 'stores:store_edit' store.id %}">⚙️ Perfil</a>
             {% endif %}
 
+            {% if user.is_superuser %}
+                <a href="{% url 'stores:users' store.id %}">👥 Usuarios</a>
+            {% endif %}
+
             <!-- Logout siempre visible -->
             <form action="{% url 'logout' %}" method="post" style="display: inline;">
                 {% csrf_token %}

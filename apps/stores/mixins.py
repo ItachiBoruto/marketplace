@@ -82,3 +82,26 @@ class RoleContextMixin:
             context["pending_orders_count"] = 0
 
         return context
+
+
+class SuperuserRequiredMixin(LoginRequiredMixin):
+    """Solo permite el acceso a superusers del marketplace."""
+
+    def dispatch(self, request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return self.handle_no_permission()
+        if not request.user.is_superuser:
+            raise Http404("Solo el administrador puede acceder a esta sección.")
+        self.store_id = kwargs.get("store_id")
+        self.user_role = "superuser"
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_store(self):
+        from .models import Store
+        try:
+            return Store.objects.get(id=self.store_id)
+        except Store.DoesNotExist:
+            return None
+
+    def get_user_role(self):
+        return "superuser"

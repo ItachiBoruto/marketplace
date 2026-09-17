@@ -1,0 +1,651 @@
+{% extends "stores/dashboard/base.html" %}
+
+{% block title %}Usuarios{% endblock %}
+
+{% block content %}
+<style>
+    /* ============ GUIA DE ROLES ============ */
+    .roles-guide {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        margin-bottom: 20px;
+        overflow: hidden;
+    }
+    .roles-guide-header {
+        background: linear-gradient(135deg, #1a1a2e, #16213e);
+        color: white;
+        padding: 16px 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        cursor: pointer;
+    }
+    .roles-guide-header h3 {
+        margin: 0;
+        font-size: 1rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .roles-guide-toggle {
+        background: rgba(255,255,255,0.15);
+        border: none;
+        color: white;
+        padding: 4px 12px;
+        border-radius: 50px;
+        font-size: 0.82rem;
+        cursor: pointer;
+        font-family: inherit;
+        font-weight: 600;
+    }
+    .roles-guide-body {
+        padding: 0 20px;
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.3s ease, padding 0.3s ease;
+    }
+    .roles-guide.open .roles-guide-body {
+        max-height: 900px;
+        padding: 20px;
+    }
+    .role-item {
+        display: flex;
+        gap: 14px;
+        padding: 14px 0;
+        border-bottom: 1px solid #f0f0f0;
+    }
+    .role-item:last-child { border-bottom: none; }
+    .role-item-icon {
+        font-size: 1.8rem;
+        line-height: 1;
+        flex-shrink: 0;
+    }
+    .role-item-content { flex: 1; }
+    .role-item-title {
+        font-weight: 700;
+        color: #1a1a2e;
+        font-size: 0.95rem;
+        margin-bottom: 4px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .role-item-title .role-badge {
+        padding: 2px 10px;
+        border-radius: 20px;
+        font-size: 0.7rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+    }
+    .role-owner-badge { background: #fef5e7; color: #b9770e; }
+    .role-manager-badge { background: #eaf2f8; color: #21618c; }
+    .role-viewer-badge { background: #f0f2f5; color: #6c757d; }
+    .role-item-desc {
+        font-size: 0.85rem;
+        color: #555;
+        line-height: 1.5;
+        margin-bottom: 6px;
+    }
+    .role-item-perms {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+    }
+    .perm-tag {
+        background: #f0f2f5;
+        color: #2c3e50;
+        font-size: 0.72rem;
+        padding: 3px 9px;
+        border-radius: 12px;
+        font-weight: 500;
+    }
+    .perm-tag.yes::before { content: "OK "; color: #2ecc71; font-weight: 700; }
+    .perm-tag.no::before { content: "X "; color: #e74c3c; font-weight: 700; }
+    .perm-tag.no { background: #fafafa; color: #95a5a6; }
+
+    /* ============ AGREGAR USUARIO ============ */
+    .add-user-card {
+        background: white;
+        border-radius: 12px;
+        padding: 20px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        margin-bottom: 24px;
+        border-left: 4px solid #3498db;
+    }
+    .add-user-card h3 {
+        margin: 0 0 12px;
+        font-size: 1rem;
+        color: #1a1a2e;
+    }
+    .search-box { position: relative; }
+    .search-box input {
+        width: 100%;
+        padding: 11px 16px;
+        border: 2px solid #e1e5ea;
+        border-radius: 8px;
+        font-size: 0.92rem;
+        font-family: inherit;
+        box-sizing: border-box;
+    }
+    .search-box input:focus {
+        outline: none;
+        border-color: #3498db;
+    }
+    .search-results {
+        position: absolute;
+        top: calc(100% + 4px);
+        left: 0;
+        right: 0;
+        background: white;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        max-height: 260px;
+        overflow-y: auto;
+        z-index: 20;
+        display: none;
+    }
+    .search-result-item {
+        padding: 10px 14px;
+        cursor: pointer;
+        border-bottom: 1px solid #f5f5f5;
+    }
+    .search-result-item:last-child { border-bottom: none; }
+    .search-result-item:hover { background: #f0f7ff; }
+    .search-result-item .username {
+        font-weight: 600;
+        color: #2c3e50;
+        display: block;
+        font-size: 0.9rem;
+    }
+    .search-result-item .email {
+        font-size: 0.78rem;
+        color: #95a5a6;
+    }
+    .search-result-empty {
+        padding: 14px;
+        text-align: center;
+        color: #95a5a6;
+        font-size: 0.85rem;
+    }
+
+    .selected-user {
+        background: #eaf2f8;
+        border-radius: 8px;
+        padding: 12px 14px;
+        margin: 12px 0;
+        display: none;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .selected-user.show { display: flex; }
+    .selected-user .info strong { color: #2c3e50; }
+    .selected-user button {
+        background: none;
+        border: none;
+        color: #e74c3c;
+        cursor: pointer;
+        font-size: 1.1rem;
+        padding: 4px 8px;
+    }
+
+    .role-picker {
+        margin: 12px 0;
+        display: none;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+    .role-picker.show { display: flex; }
+    .role-option {
+        padding: 8px 16px;
+        border-radius: 8px;
+        border: 2px solid #e1e5ea;
+        background: white;
+        cursor: pointer;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #2c3e50;
+        transition: all 0.2s;
+        font-family: inherit;
+    }
+    .role-option:hover { border-color: #3498db; }
+    .role-option.selected {
+        border-color: #3498db;
+        background: #eaf2f8;
+        color: #21618c;
+    }
+
+    .btn-submit {
+        padding: 10px 24px;
+        background: #2ecc71;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        cursor: pointer;
+        font-family: inherit;
+        display: none;
+    }
+    .btn-submit.show { display: inline-block; }
+    .btn-submit:hover { background: #27ae60; }
+
+    /* ============ LISTA ACTUAL ============ */
+    .users-list {
+        background: white;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+    .users-list-header {
+        padding: 16px 20px;
+        border-bottom: 1px solid #f0f0f0;
+        background: #fafbfc;
+        font-weight: 600;
+        color: #1a1a2e;
+        font-size: 0.95rem;
+    }
+    .user-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 14px 20px;
+        border-bottom: 1px solid #f5f5f5;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+    .user-row:last-child { border-bottom: none; }
+    .user-row .user-info {
+        flex: 1;
+        min-width: 200px;
+    }
+    .user-row .username {
+        font-weight: 700;
+        color: #1a1a2e;
+        font-size: 0.95rem;
+    }
+    .user-row .email {
+        font-size: 0.8rem;
+        color: #95a5a6;
+        display: block;
+    }
+    .role-badge {
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+    }
+    .role-owner { background: #fef5e7; color: #b9770e; }
+    .role-manager { background: #eaf2f8; color: #21618c; }
+    .role-viewer { background: #f0f2f5; color: #6c757d; }
+    .user-actions {
+        display: flex;
+        gap: 6px;
+        align-items: center;
+    }
+    .user-actions select {
+        padding: 6px 10px;
+        border-radius: 6px;
+        border: 1px solid #ddd;
+        font-family: inherit;
+        font-size: 0.82rem;
+    }
+    .btn-small {
+        padding: 6px 12px;
+        border-radius: 6px;
+        border: none;
+        font-size: 0.8rem;
+        font-weight: 600;
+        cursor: pointer;
+        font-family: inherit;
+        transition: background 0.2s;
+    }
+    .btn-small.edit { background: #eaf2f8; color: #21618c; }
+    .btn-small.edit:hover { background: #d4e6f1; }
+    .btn-small.remove { background: #fdedec; color: #c0392b; }
+    .btn-small.remove:hover { background: #fadbd8; }
+
+    .empty-users {
+        text-align: center;
+        padding: 40px 20px;
+        color: #95a5a6;
+        font-size: 0.9rem;
+    }
+
+    .modal-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.4);
+        z-index: 1000;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+    }
+    .modal-overlay.show { display: flex; }
+    .modal-box {
+        background: white;
+        border-radius: 12px;
+        padding: 24px;
+        max-width: 400px;
+        width: 100%;
+    }
+    .modal-box h3 { margin: 0 0 8px; color: #1a1a2e; }
+    .modal-box p { color: #7f8c8d; font-size: 0.9rem; margin: 0 0 20px; }
+    .modal-actions {
+        display: flex;
+        gap: 10px;
+        justify-content: flex-end;
+    }
+    .modal-actions .btn-cancel {
+        background: #f0f2f5;
+        color: #2c3e50;
+        padding: 10px 18px;
+        border-radius: 8px;
+        border: none;
+        font-size: 0.88rem;
+        font-weight: 600;
+        cursor: pointer;
+        font-family: inherit;
+    }
+    .modal-actions .btn-confirm {
+        background: #e74c3c;
+        color: white;
+        padding: 10px 18px;
+        border-radius: 8px;
+        border: none;
+        font-size: 0.88rem;
+        font-weight: 600;
+        cursor: pointer;
+        font-family: inherit;
+    }
+</style>
+
+<h1>Usuarios de {{ store.name }}</h1>
+
+<!-- ============ GUIA DE ROLES ============ -->
+<div class="roles-guide" id="rolesGuide">
+    <div class="roles-guide-header" onclick="toggleRolesGuide()">
+        <h3>&#128161; &iquest;Qué puede hacer cada rol?</h3>
+        <button type="button" class="roles-guide-toggle" id="rolesGuideToggle">Mostrar</button>
+    </div>
+    <div class="roles-guide-body">
+        <div class="role-item">
+            <div class="role-item-icon">&#128081;</div>
+            <div class="role-item-content">
+                <div class="role-item-title">
+                    Propietario
+                    <span class="role-badge role-owner-badge">Owner</span>
+                </div>
+                <div class="role-item-desc">
+                    Control total del comercio. Puede gestionar productos, pedidos, ver estadísticas,
+                    editar el perfil del comercio y configurar los datos de pago y delivery.
+                    <strong>Recomendado para el dueño o socio principal.</strong>
+                </div>
+                <div class="role-item-perms">
+                    <span class="perm-tag yes">Ver dashboard</span>
+                    <span class="perm-tag yes">Gestionar productos</span>
+                    <span class="perm-tag yes">Aprobar/rechazar pedidos</span>
+                    <span class="perm-tag yes">Marcar enviado</span>
+                    <span class="perm-tag yes">Ver movimientos</span>
+                    <span class="perm-tag yes">Editar perfil del comercio</span>
+                    <span class="perm-tag yes">Configurar datos de pago</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="role-item">
+            <div class="role-item-icon">&#128736;</div>
+            <div class="role-item-content">
+                <div class="role-item-title">
+                    Gestor
+                    <span class="role-badge role-manager-badge">Manager</span>
+                </div>
+                <div class="role-item-desc">
+                    Puede gestionar el día a día del comercio: productos, pedidos y stock.
+                    <strong>No puede cambiar la configuración del comercio</strong> ni los datos de pago.
+                    <strong>Ideal para empleados de confianza o encargados.</strong>
+                </div>
+                <div class="role-item-perms">
+                    <span class="perm-tag yes">Ver dashboard</span>
+                    <span class="perm-tag yes">Gestionar productos</span>
+                    <span class="perm-tag yes">Aprobar/rechazar pedidos</span>
+                    <span class="perm-tag yes">Marcar enviado</span>
+                    <span class="perm-tag no">Ver movimientos</span>
+                    <span class="perm-tag no">Editar perfil del comercio</span>
+                    <span class="perm-tag no">Configurar datos de pago</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="role-item">
+            <div class="role-item-icon">&#128065;</div>
+            <div class="role-item-content">
+                <div class="role-item-title">
+                    Visualizador
+                    <span class="role-badge role-viewer-badge">Viewer</span>
+                </div>
+                <div class="role-item-desc">
+                    Solo puede <strong>ver</strong> la información del comercio. No puede modificar nada.
+                    <strong>Ideal para contadores, auditores o socios que solo supervisan.</strong>
+                </div>
+                <div class="role-item-perms">
+                    <span class="perm-tag yes">Ver dashboard</span>
+                    <span class="perm-tag no">Gestionar productos</span>
+                    <span class="perm-tag no">Aprobar/rechazar pedidos</span>
+                    <span class="perm-tag no">Marcar enviado</span>
+                    <span class="perm-tag no">Ver movimientos</span>
+                    <span class="perm-tag no">Editar perfil del comercio</span>
+                    <span class="perm-tag no">Configurar datos de pago</span>
+                </div>
+            </div>
+        </div>
+
+        <div style="margin-top: 16px; padding: 12px 14px; background: #f8f9fa; border-radius: 8px; font-size: 0.83rem; color: #555; line-height: 1.5;">
+            <strong>&#9888; Importante:</strong> solo el superadministrador puede asignar o cambiar roles.
+            Asegúrate de dar el rol adecuado según el nivel de confianza.
+        </div>
+    </div>
+</div>
+
+<!-- ============ AGREGAR USUARIO ============ -->
+<div class="add-user-card">
+    <h3>&#10133; Agregar usuario</h3>
+
+    <div class="search-box">
+        <input type="text" id="userSearch" placeholder="Buscar por usuario o email... (mín. 2 caracteres)" autocomplete="off">
+        <div class="search-results" id="searchResults"></div>
+    </div>
+
+    <div class="selected-user" id="selectedUser">
+        <div class="info">
+            <strong id="selUserLabel"></strong>
+        </div>
+        <button type="button" onclick="clearSelection()">&#10005;</button>
+    </div>
+
+    <div class="role-picker" id="rolePicker">
+        <button type="button" class="role-option" data-role="owner">&#128081; Propietario</button>
+        <button type="button" class="role-option selected" data-role="manager">&#128736; Gestor</button>
+        <button type="button" class="role-option" data-role="viewer">&#128065; Visualizador</button>
+    </div>
+
+    <form method="post" action="{% url 'stores:users_add' store.id %}" id="addUserForm">
+        {% csrf_token %}
+        <input type="hidden" name="user_id" id="selUserId">
+        <input type="hidden" name="role" id="selRole" value="manager">
+        <button type="submit" class="btn-submit" id="btnSubmit">&#9989; Asignar acceso</button>
+    </form>
+</div>
+
+<!-- ============ LISTA ACTUAL ============ -->
+<div class="users-list">
+    <div class="users-list-header">
+        Usuarios con acceso ({{ permissions|length }})
+    </div>
+
+    {% for p in permissions %}
+        <div class="user-row">
+            <div class="user-info">
+                <span class="username">{{ p.user.username }}</span>
+                {% if p.user.email %}
+                    <span class="email">{{ p.user.email }}</span>
+                {% endif %}
+            </div>
+            <span class="role-badge role-{{ p.role }}">{{ p.get_role_display }}</span>
+            <div class="user-actions">
+                <form method="post" action="{% url 'stores:users_change_role' store.id p.id %}" style="display: inline-flex; gap: 6px;">
+                    {% csrf_token %}
+                    <select name="role">
+                        <option value="owner" {% if p.role == 'owner' %}selected{% endif %}>Propietario</option>
+                        <option value="manager" {% if p.role == 'manager' %}selected{% endif %}>Gestor</option>
+                        <option value="viewer" {% if p.role == 'viewer' %}selected{% endif %}>Visualizador</option>
+                    </select>
+                    <button type="submit" class="btn-small edit">Cambiar</button>
+                </form>
+                <button type="button" class="btn-small remove" onclick="confirmRemove({{ p.id }}, '{{ p.user.username|escapejs }}')">
+                    Eliminar
+                </button>
+                <form method="post" action="{% url 'stores:users_remove' store.id p.id %}" id="removeForm-{{ p.id }}" style="display: none;">
+                    {% csrf_token %}
+                </form>
+            </div>
+        </div>
+    {% empty %}
+        <div class="empty-users">
+            <p>Nadie más tiene acceso a este comercio.</p>
+        </div>
+    {% endfor %}
+</div>
+
+<!-- MODAL DE CONFIRMACION -->
+<div class="modal-overlay" id="removeModal">
+    <div class="modal-box">
+        <h3>&iquest;Eliminar acceso?</h3>
+        <p id="removeModalText">Esta acción quitará el acceso del usuario al comercio.</p>
+        <div class="modal-actions">
+            <button class="btn-cancel" onclick="closeModal()">Cancelar</button>
+            <button class="btn-confirm" id="confirmRemoveBtn">Sí, eliminar</button>
+        </div>
+    </div>
+</div>
+
+<script>
+(function() {
+    var searchInput = document.getElementById('userSearch');
+    var resultsBox = document.getElementById('searchResults');
+    var selectedUser = document.getElementById('selectedUser');
+    var selUserLabel = document.getElementById('selUserLabel');
+    var selUserId = document.getElementById('selUserId');
+    var rolePicker = document.getElementById('rolePicker');
+    var addForm = document.getElementById('addUserForm');
+    var btnSubmit = document.getElementById('btnSubmit');
+    var selRole = document.getElementById('selRole');
+    var searchUrl = "{% url 'stores:users_search' store.id %}";
+    var timer = null;
+
+    searchInput.addEventListener('input', function() {
+        var q = this.value.trim();
+        clearTimeout(timer);
+        if (q.length < 2) {
+            resultsBox.style.display = 'none';
+            return;
+        }
+        timer = setTimeout(function() {
+            fetch(searchUrl + '?q=' + encodeURIComponent(q), {
+                headers: {'X-Requested-With': 'XMLHttpRequest'}
+            })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                resultsBox.innerHTML = '';
+                if (!data.results || data.results.length === 0) {
+                    resultsBox.innerHTML = '<div class="search-result-empty">Sin resultados</div>';
+                } else {
+                    data.results.forEach(function(u) {
+                        var div = document.createElement('div');
+                        div.className = 'search-result-item';
+                        div.innerHTML = '<span class="username">' + escHtml(u.username) + '</span>' +
+                                       (u.email ? '<span class="email">' + escHtml(u.email) + '</span>' : '');
+                        div.addEventListener('click', function() { selectUser(u); });
+                        resultsBox.appendChild(div);
+                    });
+                }
+                resultsBox.style.display = 'block';
+            })
+            .catch(function() {
+                resultsBox.innerHTML = '<div class="search-result-empty">Error de conexion</div>';
+                resultsBox.style.display = 'block';
+            });
+        }, 250);
+    });
+
+    document.addEventListener('click', function(e) {
+        if (!e.target.closest('.search-box')) {
+            resultsBox.style.display = 'none';
+        }
+    });
+
+    window.selectUser = function(user) {
+        selUserId.value = user.id;
+        selUserLabel.textContent = user.username + (user.email ? ' (' + user.email + ')' : '');
+        selectedUser.classList.add('show');
+        rolePicker.classList.add('show');
+        btnSubmit.classList.add('show');
+        searchInput.value = '';
+        resultsBox.style.display = 'none';
+    };
+
+    window.clearSelection = function() {
+        selUserId.value = '';
+        selectedUser.classList.remove('show');
+        rolePicker.classList.remove('show');
+        btnSubmit.classList.remove('show');
+    };
+
+    document.querySelectorAll('.role-option').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            document.querySelectorAll('.role-option').forEach(function(b) { b.classList.remove('selected'); });
+            this.classList.add('selected');
+            selRole.value = this.dataset.role;
+        });
+    });
+
+    function escHtml(str) {
+        return String(str || '').replace(/[&<>"']/g, function(c) {
+            return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+        });
+    }
+
+    var pendingRemoveId = null;
+    window.confirmRemove = function(id, username) {
+        pendingRemoveId = id;
+        document.getElementById('removeModalText').textContent =
+            'Eliminar el acceso de "' + username + '" al comercio?';
+        document.getElementById('removeModal').classList.add('show');
+    };
+
+    window.closeModal = function() {
+        document.getElementById('removeModal').classList.remove('show');
+        pendingRemoveId = null;
+    };
+
+    document.getElementById('confirmRemoveBtn').addEventListener('click', function() {
+        if (pendingRemoveId) {
+            document.getElementById('removeForm-' + pendingRemoveId).submit();
+        }
+    });
+
+    window.toggleRolesGuide = function() {
+        var guide = document.getElementById('rolesGuide');
+        var btn = document.getElementById('rolesGuideToggle');
+        guide.classList.toggle('open');
+        btn.textContent = guide.classList.contains('open') ? 'Ocultar' : 'Mostrar';
+    };
+})();
+</script>
+{% endblock %}

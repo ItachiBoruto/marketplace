@@ -24,6 +24,42 @@ class Store(models.Model):
         help_text="Monto en dólares que se cobrará por el envío."
     )
 
+    # ===== Datos bancarios (para pagos directos al comercio) =====
+    bank_name = models.CharField(
+        max_length=100, blank=True,
+        verbose_name="Banco",
+        help_text="Ej: Banco de Venezuela, Banesco, Mercantil..."
+    )
+    account_number = models.CharField(
+        max_length=40, blank=True,
+        verbose_name="Número de cuenta",
+        help_text="Ej: 0102-1234-56-78901234"
+    )
+    account_holder = models.CharField(
+        max_length=150, blank=True,
+        verbose_name="Titular de la cuenta"
+    )
+    document = models.CharField(
+        max_length=20, blank=True,
+        verbose_name="Cédula o RIF",
+        help_text="Ej: V-12345678 o J-12345678-9"
+    )
+    payment_phone = models.CharField(
+        max_length=20, blank=True,
+        verbose_name="Teléfono para pago móvil",
+        help_text="Ej: 0414-1234567 (opcional, si acepta pago móvil)"
+    )
+    payment_email = models.EmailField(
+        blank=True,
+        verbose_name="Email para notificar pagos",
+        help_text="A dónde te llegan las notificaciones de transferencias (opcional)"
+    )
+    payment_notes = models.TextField(
+        blank=True,
+        verbose_name="Notas adicionales",
+        help_text="Información extra para el cliente (opcional)"
+    )
+
     created_at = models.DateTimeField(auto_now_add=True)
     
     users = models.ManyToManyField(
