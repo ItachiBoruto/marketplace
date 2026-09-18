@@ -54,8 +54,10 @@ class StoreOrdersView(RoleContextMixin, ManagerRequiredMixin, ListView):
     paginate_by = 20
 
     def get_queryset(self):
+        from django.db.models import Q
         store = self.get_store()
         status_filter = self.request.GET.get('status', 'pending')
+        search = self.request.GET.get('q', '').strip()
 
         order_ids = OrderItem.objects.filter(store=store).values_list('order_id', flat=True).distinct()
         qs = Order.objects.filter(id__in=order_ids).prefetch_related('items__store')
@@ -65,9 +67,20 @@ class StoreOrdersView(RoleContextMixin, ManagerRequiredMixin, ListView):
         elif status_filter == 'confirmed':
             qs = qs.filter(items__store=store, items__status='confirmed').distinct()
         elif status_filter == 'shipped':
-            qs = qs.filter(items__store=store, items__status='shipped').distinct()
+            qs = qs.filter(
+                items__store=store,
+                items__status__in=['shipped', 'delivered']
+            ).distinct()
         elif status_filter == 'cancelled':
             qs = qs.filter(items__store=store, items__status='cancelled').distinct()
+
+        # Búsqueda por secuencia de caracteres (código, cliente, referencia)
+        if search:
+            qs = qs.filter(
+                Q(reference_code__icontains=search) |
+                Q(user__username__icontains=search) |
+                Q(payment_reference__icontains=search)
+            ).distinct()
 
         return qs.order_by('-created_at')
 
@@ -80,8 +93,9 @@ class StoreOrdersView(RoleContextMixin, ManagerRequiredMixin, ListView):
         base = OrderItem.objects.filter(store=store)
         context['count_pending'] = base.filter(status='pending').count()
         context['count_confirmed'] = base.filter(status='confirmed').count()
-        context['count_shipped'] = base.filter(status='shipped').count()
+        context['count_shipped'] = base.filter(status__in=['shipped', 'delivered']).count()
         context['count_cancelled'] = base.filter(status='cancelled').count()
+        context['search'] = self.request.GET.get('q', '').strip()
 
         return context
 
@@ -212,3 +226,42 @@ def mark_item_shipped(request, store_id, order_id, item_id):
 
     messages.success(request, f'Item "{item.product_name}" marcado como enviado.')
     return redirect('stores:order_detail', store_id=store.id, order_id=order_id)
+
+
+@login_required(login_url="login")
+def mark_item_delivered(request, store_id, order_id, item_id):
+    """Marca un item como entregado al cliente."""
+    if request.method != "POST":
+        return HttpResponseBadRequest("Metodo no permitido")
+
+    store = get_object_or_404(Store, id=store_id)
+    if not _check_store_manager(request, store):
+        raise Http404()
+
+    item = get_object_or_404(OrderItem, id=item_id, order_id=order_id, store=store)
+
+    # Permitir marcar entregado si:
+    # - Esta confirmado Y el pedido es de retiro (pickup)
+    # - O esta enviado (delivery)
+    if item.status == "confirmed" and item.order.shipping_method != "pickup":
+        messages.warning(request, "Debes marcar como enviado primero.")
+        return redirect("stores:order_detail", store_id=store.id, order_id=order_id)
+
+    if item.status not in ("confirmed", "shipped"):
+        messages.warning(request, "Este item no puede marcarse como entregado.")
+        return redirect("stores:order_detail", store_id=store.id, order_id=order_id)
+
+    item.status = "delivered"
+    item.save(update_fields=["status"])
+    _update_order_status_after_item_change(item.order)
+
+    notify(
+        item.order.user,
+        "order_completed",
+        f"Producto entregado: {item.product_name}",
+        f"{store.name} marco tu pedido {item.order.reference_code} como entregado.",
+        link=f"/orders/{item.order_id}/"
+    )
+
+    messages.success(request, f'Item "{item.product_name}" marcado como entregado.')
+    return redirect("stores:order_detail", store_id=store.id, order_id=order_id)

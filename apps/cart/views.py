@@ -85,8 +85,45 @@ def add_to_cart(request, product_id):
 
 
 def view_cart(request):
+    """Carrito segmentado por comercio."""
     cart = get_or_create_cart(request)
-    return render(request, 'cart/view.html', {'cart': cart})
+
+    # Agrupar items por comercio
+    items = cart.items.select_related('product', 'product__store').all()
+
+    groups_dict = {}
+    for item in items:
+        store = item.product.store
+        if store.id not in groups_dict:
+            groups_dict[store.id] = {
+                'store': store,
+                'items': [],
+                'subtotal': 0,
+                'delivery_fee': store.delivery_fee if store.offers_delivery else 0,
+                'offers_delivery': store.offers_delivery,
+            }
+        groups_dict[store.id]['items'].append(item)
+        groups_dict[store.id]['subtotal'] += item.get_total()
+
+    # Convertir a lista y calcular totales
+    groups = []
+    for g in groups_dict.values():
+        g['has_delivery'] = g['offers_delivery'] and g['delivery_fee'] > 0
+        g['total'] = g['subtotal'] + (g['delivery_fee'] if g['has_delivery'] else 0)
+        groups.append(g)
+
+    # Ordenar por nombre del comercio
+    groups.sort(key=lambda x: x['store'].name.lower())
+
+    grand_total = sum(g['total'] for g in groups)
+    grand_total_no_delivery = sum(g['subtotal'] for g in groups)
+
+    return render(request, 'cart/view.html', {
+        'cart': cart,
+        'groups': groups,
+        'grand_total': grand_total,
+        'grand_total_no_delivery': grand_total_no_delivery,
+    })
 
 
 def update_cart_item(request, item_id):

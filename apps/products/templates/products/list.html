@@ -21,8 +21,11 @@
                 {% if user.is_authenticated and user.is_staff %}
                     <a href="/admin/">⚙️ Admin</a>
                 {% endif %}
+                {% if user.is_superuser %}
+                    <a href="{% url 'orders:superuser_orders' %}">📋 Panel</a>
+                {% endif %}
                 {% if user.is_authenticated %}
-                    <a href="{% url 'cart:view' %}">🛒 Carrito{% if cart_count %} <span class="cart-count-badge">{{ cart_count }}</span>{% endif %}</a>
+                    <a href="{% url 'cart:view' %}">🛒 Carrito<span class="cart-count-badge" {% if not cart_count %}style="display:none;"{% endif %}>{{ cart_count|default:0 }}</span></a>
                     <span class="header-user">👤 {{ user.username }}</span>
                     <form action="{% url 'logout' %}" method="post" class="logout-form">
                         {% csrf_token %}

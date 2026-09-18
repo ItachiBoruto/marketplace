@@ -273,6 +273,25 @@
             .checkout-wrapper { grid-template-columns: 1fr; }
             .shipping-options { grid-template-columns: 1fr; }
         }
+
+        .store-badge {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 14px;
+            background: #f0f7ff;
+            border: 1px solid #d6eaf8;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            font-size: 0.9rem;
+            color: #1a1a2e;
+            flex-wrap: wrap;
+        }
+        .store-badge .store-badge-note {
+            font-size: 0.78rem;
+            color: #7f8c8d;
+            font-style: italic;
+        }
     </style>
 </head>
 <body>
@@ -305,6 +324,12 @@
                     <!-- ============ COLUMNA IZQUIERDA: RESUMEN + ENVIO + TOTAL ============ -->
                     <div class="checkout-card">
                         <h2>📦 Resumen del pedido</h2>
+                        {% if store %}
+                            <div class="store-badge">
+                                🏪 <strong>{{ store.name }}</strong>
+                                <span class="store-badge-note">Este carrito es solo de este comercio</span>
+                            </div>
+                        {% endif %}
 
                         {% for item in items %}
                             <div class="order-item">
@@ -373,7 +398,7 @@
                         <!-- TOTALES (dinámicos) -->
                         <div class="summary-line" style="border-top: 1px solid #eee; padding-top: 12px;">
                             <span>Subtotal</span>
-                            <span>${{ cart.get_total|floatformat:2 }}</span>
+                            <span>${{ subtotal|floatformat:2 }}</span>
                         </div>
 
                         <div class="summary-line" id="shippingLine" style="display:none;">
@@ -383,13 +408,13 @@
 
                         <div class="order-total">
                             <span>Total USD</span>
-                            <span id="totalUsd">${{ cart.get_total|floatformat:2 }}</span>
+                            <span id="totalUsd">${{ subtotal|floatformat:2 }}</span>
                         </div>
 
                         {% if bcv_rate %}
                         <div class="order-total-bs">
                             <span>Total Bs</span>
-                            <span id="totalBs">Bs. {{ cart.get_total|to_bs:bcv_rate }}</span>
+                            <span id="totalBs">Bs. {{ subtotal|to_bs:bcv_rate }}</span>
                         </div>
                         <p class="rate-note">
                             Tasa BCV: <strong>{{ bcv_rate|floatformat:2 }} Bs/USD</strong>
@@ -463,7 +488,7 @@
         </div>
     </main>
 
-    {{ cart.get_total|stringformat:"f"|json_script:"data-subtotal" }}
+    {{ subtotal|stringformat:"f"|json_script:"data-subtotal" }}
     {{ total_delivery_fee|stringformat:"f"|json_script:"data-shipping" }}
     {{ bcv_rate|default_if_none:""|stringformat:"s"|json_script:"data-rate" }}
     <script>

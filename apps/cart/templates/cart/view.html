@@ -5,168 +5,276 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mi Carrito</title>
     {% load static %}
-    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}?v=9">
     <style>
-        .cart-container {
+        .cart-page {
             max-width: 900px;
-            margin: 30px auto;
-            background: white;
-            padding: 24px;
-            border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            margin: 24px auto;
+            padding: 0 16px;
         }
+        .cart-page h1 {
+            font-size: 1.5rem;
+            margin: 0 0 20px;
+            color: #1a1a2e;
+        }
+
+        /* ============ GRUPO POR COMERCIO ============ */
+        .store-group {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+            margin-bottom: 20px;
+            overflow: hidden;
+            border: 1px solid rgba(0,0,0,0.04);
+        }
+        .store-group-header {
+            background: linear-gradient(135deg, #f8f9fa, #eef1f5);
+            padding: 14px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #e9ecef;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .store-group-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 700;
+            color: #1a1a2e;
+            font-size: 1rem;
+        }
+        .store-group-title .store-icon {
+            font-size: 1.3rem;
+        }
+        .store-group-link {
+            color: #3498db;
+            text-decoration: none;
+            font-size: 0.82rem;
+            font-weight: 600;
+        }
+        .store-group-link:hover { text-decoration: underline; }
+
+        /* Items */
         .cart-item {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 16px 0;
-            border-bottom: 1px solid #eee;
+            padding: 14px 20px;
+            border-bottom: 1px solid #f5f5f5;
+            gap: 12px;
+            flex-wrap: wrap;
         }
-        .cart-item:last-child {
-            border-bottom: none;
+        .cart-item:last-of-type { border-bottom: none; }
+        .cart-item-img {
+            width: 60px;
+            height: 60px;
+            border-radius: 8px;
+            overflow: hidden;
+            background: #f5f7fa;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .cart-item-img img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .cart-item-img .no-img {
+            font-size: 1.5rem;
+            color: #ccc;
         }
         .cart-item-info {
             flex: 1;
+            min-width: 150px;
         }
         .cart-item-info h4 {
-            margin: 0;
-            font-size: 1.1rem;
+            margin: 0 0 2px;
+            font-size: 0.95rem;
+            color: #2c3e50;
         }
-        .cart-item-info p {
-            margin: 2px 0;
-            color: #777;
-            font-size: 0.9rem;
+        .cart-item-info .unit-price {
+            font-size: 0.8rem;
+            color: #95a5a6;
         }
         .cart-item-actions {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 8px;
+            flex-wrap: wrap;
         }
-        .cart-item-actions input[type="number"] {
+        .qty-form input[type="number"] {
             width: 60px;
-            padding: 6px 8px;
+            padding: 7px 8px;
             border: 1px solid #ddd;
             border-radius: 6px;
             text-align: center;
-            font-size: 1rem;
+            font-size: 0.95rem;
+            font-family: inherit;
         }
-        .cart-item-actions .btn-remove {
-            background: #e94560;
-            color: white;
+        .qty-form input[type="number"]:focus {
+            outline: none;
+            border-color: #e94560;
+        }
+        .cart-item-subtotal {
+            font-weight: 700;
+            color: #2c3e50;
+            font-size: 1rem;
+            min-width: 80px;
+            text-align: right;
+        }
+        .btn-remove {
+            background: #fdedec;
+            color: #c0392b;
             border: none;
-            padding: 6px 16px;
+            padding: 6px 12px;
             border-radius: 6px;
             cursor: pointer;
-            transition: background 0.3s;
-        }
-        .cart-item-actions .btn-remove:hover {
-            background: #c0392b;
-        }
-        .cart-total {
-            text-align: right;
-            font-size: 1.6rem;
-            font-weight: 700;
-            margin-top: 20px;
-            padding-top: 16px;
-            border-top: 2px solid #eee;
-        }
-        .cart-actions {
-            display: flex;
-            gap: 16px;
-            justify-content: space-between;
-            margin-top: 20px;
-            flex-wrap: wrap;
-        }
-        .btn {
-            padding: 10px 28px;
-            border-radius: 8px;
-            text-decoration: none;
+            font-size: 0.82rem;
+            font-family: inherit;
             font-weight: 600;
-            font-size: 1rem;
-            display: inline-block;
-            transition: background 0.3s;
-            border: none;
-            cursor: pointer;
         }
-        .btn-primary {
-            background: #e94560;
-            color: white;
+        .btn-remove:hover { background: #fadbd8; }
+
+        /* Totales del grupo */
+        .store-group-totals {
+            padding: 14px 20px;
+            background: #fafbfc;
+            border-top: 2px solid #e9ecef;
         }
-        .btn-primary:hover {
-            background: #c0392b;
+        .total-line {
+            display: flex;
+            justify-content: space-between;
+            padding: 4px 0;
+            font-size: 0.88rem;
+            color: #555;
         }
-        .btn-secondary {
-            background: #6c757d;
-            color: white;
+        .total-line.grand {
+            padding-top: 10px;
+            margin-top: 8px;
+            border-top: 1px dashed #ddd;
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #e94560;
         }
-        .btn-secondary:hover {
-            background: #5a6268;
+        .total-line.delivery {
+            color: #b9770e;
         }
-        .btn-success {
+        .delivery-note {
+            font-size: 0.75rem;
+            color: #95a5a6;
+            margin-top: 2px;
+            font-style: italic;
+        }
+        .group-actions {
+            margin-top: 12px;
+            display: flex;
+            justify-content: flex-end;
+        }
+        .btn-pay-store {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 11px 28px;
             background: #28a745;
             color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.92rem;
+            font-weight: 700;
+            text-decoration: none;
+            cursor: pointer;
+            transition: background 0.2s;
         }
-        .btn-success:hover {
-            background: #218838;
+        .btn-pay-store:hover { background: #218838; }
+
+        /* Resumen general */
+        .grand-summary {
+            background: white;
+            border-radius: 12px;
+            padding: 18px 20px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+            margin-bottom: 20px;
+            border: 2px solid #1a1a2e;
         }
+        .grand-summary h3 {
+            margin: 0 0 10px;
+            font-size: 0.95rem;
+            color: #7f8c8d;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+        }
+        .grand-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px 0;
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: #1a1a2e;
+        }
+        .grand-note {
+            font-size: 0.78rem;
+            color: #7f8c8d;
+            margin-top: 8px;
+            line-height: 1.5;
+        }
+
+        .btn-back-home {
+            display: inline-block;
+            padding: 10px 22px;
+            background: #f0f2f5;
+            color: #2c3e50;
+            text-decoration: none;
+            border-radius: 8px;
+            font-size: 0.88rem;
+            font-weight: 600;
+            transition: background 0.2s;
+        }
+        .btn-back-home:hover { background: #e2e6ea; }
+
         .empty-cart {
             text-align: center;
             padding: 60px 20px;
-            color: #777;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
         }
-        .empty-cart h3 {
-            font-size: 1.5rem;
-            margin-bottom: 10px;
+        .empty-cart .icon { font-size: 4rem; margin-bottom: 12px; }
+        .empty-cart h3 { margin: 0 0 8px; color: #2c3e50; font-size: 1.3rem; }
+        .empty-cart p { color: #7f8c8d; margin: 0 0 20px; font-size: 0.92rem; }
+        .empty-cart a.btn-primary {
+            display: inline-block;
+            padding: 12px 28px;
+            background: #e94560;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
         }
-        .empty-cart .btn {
-            margin-top: 16px;
-        }
-        .messages {
-            list-style: none;
-            padding: 0;
-        }
+
+        .messages { list-style: none; padding: 0; margin: 0 0 16px; }
         .messages li {
             padding: 12px 18px;
-            margin-bottom: 10px;
-            border-radius: 6px;
+            margin-bottom: 8px;
+            border-radius: 8px;
+            font-size: 0.9rem;
         }
-        .messages .success {
-            background: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-        .messages .error {
-            background: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-        .messages .warning {
-            background: #fff3cd;
-            color: #856404;
-            border: 1px solid #ffeeba;
-        }
-        .messages .info {
-            background: #cce5ff;
-            color: #004085;
-            border: 1px solid #b8daff;
-        }
-        @media (max-width: 768px) {
-            .cart-item {
-                flex-direction: column;
-                align-items: stretch;
-                gap: 8px;
-            }
-            .cart-item-actions {
-                justify-content: flex-end;
-            }
-            .cart-actions {
-                flex-direction: column;
-                align-items: center;
-            }
-            .cart-actions .btn {
-                width: 100%;
-                text-align: center;
-            }
+        .messages .success { background: #d4edda; color: #155724; }
+        .messages .error { background: #f8d7da; color: #721c24; }
+        .messages .warning { background: #fff3cd; color: #856404; }
+        .messages .info { background: #cce5ff; color: #004085; }
+
+        @media (max-width: 600px) {
+            .cart-item { padding: 12px 16px; }
+            .cart-item-img { width: 50px; height: 50px; }
+            .cart-item-subtotal { min-width: auto; }
+            .store-group-header { padding: 12px 16px; }
+            .btn-pay-store { width: 100%; justify-content: center; }
+            .group-actions { justify-content: stretch; }
         }
     </style>
 </head>
@@ -177,12 +285,14 @@
             <nav>
                 <a href="/">🏠 Inicio</a>
                 <a href="/stores/">📦 Comercios</a>
-                <a href="{% url 'cart:view' %}">🛒 Carrito{% if cart_count %} <span class="cart-count-badge">{{ cart_count }}</span>{% endif %}</a>
                 {% if user.is_authenticated and user.is_staff %}
                     <a href="/admin/">⚙️ Admin</a>
                 {% endif %}
+                {% if user.is_superuser %}
+                    <a href="{% url 'orders:superuser_orders' %}">📋 Panel</a>
+                {% endif %}
                 {% if user.is_authenticated %}
-                    <span style="color: rgba(255,255,255,0.7); margin: 0 10px;">👤 {{ user.username}}</span>
+                    <span style="color: rgba(255,255,255,0.7); margin: 0 10px;">👤 {{ user.username }}</span>
                     <form action="{% url 'logout' %}" method="post" style="display: inline;">
                         {% csrf_token %}
                         <button type="submit" style="background: none; border: none; color: rgba(255,255,255,0.85); cursor: pointer; font-size: 0.95rem; padding: 0; margin: 0 10px;">🚪 Cerrar sesión</button>
@@ -193,58 +303,112 @@
     </header>
 
     <main>
-        <div class="container">
-            <div class="cart-container">
-                <h2>🛒 Mi Carrito</h2>
+        <div class="cart-page">
+            <h1>🛒 Mi Carrito</h1>
 
-                {% if messages %}
-                    <ul class="messages">
-                        {% for message in messages %}
-                            <li class="{{ message.tags }}">{{ message }}</li>
-                        {% endfor %}
-                    </ul>
-                {% endif %}
+            {% if messages %}
+                <ul class="messages">
+                    {% for message in messages %}
+                        <li class="{{ message.tags }}">{{ message }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
 
-                {% if cart.items.all %}
-                    {% for item in cart.items.all %}
-                        <div class="cart-item">
-                            <div class="cart-item-info">
-                                <h4>{{ item.product.name }}</h4>
-                                <p>Precio unitario: ${{ item.price|floatformat:2 }}</p>
-                                <p style="font-size: 0.85rem; color: #999;">🏪 {{ item.product.store.name }}</p>
+            {% if groups %}
+                <!-- Resumen general -->
+                <div class="grand-summary">
+                    <h3>Resumen</h3>
+                    <div class="grand-row">
+                        <span>Total de {{ groups|length }} comercio{{ groups|length|pluralize:"s" }}</span>
+                        <span>${{ grand_total_no_delivery|floatformat:2 }}</span>
+                    </div>
+                    <div class="grand-note">
+                        📌 Cada comercio se paga por separado. Haz clic en "Pagar este carrito" en cada bloque.
+                        {% if groups|length > 1 %}
+                            Esto asegura que cada vendedor reciba su dinero directamente.
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Grupos por comercio -->
+                {% for group in groups %}
+                    <div class="store-group">
+                        <div class="store-group-header">
+                            <div class="store-group-title">
+                                <span class="store-icon">🏪</span>
+                                <span>{{ group.store.name }}</span>
                             </div>
-                            <div class="cart-item-actions">
-                                <form action="{% url 'cart:update' item.id %}" method="post" style="display: inline;">
-                                    {% csrf_token %}
-                                    <input type="number" name="quantity" value="{{ item.quantity }}" min="0" onchange="this.form.submit()">
-                                </form>
-                                <form action="{% url 'cart:remove' item.id %}" method="post" style="display: inline;">
-                                    {% csrf_token %}
-                                    <button type="submit" class="btn-remove">Eliminar</button>
-                                </form>
+                            <a href="{% url 'stores:detail' group.store.id %}" class="store-group-link">Ver comercio →</a>
+                        </div>
+
+                        {% for item in group.items %}
+                            <div class="cart-item">
+                                <div class="cart-item-img">
+                                    {% if item.product.image %}
+                                        <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}">
+                                    {% else %}
+                                        <div class="no-img">📷</div>
+                                    {% endif %}
+                                </div>
+                                <div class="cart-item-info">
+                                    <h4>{{ item.product.name }}</h4>
+                                    <span class="unit-price">${{ item.price|floatformat:2 }} c/u</span>
+                                </div>
+                                <div class="cart-item-actions">
+                                    <form action="{% url 'cart:update' item.id %}" method="post" class="qty-form">
+                                        {% csrf_token %}
+                                        <input type="number" name="quantity" value="{{ item.quantity }}" min="0" onchange="this.form.submit()">
+                                    </form>
+                                    <span class="cart-item-subtotal">${{ item.get_total|floatformat:2 }}</span>
+                                    <form action="{% url 'cart:remove' item.id %}" method="post" style="display:inline;">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn-remove">🗑️</button>
+                                    </form>
+                                </div>
+                            </div>
+                        {% endfor %}
+
+                        <div class="store-group-totals">
+                            <div class="total-line">
+                                <span>Subtotal</span>
+                                <span>${{ group.subtotal|floatformat:2 }}</span>
+                            </div>
+                            {% if group.has_delivery %}
+                                <div class="total-line delivery">
+                                    <span>🚚 Envío</span>
+                                    <span>${{ group.delivery_fee|floatformat:2 }}</span>
+                                </div>
+                                <div class="delivery-note">
+                                    Este comercio cobra envío. Puedes elegir retiro en tienda al pagar.
+                                </div>
+                            {% endif %}
+                            <div class="total-line grand">
+                                <span>Total</span>
+                                <span>${{ group.total|floatformat:2 }}</span>
+                            </div>
+
+                            <div class="group-actions">
+                                <a href="{% url 'orders:checkout' %}?store={{ group.store.id }}" class="btn-pay-store">
+                                    💳 Pagar este carrito
+                                </a>
                             </div>
                         </div>
-                    {% endfor %}
+                    </div>
+                {% endfor %}
 
-                    <div class="cart-total">
-                        Total: ${{ cart.get_total|floatformat:2 }}
-                    </div>
+                <div style="text-align: center; margin-top: 24px;">
+                    <a href="/" class="btn-back-home">← Seguir comprando</a>
+                </div>
 
-                    <div class="cart-actions">
-                        <a href="/" class="btn btn-secondary">Seguir comprando</a>
-                        <a href="{% url 'orders:checkout' %}" class="btn btn-success">Proceder al pago</a>
-                    </div>
-                {% else %}
-                    <div class="empty-cart">
-                        <h3>🛒 Tu carrito está vacío</h3>
-                        <p>¡Explora nuestros productos y agrega lo que te guste!</p>
-                        <a href="/" class="btn btn-primary">Ver productos</a>
-                    </div>
-                {% endif %}
-            </div>
+            {% else %}
+                <div class="empty-cart">
+                    <div class="icon">🛒</div>
+                    <h3>Tu carrito está vacío</h3>
+                    <p>¡Explora nuestros productos y agrega lo que te guste!</p>
+                    <a href="/" class="btn-primary">Ver productos</a>
+                </div>
+            {% endif %}
         </div>
     </main>
-    <script src="{% static 'js/notifications.js' %}"></script>
-    <script src="/static/js/email-verify-banner.js"></script>
 </body>
 </html>

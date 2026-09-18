@@ -19,8 +19,20 @@ from .services import (
 
 @login_required(login_url='login')
 def checkout(request):
-    """Checkout: resumen + datos bancarios + formulario con opción de envío."""
+    """Checkout: muestra items de UN comercio (por ?store=<id>) y permite pagar."""
     expire_old_reservations()
+
+    # Determinar store_id desde GET o POST
+    store_id = request.GET.get('store') or request.POST.get('store_id')
+    store = None
+
+    if store_id:
+        from apps.stores.models import Store
+        try:
+            store = Store.objects.get(id=store_id, is_active=True)
+        except Store.DoesNotExist:
+            messages.error(request, 'El comercio seleccionado no existe.')
+            return redirect('cart:view')
 
     try:
         cart = Cart.objects.get(user=request.user)
@@ -28,13 +40,30 @@ def checkout(request):
         messages.warning(request, 'Tu carrito está vacío.')
         return redirect('cart:view')
 
-    items = list(cart.items.select_related('product', 'product__store').all())
+    # Filtrar items por comercio (o todos si no se especifica)
+    items_qs = cart.items.select_related('product', 'product__store').all()
+    if store is not None:
+        items_qs = items_qs.filter(product__store=store)
+
+    items = list(items_qs)
 
     if not items:
-        messages.warning(request, 'Tu carrito está vacío.')
+        messages.warning(request, 'No hay productos de este comercio en tu carrito.')
         return redirect('cart:view')
 
-    # Validación previa de stock
+    # Si no se especificó store y hay varios comercios, redirigir al carrito
+    if store is None:
+        stores_in_cart = set(item.product.store_id for item in items)
+        if len(stores_in_cart) > 1:
+            messages.info(
+                request,
+                'Selecciona un comercio para pagar. Cada comercio se paga por separado.'
+            )
+            return redirect('cart:view')
+        # Un solo comercio → tomar ese
+        store = items[0].product.store
+
+    # Validar stock
     for item in items:
         if item.quantity > item.product.stock:
             messages.error(
@@ -44,20 +73,12 @@ def checkout(request):
             )
             return redirect('cart:view')
 
-    # Calcular envío: 1 tarifa por comercio distinto
-    store_fees = {}
-    for item in items:
-        store = item.product.store
-        if store.id not in store_fees:
-            store_fees[store.id] = {
-                'store': store,
-                'fee': store.delivery_fee if store.offers_delivery else 0,
-                'offers_delivery': store.offers_delivery,
-            }
+    # Calcular envío solo para este comercio
+    delivery_available = store.offers_delivery
+    total_delivery_fee = store.delivery_fee if delivery_available else 0
 
-    # Delivery disponible solo si TODOS los comercios lo ofrecen
-    delivery_available = all(s['offers_delivery'] for s in store_fees.values())
-    total_delivery_fee = sum(s['fee'] for s in store_fees.values()) if delivery_available else 0
+    # Subtotal solo de estos items
+    subtotal = sum(item.get_total() for item in items)
 
     if request.method == 'POST':
         form = PaymentForm(
@@ -83,17 +104,18 @@ def checkout(request):
                     user=request.user,
                     payment_data=payment_data,
                     cart=cart,
+                    store=store,
                 )
                 messages.success(
                     request,
-                    f'¡Pedido #{order.pk} registrado! Verificaremos tu pago pronto.'
+                    f'¡Pedido {order.reference_code} registrado! Verificaremos tu pago pronto.'
                 )
                 return redirect('orders:success', order_id=order.pk)
             except InsufficientStockError as e:
                 messages.error(request, str(e))
                 return redirect('cart:view')
             except EmptyCartError:
-                messages.warning(request, 'Tu carrito está vacío.')
+                messages.warning(request, 'No hay productos para procesar.')
                 return redirect('cart:view')
     else:
         form = PaymentForm(delivery_available=delivery_available)
@@ -102,10 +124,11 @@ def checkout(request):
         'cart': cart,
         'items': items,
         'form': form,
+        'store': store,
+        'subtotal': subtotal,
         'bank_info': settings.BANK_INFO,
         'delivery_available': delivery_available,
         'total_delivery_fee': total_delivery_fee,
-        'store_fees': list(store_fees.values()),
     })
 
 

@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ order.reference_code }} - Admin</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/style.css' %}?v=9">
+    <style>
+        .detail-wrap { max-width: 900px; margin: 24px auto; padding: 0 16px; }
+        .btn-back {
+            display: inline-block; margin-bottom: 16px; color: #6c757d;
+            text-decoration: none; font-size: 0.9rem; font-weight: 600;
+        }
+        .btn-back:hover { color: #2c3e50; }
+
+        .card {
+            background: white; border-radius: 12px; padding: 20px 24px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06); margin-bottom: 16px;
+        }
+        .card h2 {
+            margin: 0 0 14px; font-size: 1.05rem; color: #1a1a2e;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .info-row {
+            display: flex; justify-content: space-between; padding: 8px 0;
+            border-bottom: 1px solid #f5f5f5; font-size: 0.9rem;
+        }
+        .info-row:last-child { border-bottom: none; }
+        .info-row .lbl { color: #7f8c8d; }
+        .info-row .val { font-weight: 600; color: #2c3e50; text-align: right; word-break: break-word; max-width: 60%; }
+
+        .status-badge {
+            display: inline-block; padding: 5px 14px; border-radius: 20px;
+            font-size: 0.8rem; font-weight: 700; text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+        .status-payment_submitted { background: #fff3cd; color: #856404; }
+        .status-confirmed { background: #cce5ff; color: #004085; }
+        .status-shipped { background: #e8d5f0; color: #6c3483; }
+        .status-completed { background: #d4edda; color: #155724; }
+        .status-cancelled { background: #f8d7da; color: #721c24; }
+        .status-expired { background: #e2e3e5; color: #383d41; }
+
+        .item-line {
+            display: flex; justify-content: space-between; padding: 10px 0;
+            border-bottom: 1px solid #f5f5f5; font-size: 0.9rem;
+        }
+        .item-line:last-child { border-bottom: none; }
+        .item-line .store-nm {
+            font-size: 0.78rem; color: #7f8c8d; display: block;
+        }
+        .total-line {
+            display: flex; justify-content: space-between; padding: 5px 0;
+            font-size: 0.92rem; color: #555;
+        }
+        .total-line.grand {
+            padding-top: 10px; margin-top: 8px; border-top: 2px solid #e94560;
+            font-size: 1.2rem; font-weight: 700; color: #e94560;
+        }
+
+        .proof-img {
+            max-width: 100%; max-height: 400px; border-radius: 8px;
+            margin-top: 8px; border: 1px solid #e9ecef;
+        }
+
+        .action-bar {
+            display: flex; gap: 12px; flex-wrap: wrap; margin-top: 24px;
+            justify-content: flex-end;
+        }
+        .btn-action {
+            padding: 12px 28px; border-radius: 8px; border: none;
+            font-size: 0.95rem; font-weight: 700; cursor: pointer;
+            font-family: inherit; transition: all 0.2s;
+            display: inline-flex; align-items: center; gap: 8px;
+        }
+        .btn-confirm {
+            background: #2ecc71; color: white;
+        }
+        .btn-confirm:hover { background: #27ae60; }
+        .btn-cancel {
+            background: #e74c3c; color: white;
+        }
+        .btn-cancel:hover { background: #c0392b; }
+
+        
+        .btn-revert {
+            background: #f0f2f5;
+            color: #2c3e50;
+            border: 1px solid #ddd;
+        }
+        .btn-revert:hover { background: #e2e6ea; }
+
+        .notice {
+            padding: 12px 16px; border-radius: 8px; font-size: 0.88rem;
+            background: #f0f7ff; color: #21618c; border-left: 4px solid #3498db;
+            margin-bottom: 16px; line-height: 1.5;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>🛒 Mi Marketplace - Admin</h1>
+            <nav>
+                <a href="/">🏠 Inicio</a>
+                <a href="/orders/panel/">📋 Panel</a>
+                <span style="color: rgba(255,255,255,0.7); margin: 0 10px;">👤 {{ user.username }}</span>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <div class="detail-wrap">
+            <a href="{% url 'orders:superuser_orders' %}" class="btn-back">← Volver al panel</a>
+
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="notice">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+
+            <!-- Header del pedido -->
+            <div class="card">
+                <h2>📋 Pedido {{ order.reference_code }}</h2>
+                <div class="info-row">
+                    <span class="lbl">Estado</span>
+                    <span class="val"><span class="status-badge status-{{ order.status }}">{{ order.get_status_display }}</span></span>
+                </div>
+                <div class="info-row">
+                    <span class="lbl">Fecha</span>
+                    <span class="val">{{ order.created_at|date:"d/m/Y H:i" }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="lbl">Cliente</span>
+                    <span class="val">{{ order.user.username }}</span>
+                </div>
+                {% if order.user.email %}
+                <div class="info-row">
+                    <span class="lbl">Email</span>
+                    <span class="val">{{ order.user.email }}</span>
+                </div>
+                {% endif %}
+                {% if order.user.profile.phone %}
+                <div class="info-row">
+                    <span class="lbl">Telefono</span>
+                    <span class="val">{{ order.user.profile.phone }}</span>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Pago -->
+            <div class="card">
+                <h2>💳 Datos del pago</h2>
+                <div class="info-row">
+                    <span class="lbl">Banco emisor</span>
+                    <span class="val">{{ order.payment_bank|default:"—" }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="lbl">Referencia</span>
+                    <span class="val">{{ order.payment_reference|default:"—" }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="lbl">Fecha del pago</span>
+                    <span class="val">{{ order.payment_date|date:"d/m/Y"|default:"—" }}</span>
+                </div>
+                {% if order.payment_proof %}
+                    <div style="margin-top:12px;">
+                        <span class="lbl" style="font-size:0.85rem;color:#7f8c8d;">Comprobante:</span><br>
+                        <a href="{{ order.payment_proof.url }}" target="_blank">
+                            <img src="{{ order.payment_proof.url }}" alt="Comprobante" class="proof-img">
+                        </a>
+                    </div>
+                {% endif %}
+                {% if order.notes %}
+                    <div class="info-row" style="margin-top:8px;">
+                        <span class="lbl">Notas del cliente</span>
+                        <span class="val">{{ order.notes }}</span>
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Envio -->
+            <div class="card">
+                <h2>🚚 Entrega</h2>
+                <div class="info-row">
+                    <span class="lbl">Metodo</span>
+                    <span class="val">
+                        {% if order.shipping_method == 'delivery' %}🛵 Delivery{% else %}🏪 Retiro en tienda{% endif %}
+                    </span>
+                </div>
+                {% if order.delivery_address %}
+                <div class="info-row">
+                    <span class="lbl">Direccion</span>
+                    <span class="val">{{ order.delivery_address }}</span>
+                </div>
+                {% endif %}
+                {% if order.shipping_fee %}
+                <div class="info-row">
+                    <span class="lbl">Costo de envio</span>
+                    <span class="val">${{ order.shipping_fee|floatformat:2 }}</span>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Items -->
+            <div class="card">
+                <h2>📦 Productos por comercio</h2>
+
+                {% regroup order.items.all by store as items_by_store %}
+                {% for group in items_by_store %}
+                    <div style="margin-bottom:16px;">
+                        <div style="font-size:0.85rem;font-weight:700;color:#1a1a2e;padding:8px 0;border-bottom:2px solid #e94560;">
+                            🏪 {{ group.grouper.name }}
+                        </div>
+                        {% for item in group.list %}
+                            <div class="item-line">
+                                <div>
+                                    {{ item.quantity }} × {{ item.product_name }}
+                                    <span class="store-nm">Estado: {{ item.get_status_display }}</span>
+                                </div>
+                                <div style="text-align:right;">
+                                    <div style="font-size:0.78rem;color:#95a5a6;">${{ item.product_price|floatformat:2 }} c/u</div>
+                                    <div style="font-weight:600;">${{ item.get_subtotal|floatformat:2 }}</div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endfor %}
+
+                <div class="total-line" style="margin-top:12px;">
+                    <span>Subtotal productos</span>
+                    <span>${{ order.total|floatformat:2 }}</span>
+                </div>
+                {% if order.shipping_fee %}
+                <div class="total-line">
+                    <span>Envio</span>
+                    <span>${{ order.shipping_fee|floatformat:2 }}</span>
+                </div>
+                {% endif %}
+                <div class="total-line grand">
+                    <span>Total</span>
+                    <span>${{ order.grand_total|floatformat:2 }}</span>
+                </div>
+            </div>
+
+            <!-- Acciones -->
+            {% if order.status == 'confirmed' or order.status == 'shipped' %}
+                <div class="card">
+                    <h2>⚡ Acciones</h2>
+                    <p style="font-size:0.88rem;color:#7f8c8d;margin:0 0 12px;line-height:1.5;">
+                        Este pedido ya tiene el pago verificado. Marca como entregado cuando
+                        el cliente haya recibido su pedido (o lo retiró en tienda).
+                    </p>
+                    <div class="action-bar">
+                        <form method="post" action="{% url 'orders:superuser_mark_delivered' order.pk %}" style="display:inline;" onsubmit="return confirm('Marcar este pedido como entregado?');">
+                            {% csrf_token %}
+                            <button type="submit" class="btn-action btn-confirm">
+                                📦 Marcar como entregado
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            {% endif %}
+
+            {% if order.status == 'completed' %}
+                <div class="card" style="border-left:4px solid #e74c3c;">
+                    <h2>↩️ Revertir entrega</h2>
+                    <p style="font-size:0.88rem;color:#7f8c8d;margin:0 0 12px;line-height:1.5;">
+                        <strong>Atención:</strong> si marcas este pedido como no entregado,
+                        volverá al estado <em>Por entregar</em> y los items quedarán
+                        pendientes de cerrar nuevamente.
+                        Esta acción se registra en el historial.
+                    </p>
+                    <div class="action-bar">
+                        <form method="post" action="{% url 'orders:superuser_revert_delivery' order.pk %}" style="display:inline;" onsubmit="return confirm('Revertir el pedido {{ order.reference_code }}? Los items volverán a su estado anterior.');">
+                            {% csrf_token %}
+                            <button type="submit" class="btn-action btn-revert">
+                                ↩️ Revertir entrega
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            {% endif %}
+
+            {% if order.status == 'payment_submitted' %}
+                <div class="card">
+                    <h2>⚡ Acciones</h2>
+                    <p style="font-size:0.88rem;color:#7f8c8d;margin:0 0 12px;line-height:1.5;">
+                        Verifica que el pago llego correctamente a la cuenta del comercio
+                        antes de confirmar. Si no lo recibiste, puedes cancelar el pedido
+                        y el stock volvera a estar disponible.
+                    </p>
+                    <div class="action-bar">
+                        <form method="post" action="{% url 'orders:superuser_confirm_payment' order.pk %}" style="display:inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="btn-action btn-confirm">
+                                ✅ Confirmar pago
+                            </button>
+                        </form>
+                        <form method="post" action="{% url 'orders:superuser_cancel_order' order.pk %}" style="display:inline;" onsubmit="return confirm('Cancelar este pedido? Se devolvera el stock.');">
+                            {% csrf_token %}
+                            <button type="submit" class="btn-action btn-cancel">
+                                ❌ No recibi el pago
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </main>
+</body>
+</html>

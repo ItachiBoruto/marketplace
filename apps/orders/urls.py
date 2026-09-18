@@ -1,6 +1,6 @@
 from django.urls import path
 
-from . import views
+from . import views, views_panel
 
 app_name = 'orders'
 
@@ -12,4 +12,12 @@ urlpatterns = [
     path('payment-qr/', views.payment_qr, name='payment_qr'),
     path('cron/expire/', views.cron_expire_reservations, name='cron_expire'),
     path('cron/bcv/', views.cron_update_bcv, name='cron_bcv'),
+    # Panel global del superuser
+    path("panel/", views_panel.SuperuserOrderListView.as_view(), name="superuser_orders"),
+    path("panel/<int:order_id>/", views_panel.SuperuserOrderDetailView.as_view(), name="superuser_order_detail"),
+    path("panel/<int:order_id>/confirm-payment/", views_panel.superuser_confirm_payment, name="superuser_confirm_payment"),
+    path("panel/<int:order_id>/cancel/", views_panel.superuser_cancel_order, name="superuser_cancel_order"),
+    path("panel/<int:order_id>/mark-delivered/", views_panel.superuser_mark_delivered, name="superuser_mark_delivered"),
+    path("panel/<int:order_id>/revert-delivery/", views_panel.superuser_revert_delivery, name="superuser_revert_delivery"),
+    path("panel/history/", views_panel.SalesHistoryView.as_view(), name="sales_history"),
 ]

@@ -37,4 +37,5 @@ urlpatterns = [
     path("dashboard/<int:store_id>/users/add/", views_users.add_store_user, name="users_add"),
     path("dashboard/<int:store_id>/users/<int:permission_id>/change-role/", views_users.change_user_role, name="users_change_role"),
     path("dashboard/<int:store_id>/users/<int:permission_id>/remove/", views_users.remove_store_user, name="users_remove"),
+    path("dashboard/<int:store_id>/orders/<int:order_id>/items/<int:item_id>/deliver/", views_orders.mark_item_delivered, name="order_item_deliver"),
 ]

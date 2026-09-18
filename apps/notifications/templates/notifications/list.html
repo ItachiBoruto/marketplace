@@ -108,6 +108,9 @@
                 {% if user.is_authenticated and user.is_staff %}
                     <a href="/admin/">⚙️ Admin</a>
                 {% endif %}
+                {% if user.is_superuser %}
+                    <a href="{% url 'orders:superuser_orders' %}">📋 Panel</a>
+                {% endif %}
             </nav>
         </div>
     </header>

@@ -91,6 +91,7 @@
 
             {% if user.is_superuser %}
                 <a href="{% url 'stores:users' store.id %}">👥 Usuarios</a>
+                <a href="{% url 'orders:superuser_orders' %}">📋 Panel global</a>
             {% endif %}
 
             <!-- Logout siempre visible -->

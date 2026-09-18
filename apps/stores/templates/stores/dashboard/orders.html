@@ -12,6 +12,51 @@
         gap: 12px;
         margin-bottom: 16px;
     }
+    .search-box {
+        position: relative;
+        flex: 1;
+        max-width: 420px;
+        min-width: 200px;
+    }
+    .search-box input {
+        width: 100%;
+        padding: 10px 40px 10px 16px;
+        border: 2px solid #e1e5ea;
+        border-radius: 50px;
+        font-size: 0.9rem;
+        font-family: inherit;
+        box-sizing: border-box;
+        transition: border-color 0.2s;
+    }
+    .search-box input:focus {
+        outline: none;
+        border-color: #3498db;
+    }
+    .search-box .search-icon {
+        position: absolute;
+        right: 14px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #95a5a6;
+        pointer-events: none;
+    }
+    .search-box .clear-search {
+        position: absolute;
+        right: 14px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: none;
+        border: none;
+        color: #95a5a6;
+        cursor: pointer;
+        font-size: 1.1rem;
+        padding: 4px;
+        display: none;
+    }
+    .search-box.has-value .search-icon { display: none; }
+    .search-box.has-value .clear-search { display: block; }
+    .search-box.has-value .clear-search:hover { color: #e74c3c; }
+
     .filters-bar {
         display: flex;
         gap: 8px;
@@ -43,6 +88,7 @@
         background: #1a1a2e;
         color: white;
     }
+
     .order-card {
         background: white;
         border-radius: 12px;
@@ -57,18 +103,20 @@
     .order-card.confirmed { border-left-color: #3498db; }
     .order-card.shipped { border-left-color: #9b59b6; }
     .order-card.cancelled { border-left-color: #e74c3c; opacity: 0.8; }
+
     .order-card-header {
         display: flex;
         justify-content: space-between;
         align-items: center;
         flex-wrap: wrap;
         gap: 8px;
-        margin-bottom: 8px;
+        margin-bottom: 10px;
     }
     .order-id {
         font-weight: 700;
         color: #1a1a2e;
         font-size: 1.05rem;
+        font-family: 'Courier New', monospace;
     }
     .order-meta {
         font-size: 0.82rem;
@@ -99,21 +147,57 @@
     .status-mini.shipped { background: #f4ecf7; color: #6c3483; }
     .status-mini.delivered { background: #eafaf1; color: #229954; }
     .status-mini.cancelled { background: #fdedec; color: #c0392b; }
-    .order-actions {
-        margin-top: 8px;
-        text-align: right;
+
+    .order-actions-row {
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        gap: 8px;
+        margin-top: 12px;
+        flex-wrap: wrap;
     }
-    .btn-view {
-        display: inline-block;
-        padding: 6px 16px;
-        background: #1a1a2e;
-        color: white;
-        text-decoration: none;
-        border-radius: 6px;
+    .btn-action {
+        padding: 8px 16px;
+        border-radius: 8px;
+        border: none;
+        cursor: pointer;
         font-size: 0.85rem;
         font-weight: 600;
+        font-family: inherit;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        transition: all 0.2s;
     }
-    .btn-view:hover { background: #0f3460; }
+    .btn-view {
+        background: #f0f2f5;
+        color: #2c3e50;
+    }
+    .btn-view:hover { background: #e2e6ea; }
+    .btn-approve {
+        background: #2ecc71;
+        color: white;
+    }
+    .btn-approve:hover { background: #27ae60; }
+    .btn-reject {
+        background: #fdedec;
+        color: #c0392b;
+        border: 1px solid #f5b7b1;
+    }
+    .btn-reject:hover { background: #fadbd8; }
+    .btn-ship {
+        background: #6c3483;
+        color: white;
+    }
+    .btn-ship:hover { background: #4a235a; }
+    .btn-deliver {
+        background: #16a085;
+        color: white;
+    }
+    .btn-deliver:hover { background: #138d75; }
+
+
     .empty-state {
         text-align: center;
         padding: 60px 20px;
@@ -121,28 +205,126 @@
         background: white;
         border-radius: 12px;
     }
+    .empty-state .icon { font-size: 3rem; margin-bottom: 12px; }
     .empty-state h3 { margin-bottom: 8px; color: #2c3e50; }
-    .empty-icon { font-size: 3rem; margin-bottom: 12px; }
+
+    /* Modal */
+    .modal-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.5);
+        z-index: 1000;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+    }
+    .modal-overlay.show { display: flex; }
+    .modal-box {
+        background: white;
+        border-radius: 12px;
+        padding: 26px;
+        max-width: 440px;
+        width: 100%;
+        text-align: center;
+    }
+    .modal-box .icon {
+        font-size: 3rem;
+        margin-bottom: 8px;
+        display: block;
+    }
+    .modal-box h3 {
+        margin: 0 0 10px;
+        color: #1a1a2e;
+        font-size: 1.15rem;
+    }
+    .modal-box p {
+        color: #555;
+        font-size: 0.9rem;
+        line-height: 1.5;
+        margin: 0 0 22px;
+    }
+    .modal-box .order-code {
+        font-family: 'Courier New', monospace;
+        font-weight: 700;
+        color: #1a1a2e;
+        background: #f8f9fa;
+        padding: 2px 8px;
+        border-radius: 4px;
+    }
+    .modal-actions {
+        display: flex;
+        gap: 10px;
+        justify-content: center;
+    }
+    .modal-actions button {
+        padding: 11px 24px;
+        border-radius: 8px;
+        border: none;
+        font-size: 0.9rem;
+        font-weight: 600;
+        cursor: pointer;
+        font-family: inherit;
+        transition: background 0.2s;
+    }
+    .modal-cancel {
+        background: #f0f2f5;
+        color: #2c3e50;
+    }
+    .modal-cancel:hover { background: #e2e6ea; }
+    .modal-confirm-ship {
+        background: #6c3483;
+        color: white;
+    }
+    .modal-confirm-ship:hover { background: #4a235a; }
+    .modal-confirm-approve {
+        background: #2ecc71;
+        color: white;
+    }
+    .modal-confirm-approve:hover { background: #27ae60; }
+    .modal-confirm-reject {
+        background: #e74c3c;
+        color: white;
+    }
+    .modal-confirm-reject:hover { background: #c0392b; }
+    .modal-confirm-deliver {
+        background: #16a085;
+        color: white;
+    }
+    .modal-confirm-deliver:hover { background: #138d75; }
+
+
+    @media (max-width: 600px) {
+        .search-box { max-width: 100%; }
+        .order-actions-row { justify-content: stretch; }
+        .order-actions-row .btn-action { flex: 1; justify-content: center; }
+    }
 </style>
 
 <div class="orders-header">
-    <h1 style="margin: 0;">📦 Pedidos de {{ store.name }}</h1>
+    <h1 style="margin: 0;">🧾 Pedidos de {{ store.name }}</h1>
+    <form method="get" class="search-box {% if search %}has-value{% endif %}" id="searchForm">
+        <input type="hidden" name="status" value="{{ current_status }}">
+        <input type="text" name="q" id="searchInput" value="{{ search }}" placeholder="Buscar por código, cliente o referencia..." autocomplete="off">
+        <span class="search-icon">🔍</span>
+        <button type="button" class="clear-search" id="clearSearch" aria-label="Limpiar">✕</button>
+    </form>
 </div>
 
 <div class="filters-bar">
-    <a href="?status=pending" class="filter-btn {% if current_status == 'pending' %}active{% endif %}">
+    <a href="?status=pending{% if search %}&q={{ search }}{% endif %}" class="filter-btn {% if current_status == 'pending' %}active{% endif %}">
         Pendientes <span class="count">{{ count_pending }}</span>
     </a>
-    <a href="?status=confirmed" class="filter-btn {% if current_status == 'confirmed' %}active{% endif %}">
-        Confirmados <span class="count">{{ count_confirmed }}</span>
+    <a href="?status=confirmed{% if search %}&q={{ search }}{% endif %}" class="filter-btn {% if current_status == 'confirmed' %}active{% endif %}">
+        Por entregar <span class="count">{{ count_confirmed }}</span>
     </a>
-    <a href="?status=shipped" class="filter-btn {% if current_status == 'shipped' %}active{% endif %}">
-        Enviados <span class="count">{{ count_shipped }}</span>
+    <a href="?status=shipped{% if search %}&q={{ search }}{% endif %}" class="filter-btn {% if current_status == 'shipped' %}active{% endif %}">
+        Enviados/Entregados <span class="count">{{ count_shipped }}</span>
     </a>
-    <a href="?status=cancelled" class="filter-btn {% if current_status == 'cancelled' %}active{% endif %}">
+    <a href="?status=cancelled{% if search %}&q={{ search }}{% endif %}" class="filter-btn {% if current_status == 'cancelled' %}active{% endif %}">
         Rechazados <span class="count">{{ count_cancelled }}</span>
     </a>
-    <a href="?status=all" class="filter-btn {% if current_status == 'all' %}active{% endif %}">
+    <a href="?status=all{% if search %}&q={{ search }}{% endif %}" class="filter-btn {% if current_status == 'all' %}active{% endif %}">
         Todos
     </a>
 </div>
@@ -151,7 +333,7 @@
     <div class="order-card {{ order.status }}">
         <div class="order-card-header">
             <div>
-                <span class="order-id">Pedido {{ order.reference_code }}</span>
+                <span class="order-id">{{ order.reference_code }}</span>
                 <span class="order-meta"> · {{ order.created_at|date:"d/m/Y H:i" }}</span>
             </div>
             <span class="order-meta">Cliente: <strong>{{ order.user.username }}</strong></span>
@@ -171,15 +353,47 @@
             {% endfor %}
         </div>
 
-        <div class="order-actions">
-            <a href="{% url 'stores:order_detail' store.id order.pk %}" class="btn-view">
-                Ver detalle →
+        <div class="order-actions-row">
+            <a href="{% url 'stores:order_detail' store.id order.pk %}" class="btn-action btn-view">
+                👁️ Ver detalle
             </a>
+
+            {% for item in order.items.all %}
+                {% if item.store == store %}
+                    {% if item.status == 'pending' %}
+                        <button type="button" class="btn-action btn-approve"
+                                data-order-id="{{ order.pk }}" onclick="confirmAction('approve', {{ item.pk }}, '{{ order.reference_code }}', '{{ item.product_name|escapejs }}', this)">
+                            ✅ Aprobar
+                        </button>
+                        <button type="button" class="btn-action btn-reject"
+                                data-order-id="{{ order.pk }}" onclick="confirmAction('reject', {{ item.pk }}, '{{ order.reference_code }}', '{{ item.product_name|escapejs }}', this)">
+                            ❌ Rechazar
+                        </button>
+                    {% elif item.status == 'confirmed' %}
+                        {% if order.shipping_method == 'pickup' %}
+                            <button type="button" class="btn-action btn-deliver"
+                                    data-order-id="{{ order.pk }}" onclick="confirmAction('deliver', {{ item.pk }}, '{{ order.reference_code }}', '{{ item.product_name|escapejs }}', this)">
+                                📦 Marcar entregado
+                            </button>
+                        {% else %}
+                            <button type="button" class="btn-action btn-ship"
+                                    data-order-id="{{ order.pk }}" onclick="confirmAction('ship', {{ item.pk }}, '{{ order.reference_code }}', '{{ item.product_name|escapejs }}', this)">
+                                🚚 Marcar enviado
+                            </button>
+                        {% endif %}
+                    {% elif item.status == 'shipped' %}
+                        <button type="button" class="btn-action btn-deliver"
+                                data-order-id="{{ order.pk }}" onclick="confirmAction('deliver', {{ item.pk }}, '{{ order.reference_code }}', '{{ item.product_name|escapejs }}', this)">
+                            📦 Marcar entregado
+                        </button>
+                    {% endif %}
+                {% endif %}
+            {% endfor %}
         </div>
     </div>
 {% empty %}
     <div class="empty-state">
-        <div class="empty-icon">📭</div>
+        <div class="icon">📭</div>
         <h3>No hay pedidos {{ current_status }}</h3>
         <p>Cuando recibas pedidos aparecerán aquí.</p>
     </div>
@@ -188,12 +402,148 @@
 {% if is_paginated %}
     <div style="text-align: center; margin-top: 20px;">
         {% if page_obj.has_previous %}
-            <a href="?status={{ current_status }}&page={{ page_obj.previous_page_number }}">← Anterior</a>
+            <a href="?status={{ current_status }}{% if search %}&q={{ search }}{% endif %}&page={{ page_obj.previous_page_number }}">← Anterior</a>
         {% endif %}
         <span style="margin: 0 12px;">Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
         {% if page_obj.has_next %}
-            <a href="?status={{ current_status }}&page={{ page_obj.next_page_number }}">Siguiente →</a>
+            <a href="?status={{ current_status }}{% if search %}&q={{ search }}{% endif %}&page={{ page_obj.next_page_number }}">Siguiente →</a>
         {% endif %}
     </div>
 {% endif %}
+
+<!-- MODAL DE CONFIRMACION -->
+<div class="modal-overlay" id="actionModal">
+    <div class="modal-box">
+        <span class="icon" id="modalIcon">🚚</span>
+        <h3 id="modalTitle">Confirmar accion</h3>
+        <p id="modalText"></p>
+        <form method="post" id="modalForm" style="display: none;">
+            {% csrf_token %}
+        </form>
+        <div class="modal-actions">
+            <button type="button" class="modal-cancel" onclick="closeModal()">Cancelar</button>
+            <button type="button" class="modal-confirm-ship" id="modalConfirmBtn" onclick="submitModal()">Confirmar</button>
+        </div>
+    </div>
+</div>
+
+<script>
+(function() {
+    var storeId = {{ store.id }};
+    var modal = document.getElementById('actionModal');
+    var modalIcon = document.getElementById('modalIcon');
+    var modalTitle = document.getElementById('modalTitle');
+    var modalText = document.getElementById('modalText');
+    var modalForm = document.getElementById('modalForm');
+    var modalBtn = document.getElementById('modalConfirmBtn');
+    var pendingAction = null;
+
+    // BUSQUEDA CON DEBOUNCE
+    var searchInput = document.getElementById('searchInput');
+    var searchForm = document.getElementById('searchForm');
+    var clearSearch = document.getElementById('clearSearch');
+    var searchBox = document.querySelector('.search-box');
+    var timer = null;
+
+    function updateSearchBoxState() {
+        if (searchInput.value.trim()) {
+            searchBox.classList.add('has-value');
+        } else {
+            searchBox.classList.remove('has-value');
+        }
+    }
+
+    if (searchInput) {
+        updateSearchBoxState();
+        searchInput.addEventListener('input', function() {
+            updateSearchBoxState();
+            clearTimeout(timer);
+            timer = setTimeout(function() {
+                searchForm.submit();
+            }, 800);
+        });
+        searchInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                clearTimeout(timer);
+                searchForm.submit();
+            }
+        });
+    }
+
+    if (clearSearch) {
+        clearSearch.addEventListener('click', function() {
+            searchInput.value = '';
+            searchForm.submit();
+        });
+    }
+
+    // MODAL DE CONFIRMACION
+    window.confirmAction = function(action, itemId, orderCode, productName, btn) {
+        pendingAction = { action: action, itemId: itemId, btn: btn };
+
+        var configs = {
+            approve: {
+                icon: String.fromCodePoint(0x2705),
+                title: 'Aprobar producto',
+                text: 'Confirmas que puedes entregar <strong>' + productName + '</strong> del pedido <span class="order-code">' + orderCode + '</span>?',
+                btnClass: 'modal-confirm-approve',
+                btnText: 'Si, aprobar'
+            },
+            reject: {
+                icon: String.fromCodePoint(0x274C),
+                title: 'Rechazar producto',
+                text: 'Rechazar <strong>' + productName + '</strong> del pedido <span class="order-code">' + orderCode + '</span>? Se devolvera el stock.',
+                btnClass: 'modal-confirm-reject',
+                btnText: 'Si, rechazar'
+            },
+            ship: {
+                icon: String.fromCodePoint(0x1F69A),
+                title: 'Marcar como enviado',
+                text: 'Confirmas que enviaste <strong>' + productName + '</strong> del pedido <span class="order-code">' + orderCode + '</span>?',
+                btnClass: 'modal-confirm-ship',
+                btnText: 'Si, marcar enviado'
+            },
+            deliver: {
+                icon: String.fromCodePoint(0x1F4E6),
+                title: 'Marcar como entregado',
+                text: 'Confirmas que ya entregaste <strong>' + productName + '</strong> del pedido <span class="order-code">' + orderCode + '</span>?',
+                btnClass: 'modal-confirm-deliver',
+                btnText: 'Si, marcar entregado'
+            }
+        };
+
+        var cfg = configs[action];
+        modalIcon.textContent = cfg.icon;
+        modalTitle.textContent = cfg.title;
+        modalText.innerHTML = cfg.text;
+
+        modalBtn.className = cfg.btnClass;
+        modalBtn.textContent = cfg.btnText;
+
+        var orderId = btn.getAttribute('data-order-id');
+        var actionUrl = '/stores/dashboard/' + storeId + '/orders/' + orderId + '/items/' + itemId + '/' + action + '/';
+        modalForm.action = actionUrl;
+
+        modal.classList.add('show');
+    };
+
+    window.closeModal = function() {
+        modal.classList.remove('show');
+        pendingAction = null;
+    };
+
+    window.submitModal = function() {
+        if (pendingAction) {
+            modalForm.submit();
+        }
+    };
+
+    if (modal) {
+        modal.addEventListener('click', function(e) {
+            if (e.target === modal) closeModal();
+        });
+    }
+})();
+</script>
 {% endblock %}

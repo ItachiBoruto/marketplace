@@ -32,16 +32,23 @@ class EmptyCartError(Exception):
 
 
 @transaction.atomic
-def create_order_from_cart(user, payment_data, cart):
+def create_order_from_cart(user, payment_data, cart, store=None):
     """
     Crea un pedido desde el carrito con reserva atómica de stock.
 
+    Si se pasa `store`, solo procesa los items de ese comercio.
+    Si no, procesa todos los items del carrito.
+
     Bloquea las filas de los productos durante la transacción, valida stock,
-    descuenta, crea OrderItems y StockMovements, y vacía el carrito.
+    descuenta, crea OrderItems y StockMovements, y vacía solo esos items.
     """
-    items = list(cart.items.select_related('product', 'product__store').all())
+    qs = cart.items.select_related('product', 'product__store').all()
+    if store is not None:
+        qs = qs.filter(product__store=store)
+
+    items = list(qs)
     if not items:
-        raise EmptyCartError('El carrito está vacío.')
+        raise EmptyCartError('No hay productos para procesar.')
 
     product_ids = [item.product_id for item in items]
 
@@ -99,8 +106,9 @@ def create_order_from_cart(user, payment_data, cart):
             order_reference=f'Pedido #{order.pk}',
         )
 
-    # Vaciar el carrito
-    cart.items.all().delete()
+    # Vaciar SOLO los items procesados
+    for item in items:
+        item.delete()
 
     # ===== Notificaciones =====
     # Al admin (superusers): nuevo pedido recibido

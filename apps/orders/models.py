@@ -10,8 +10,8 @@ class Order(models.Model):
 
     STATUS_CHOICES = [
         ('pending_payment', 'Esperando pago'),
-        ('payment_submitted', 'Pago reportado'),
-        ('confirmed', 'Pago confirmado'),
+        ('payment_submitted', 'Por verificar pago'),
+        ('confirmed', 'Por entregar'),
         ('shipped', 'Enviado'),
         ('completed', 'Completado'),
         ('cancelled', 'Cancelado'),

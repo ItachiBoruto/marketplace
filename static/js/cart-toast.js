@@ -9,9 +9,13 @@
         if (badges.length === 0) return;
         badges.forEach(function (b) {
             b.textContent = count;
-            b.style.display = '';
-            b.classList.add('bump');
-            setTimeout(function () { b.classList.remove('bump'); }, 500);
+            if (count > 0) {
+                b.style.display = 'inline-block';
+                b.classList.add('bump');
+                setTimeout(function () { b.classList.remove('bump'); }, 500);
+            } else {
+                b.style.display = 'none';
+            }
         });
     }
 

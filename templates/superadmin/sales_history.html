@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Historial de ventas - Admin</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/style.css' %}?v=9">
+    <style>
+        .history-wrap { max-width: 1100px; margin: 24px auto; padding: 0 16px; }
+        .history-header {
+            display: flex; justify-content: space-between; align-items: center;
+            flex-wrap: wrap; gap: 12px; margin-bottom: 20px;
+        }
+        .history-header h1 { font-size: 1.5rem; color: #1a1a2e; margin: 0; }
+
+        .period-tabs {
+            display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px;
+        }
+        .period-tab {
+            padding: 9px 18px; border-radius: 50px;
+            background: #f0f2f5; color: #444; text-decoration: none;
+            font-size: 0.88rem; font-weight: 600;
+            transition: all 0.2s;
+        }
+        .period-tab:hover { background: #e2e6ea; }
+        .period-tab.active { background: #1a1a2e; color: white; }
+
+        .custom-dates {
+            display: flex; gap: 8px; align-items: center; flex-wrap: wrap;
+            background: white; padding: 12px 16px; border-radius: 10px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.06); margin-bottom: 16px;
+        }
+        .custom-dates input, .custom-dates select {
+            padding: 8px 12px; border: 2px solid #e1e5ea; border-radius: 8px;
+            font-size: 0.88rem; font-family: inherit;
+        }
+        .custom-dates button {
+            padding: 9px 18px; background: #3498db; color: white;
+            border: none; border-radius: 8px; font-weight: 600;
+            cursor: pointer; font-family: inherit;
+        }
+
+        .summary-card {
+            background: white; border-radius: 12px; padding: 20px 24px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08); margin-bottom: 24px;
+            border-left: 5px solid #2ecc71;
+        }
+        .summary-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 16px;
+        }
+        .summary-item {
+            text-align: left;
+        }
+        .summary-item .lbl {
+            font-size: 0.78rem; color: #7f8c8d; text-transform: uppercase;
+            letter-spacing: 0.5px; font-weight: 600; margin-bottom: 4px;
+        }
+        .summary-item .val {
+            font-size: 1.6rem; font-weight: 700; color: #1a1a2e;
+        }
+        .summary-item .val.usd { color: #2ecc71; }
+        .summary-item .val.bs { color: #f39c12; }
+
+        .day-block {
+            background: white; border-radius: 12px; margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06); overflow: hidden;
+        }
+        .day-header {
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            color: white; padding: 14px 20px;
+            display: flex; justify-content: space-between; align-items: center;
+            flex-wrap: wrap; gap: 8px;
+        }
+        .day-header .day-title {
+            font-weight: 700; font-size: 1rem;
+        }
+        .day-header .day-stats {
+            display: flex; gap: 18px; font-size: 0.85rem;
+            color: rgba(255,255,255,0.85);
+        }
+        .day-header .day-stat strong {
+            color: white; font-size: 1rem;
+        }
+
+        .day-body {
+            padding: 12px 0;
+        }
+        .order-row {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 10px 20px; border-bottom: 1px solid #f5f5f5;
+            gap: 12px; flex-wrap: wrap;
+            text-decoration: none; color: inherit;
+            transition: background 0.15s;
+        }
+        .order-row:hover { background: #f8f9fa; }
+        .order-row:last-child { border-bottom: none; }
+        .order-row-code {
+            font-family: 'Courier New', monospace; font-weight: 700;
+            color: #1a1a2e; font-size: 0.9rem;
+        }
+        .order-row-meta {
+            font-size: 0.82rem; color: #7f8c8d;
+        }
+        .order-row-amount {
+            font-weight: 700; color: #e94560; font-size: 0.95rem;
+            text-align: right;
+        }
+        .order-row-amount-bs {
+            font-size: 0.78rem; color: #95a5a6;
+            text-align: right;
+        }
+
+        .empty-history {
+            text-align: center; padding: 60px 20px;
+            background: white; border-radius: 12px;
+            color: #7f8c8d;
+        }
+        .empty-history .icon {
+            font-size: 3.5rem; display: block; margin-bottom: 12px;
+        }
+
+        .back-link {
+            display: inline-block; margin-bottom: 16px;
+            color: #6c757d; text-decoration: none;
+            font-size: 0.9rem; font-weight: 600;
+        }
+        .back-link:hover { color: #2c3e50; }
+
+        @media (max-width: 600px) {
+            .day-header { flex-direction: column; align-items: flex-start; }
+            .order-row { flex-direction: column; align-items: stretch; }
+            .order-row-amount { text-align: left; }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>🛒 Mi Marketplace - Admin</h1>
+            <nav>
+                <a href="/">🏠 Inicio</a>
+                <a href="/orders/panel/">📋 Panel</a>
+                <a href="/orders/panel/history/">📊 Historial</a>
+                <span style="color: rgba(255,255,255,0.7); margin: 0 10px;">👤 {{ user.username }}</span>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <div class="history-wrap">
+            <a href="/orders/panel/" class="back-link">← Volver al panel</a>
+
+            <div class="history-header">
+                <h1>📊 Historial de ventas</h1>
+            </div>
+
+            <!-- Filtros de periodo -->
+            <div class="period-tabs">
+                <a href="?period=today{% if current_store %}&store={{ current_store }}{% endif %}" class="period-tab {% if current_period == 'today' %}active{% endif %}">Hoy</a>
+                <a href="?period=yesterday{% if current_store %}&store={{ current_store }}{% endif %}" class="period-tab {% if current_period == 'yesterday' %}active{% endif %}">Ayer</a>
+                <a href="?period=last_7{% if current_store %}&store={{ current_store }}{% endif %}" class="period-tab {% if current_period == 'last_7' %}active{% endif %}">Últimos 7 días</a>
+                <a href="?period=this_month{% if current_store %}&store={{ current_store }}{% endif %}" class="period-tab {% if current_period == 'this_month' %}active{% endif %}">Este mes</a>
+                <a href="?period=custom{% if current_store %}&store={{ current_store }}{% endif %}" class="period-tab {% if current_period == 'custom' %}active{% endif %}">Personalizado</a>
+            </div>
+
+            <!-- Filtros adicionales -->
+            <form method="get" class="custom-dates">
+                <input type="hidden" name="period" value="{{ current_period }}">
+                {% if current_period == 'custom' %}
+                    <label style="font-size:0.85rem;color:#7f8c8d;">Desde:</label>
+                    <input type="date" name="start" value="{{ start_date }}" required>
+                    <label style="font-size:0.85rem;color:#7f8c8d;">Hasta:</label>
+                    <input type="date" name="end" value="{{ end_date }}" required>
+                {% endif %}
+                <label style="font-size:0.85rem;color:#7f8c8d;">Comercio:</label>
+                <select name="store">
+                    <option value="">Todos</option>
+                    {% for s in stores %}
+                        <option value="{{ s.id }}" {% if current_store == s.id|stringformat:"s" %}selected{% endif %}>{{ s.name }}</option>
+                    {% endfor %}
+                </select>
+                <button type="submit">🔍 Aplicar</button>
+            </form>
+
+            <!-- Resumen general -->
+            <div class="summary-card">
+                <div class="summary-grid">
+                    <div class="summary-item">
+                        <div class="lbl">Pedidos en el periodo</div>
+                        <div class="val">{{ grand_total_orders }}</div>
+                    </div>
+                    <div class="summary-item">
+                        <div class="lbl">Total en dólares</div>
+                        <div class="val usd">${{ grand_total_usd|floatformat:2 }}</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Grupos por día -->
+            {% for day in day_groups %}
+                <div class="day-block">
+                    <div class="day-header">
+                        <div class="day-title">
+                            📅 {{ day.date|date:"l, d \d\e F \d\e Y" }}
+                        </div>
+                        <div class="day-stats">
+                            <div class="day-stat">
+                                <strong>{{ day.count }}</strong> pedido{{ day.count|pluralize:"s" }}
+                            </div>
+                            <div class="day-stat">
+                                <strong>${{ day.total_usd|floatformat:2 }}</strong> USD
+                            </div>
+                            {% if day.total_bs %}
+                                <div class="day-stat">
+                                    <strong>Bs. {{ day.total_bs|floatformat:2 }}</strong>
+                                </div>
+                            {% endif %}
+                            {% if day.avg_rate %}
+                                <div class="day-stat">
+                                    Tasa: <strong>{{ day.avg_rate|floatformat:2 }}</strong>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="day-body">
+                        {% for order in day.orders %}
+                            <a href="{% url 'orders:superuser_order_detail' order.pk %}" class="order-row">
+                                <div>
+                                    <span class="order-row-code">{{ order.reference_code }}</span>
+                                    <span class="order-row-meta"> · {{ order.user.username }} · {{ order.created_at|date:"H:i" }}</span>
+                                </div>
+                                <div>
+                                    <div class="order-row-amount">${{ order.grand_total|floatformat:2 }}</div>
+                                    {% if order.exchange_rate %}
+                                        <div class="order-row-amount-bs">
+                                            Bs. {{ order.grand_total|floatformat:2 }} × {{ order.exchange_rate|floatformat:2 }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </a>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% empty %}
+                <div class="empty-history">
+                    <span class="icon">📭</span>
+                    <h3>No hay ventas en este periodo</h3>
+                    <p>Cambia el filtro de fecha para ver otros períodos.</p>
+                </div>
+            {% endfor %}
+        </div>
+    </main>
+</body>
+</html>
