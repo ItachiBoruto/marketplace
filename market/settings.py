@@ -231,6 +231,9 @@ DEFAULT_FROM_EMAIL = os.environ.get(
 )
 SERVER_EMAIL = DEFAULT_FROM_EMAIL
 
+# Interruptor para deshabilitar el envio de emails (util en Render free)
+EMAIL_ENABLED = os.environ.get('EMAIL_ENABLED', 'True') == 'True'
+
 if DEBUG and not EMAIL_HOST_USER:
     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 

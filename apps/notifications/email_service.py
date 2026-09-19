@@ -11,6 +11,11 @@ logger = logging.getLogger(__name__)
 
 def _base_send(subject, template_name, context, to_emails):
     """Envia un email con HTML + fallback texto plano."""
+    # Verificar si el envio de emails esta deshabilitado globalmente
+    if not getattr(settings, "EMAIL_ENABLED", True):
+        logger.debug("Email deshabilitado (EMAIL_ENABLED=False): %s", subject)
+        return 0
+
     if not to_emails:
         return 0
 
@@ -31,7 +36,7 @@ def _base_send(subject, template_name, context, to_emails):
         logger.info("Email '%s' enviado a %s", subject, to_emails)
         return len(to_emails)
     except Exception as e:
-        logger.exception("Error enviando email '%s': %s", subject, e)
+        logger.warning("Error enviando email '%s': %s", subject, e)
         return 0
 
 

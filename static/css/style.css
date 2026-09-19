@@ -2126,3 +2126,46 @@ header nav a:hover {
     .verify-email-banner .ve-close { margin-left: 0; }
 }
 
+/* ============================================================
+   NOTIFICACIONES - AJUSTES RESPONSIVE
+   ============================================================ */
+@media (max-width: 600px) {
+    /* El wrapper no bloquea la posicion */
+    .notif-wrapper {
+        position: static;
+    }
+
+    /* El dropdown pasa a fixed y ocupa toda la pantalla */
+    .notif-dropdown {
+        position: fixed;
+        top: 70px;
+        left: 10px;
+        right: 10px;
+        width: auto;
+        max-width: none;
+        max-height: calc(100vh - 100px);
+        overflow-y: auto;
+        border-radius: 12px;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.25);
+    }
+
+    .notif-dropdown-header {
+        position: sticky;
+        top: 0;
+        background: white;
+        z-index: 1;
+    }
+
+    .notif-list {
+        max-height: calc(100vh - 200px);
+        overflow-y: auto;
+    }
+
+    .notif-item-title {
+        font-size: 0.9rem;
+    }
+
+    .notif-item-msg {
+        font-size: 0.82rem;
+    }
+}

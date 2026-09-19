@@ -1,6 +1,7 @@
 from django.conf import settings
 from django.contrib import messages
-from django.contrib.auth import login
+from django.contrib.messages import get_messages
+from django.contrib.auth import login, logout as auth_logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.contrib.auth.views import LoginView
@@ -261,3 +262,18 @@ def axes_lockout_response(request, credentials, *args, **kwargs):
         f"Podrás intentarlo de nuevo en un momento."
     )
     return redirect("login")
+
+
+def custom_logout(request):
+    """
+    Cierra la sesion del usuario y limpia TODOS los mensajes pendientes
+    para evitar que aparezcan en la pantalla de login.
+    """
+    # Limpiar mensajes pendientes
+    storage = get_messages(request)
+    list(storage)  # consume la iteracion (los borra del storage)
+
+    # Cerrar sesion
+    auth_logout(request)
+
+    return redirect("/")
