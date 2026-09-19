@@ -14,6 +14,14 @@ import cloudinary.api
 # ===== CARGAR .env (desarrollo local) =====
 load_dotenv()
 
+# ===== SENTRY (solo si SENTRY_DSN esta configurado) =====
+try:
+    from apps.utils.sentry_config import init_sentry
+    init_sentry()
+except Exception as _sentry_err:
+    import logging
+    logging.getLogger(__name__).warning("Sentry no se pudo inicializar: %s", _sentry_err)
+
 try:
     dj_database_url = importlib.import_module('dj_database_url')
 except ModuleNotFoundError:
@@ -58,7 +66,7 @@ INSTALLED_APPS = [
     'apps.inventory',
     'apps.cart',
     'apps.orders',
-    'apps.notifications',       # ← NUEVO
+    'apps.notifications',
     'apps.audit',
     'apps.utils',
 ]
@@ -66,6 +74,7 @@ INSTALLED_APPS = [
 # ===== MIDDLEWARE =====
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'apps.audit.middleware_nocache.NoCacheForAuthenticatedMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -75,6 +84,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'apps.audit.middleware.AuditMiddleware',
+    'apps.audit.middleware_access.AccessAuditMiddleware',
     'axes.middleware.AxesMiddleware',
 ]
 
@@ -123,10 +133,10 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 # ===== HASHERS DE CONTRASEÑAS =====
-# Argon2 es el recomendado por OWASP (2024+) por su resistencia a GPU/ASIC
+# Argon2 es el recomendado por OWASP
 PASSWORD_HASHERS = [
-    'django.contrib.auth.hashers.Argon2PasswordHasher',       # Primero = nuevos
-    'django.contrib.auth.hashers.PBKDF2PasswordHasher',        # Fallback
+    'django.contrib.auth.hashers.Argon2PasswordHasher',
+    'django.contrib.auth.hashers.PBKDF2PasswordHasher',
     'django.contrib.auth.hashers.PBKDF2SHA1PasswordHasher',
     'django.contrib.auth.hashers.BCryptSHA256PasswordHasher',
     'django.contrib.auth.hashers.ScryptPasswordHasher',
@@ -180,6 +190,7 @@ LOGOUT_REDIRECT_URL = '/'
 # ===== DJANGO-AXES (Rate limiting de login) =====
 AUTHENTICATION_BACKENDS = [
     'axes.backends.AxesStandaloneBackend',
+    'apps.accounts.backends.EmailOrUsernameBackend',
     'django.contrib.auth.backends.ModelBackend',
 ]
 
@@ -194,6 +205,34 @@ AXES_IPWARE_META_PRECEDENCE_ORDER = [
     'HTTP_X_FORWARDED_FOR',
     'REMOTE_ADDR',
 ]
+
+# ===== VISTA PERSONALIZADA DE CSRF FAILURE =====
+def csrf_failure_view(request, reason=""):
+    from django.shortcuts import render
+    return render(request, "403.html", status=403)
+
+CSRF_FAILURE_VIEW = "market.settings.csrf_failure_view"
+
+# ============================================================
+# ===== EMAIL / SMTP =====
+# ============================================================
+EMAIL_BACKEND = os.environ.get(
+    'EMAIL_BACKEND',
+    'django.core.mail.backends.smtp.EmailBackend'
+)
+EMAIL_HOST = os.environ.get('EMAIL_HOST', 'smtp.gmail.com')
+EMAIL_PORT = int(os.environ.get('EMAIL_PORT', 587))
+EMAIL_USE_TLS = os.environ.get('EMAIL_USE_TLS', 'True') == 'True'
+EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', '')
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '')
+DEFAULT_FROM_EMAIL = os.environ.get(
+    'DEFAULT_FROM_EMAIL',
+    'Mi Marketplace <noreply@marketplace.local>'
+)
+SERVER_EMAIL = DEFAULT_FROM_EMAIL
+
+if DEBUG and not EMAIL_HOST_USER:
+    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 # ===== SEGURIDAD SOLO EN PRODUCCIÓN =====
 if not DEBUG:
@@ -218,7 +257,7 @@ BANK_INFO = {
     'bank_name': os.environ.get('BANK_NAME', 'Banco de Venezuela'),
     'account_number': os.environ.get('BANK_ACCOUNT', '0102-XXXX-XXXX-XXXX'),
     'account_holder': os.environ.get('BANK_HOLDER', 'Mi Marketplace'),
-    'document': os.environ.get('BANK_DOCUMENT', ''),  # Cédula o RIF
+    'document': os.environ.get('BANK_DOCUMENT', ''),
     'email': os.environ.get('BANK_EMAIL', 'pagos@marketplace.com'),
     'phone': os.environ.get('BANK_PHONE', '+58 XXX-XXX-XXXX'),
 }
@@ -230,14 +269,6 @@ ORDER_RESERVATION_MINUTES = int(os.environ.get('ORDER_RESERVATION_MINUTES', 30))
 
 # Token para el endpoint cron de expiración de reservas
 CRON_SECRET_TOKEN = os.environ.get('CRON_SECRET_TOKEN', '')
-
-
-# ===== VISTA PERSONALIZADA DE CSRF FAILURE =====
-def csrf_failure_view(request, reason=""):
-    from django.shortcuts import render
-    return render(request, "403.html", status=403)
-
-CSRF_FAILURE_VIEW = "market.settings.csrf_failure_view"
 
 # ===== LOGGING =====
 LOGGING = {
@@ -278,25 +309,3 @@ LOGGING = {
         },
     },
 }
-
-# ============================================================
-# ===== EMAIL / SMTP =====
-# ============================================================
-EMAIL_BACKEND = os.environ.get(
-    'EMAIL_BACKEND',
-    'django.core.mail.backends.smtp.EmailBackend'
-)
-EMAIL_HOST = os.environ.get('EMAIL_HOST', 'smtp.gmail.com')
-EMAIL_PORT = int(os.environ.get('EMAIL_PORT', 587))
-EMAIL_USE_TLS = os.environ.get('EMAIL_USE_TLS', 'True') == 'True'
-EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', '')
-EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '')
-DEFAULT_FROM_EMAIL = os.environ.get(
-    'DEFAULT_FROM_EMAIL',
-    'Mi Marketplace <noreply@marketplace.local>'
-)
-SERVER_EMAIL = DEFAULT_FROM_EMAIL
-
-# En desarrollo, mostrar en consola en vez de enviar de verdad
-if DEBUG and not EMAIL_HOST_USER:
-    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
