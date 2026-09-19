@@ -6,6 +6,7 @@ from django.shortcuts import get_object_or_404, redirect
 from django.views.generic import DetailView, ListView
 
 from apps.notifications.email_service import send_order_item_rejected
+from apps.utils.async_tasks import run_async
 from apps.notifications.models import notify
 from apps.orders.models import Order, OrderItem
 from apps.orders.services import reject_order_item
@@ -185,12 +186,12 @@ def reject_order_item_view(request, store_id, order_id, item_id):
         link=f'/orders/{item.order_id}/'
     )
 
-    # Email al cliente (no bloquea si falla)
-    send_order_item_rejected(
+    # Email al cliente (en background)
+    run_async(
+        send_order_item_rejected,
         order=item.order,
         item=item,
         store_name=store.name,
-        request=request,
     )
 
     messages.success(request, f'Item "{item.product_name}" rechazado. Stock devuelto.')

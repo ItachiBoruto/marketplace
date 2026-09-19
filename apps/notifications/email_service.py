@@ -66,11 +66,14 @@ def send_order_item_rejected(order, item, store_name, request=None):
     if not order.user.email:
         return 0
 
-    order_url = ""
+    # Construir URL sin depender del request (para poder correr en background)
+    base_url = getattr(settings, "SITE_URL", "")
     if request:
-        order_url = request.build_absolute_uri(
-            reverse("orders:detail", args=[order.pk])
-        )
+        order_url = request.build_absolute_uri(reverse("orders:detail", args=[order.pk]))
+    elif base_url:
+        order_url = f"{base_url.rstrip('/')}{reverse('orders:detail', args=[order.pk])}"
+    else:
+        order_url = reverse("orders:detail", args=[order.pk])
 
     return _base_send(
         subject=f"Actualizacion de tu pedido {order.reference_code}",

@@ -8,6 +8,7 @@ from apps.inventory.models import StockMovement
 from apps.products.models import Product
 
 from apps.notifications.email_service import send_new_order_to_admin
+from apps.utils.async_tasks import run_async
 from apps.notifications.models import notify, notify_superusers
 
 from .exchange import get_bcv_rate
@@ -128,8 +129,8 @@ def create_order_from_cart(user, payment_data, cart, store=None):
         link=f"/orders/{order.pk}/"
     )
 
-    # Email al admin (no bloquea si falla)
-    send_new_order_to_admin(order)
+    # Email al admin (en background, no bloquea el request)
+    run_async(send_new_order_to_admin, order)
 
     return order
 
