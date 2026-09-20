@@ -1,0 +1,272 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ page_title }} - Mi Marketplace</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}?v=10">
+    <style>
+        .legal-page {
+            max-width: 800px;
+            margin: 30px auto;
+            padding: 24px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+        }
+        .legal-page h1 {
+            font-size: 1.6rem;
+            color: #1a1a2e;
+            margin: 0 0 8px;
+        }
+        .legal-page .last-updated {
+            font-size: 0.85rem;
+            color: #7f8c8d;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid #eee;
+        }
+        .legal-page h2 {
+            font-size: 1.15rem;
+            color: #1a1a2e;
+            margin: 28px 0 10px;
+            padding-bottom: 6px;
+            border-bottom: 2px solid #e94560;
+        }
+        .legal-page p {
+            font-size: 0.92rem;
+            color: #444;
+            line-height: 1.7;
+            margin: 8px 0;
+        }
+        .legal-page ul {
+            font-size: 0.92rem;
+            color: #444;
+            line-height: 1.7;
+            padding-left: 22px;
+            margin: 8px 0;
+        }
+        .legal-page li { margin-bottom: 4px; }
+        .legal-page a {
+            color: #e94560;
+            text-decoration: none;
+        }
+        .legal-page a:hover { text-decoration: underline; }
+        .back-link {
+            display: inline-block;
+            margin-bottom: 16px;
+            color: #6c757d;
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>🛒 Mi Marketplace</h1>
+            <nav>
+                <a href="/">🏠 Inicio</a>
+                <a href="/stores/">📦 Comercios</a>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <div class="container">
+            <div class="legal-page">
+                <a href="/" class="back-link">← Volver al inicio</a>
+                <h1>{{ page_title }}</h1>
+                <p class="last-updated">Última actualización: {{ last_updated }}</p>
+
+                <h2>1. Información General</h2>
+                <p>
+                    Bienvenido a <strong>Mi Marketplace</strong>, una plataforma digital que conecta
+                    a compradores con comercios locales en Venezuela. La presente Política de
+                    Privacidad describe qué datos personales recopilamos, cómo los utilizamos,
+                    con quién los compartimos y qué derechos tiene usted sobre su información.
+                </p>
+                <p>
+                    Al registrarse y utilizar nuestra plataforma, usted acepta las prácticas
+                    descritas en esta política. Esta se rige por los principios establecidos en
+                    la <strong>Constitución de la República Bolivariana de Venezuela</strong>
+                    (artículos 28 y 60), la <strong>Ley de Infogobierno</strong> y los
+                    principios de tratamiento de datos establecidos por la Sala Constitucional
+                    del Tribunal Supremo de Justicia.
+                </p>
+
+                <h2>2. Responsable del Tratamiento</h2>
+                <p>
+                    El responsable del tratamiento de sus datos personales es
+                    <strong>Mi Marketplace</strong>, con domicilio en Venezuela.
+                </p>
+                <p>
+                    <strong>Correo electrónico de contacto:</strong>
+                    <a href="mailto:Intartmp@gmail.com">Intartmp@gmail.com</a>
+                </p>
+
+                <h2>3. Datos que Recopilamos</h2>
+                <p>Recopilamos las siguientes categorías de datos personales:</p>
+                <ul>
+                    <li><strong>Datos de registro:</strong> nombre de usuario, correo electrónico y número de teléfono.</li>
+                    <li><strong>Datos de perfil:</strong> nombre completo, dirección de entrega (si aplica), y otra información que usted decida proporcionar.</li>
+                    <li><strong>Datos de transacción:</strong> productos comprados, montos, método de pago (referencia bancaria, comprobante), método de envío y dirección de entrega.</li>
+                    <li><strong>Datos técnicos:</strong> dirección IP, tipo de navegador, dispositivo utilizado y datos de navegación.</li>
+                </ul>
+                <p>
+                    Los datos marcados como obligatorios en el formulario de registro son
+                    necesarios para prestar el servicio. Si no los proporciona, no podrá
+                    registrarse ni realizar compras.
+                </p>
+
+                <h2>4. Finalidad del Tratamiento</h2>
+                <p>Utilizamos sus datos personales para las siguientes finalidades:</p>
+                <ul>
+                    <li><strong>Gestionar su cuenta:</strong> crear y administrar su usuario en la plataforma.</li>
+                    <li><strong>Procesar pedidos:</strong> gestionar compras, pagos, envíos y entregas.</li>
+                    <li><strong>Comunicaciones:</strong> enviarle notificaciones sobre el estado de sus pedidos, confirmaciones de pago y avisos importantes.</li>
+                    <li><strong>Verificación de identidad:</strong> confirmar que su correo electrónico es real y válido.</li>
+                    <li><strong>Mejorar el servicio:</strong> analizar el uso de la plataforma para optimizar la experiencia.</li>
+                    <li><strong>Cumplimiento legal:</strong> cumplir con obligaciones legales aplicables.</li>
+                </ul>
+                <p><strong>No vendemos ni comercializamos sus datos personales a terceros.</strong></p>
+
+                <h2>5. Base Legal del Tratamiento</h2>
+                <p>
+                    El tratamiento de sus datos se basa en:
+                </p>
+                <ul>
+                    <li>Su <strong>consentimiento previo</strong>, otorgado al registrarse y aceptar esta política.</li>
+                    <li>La <strong>ejecución del contrato</strong> de compraventa, para procesar sus pedidos.</li>
+                    <li>El <strong>cumplimiento de obligaciones legales</strong> aplicables en Venezuela.</li>
+                </ul>
+
+                <h2>6. Conservación de Datos</h2>
+                <p>
+                    Conservamos sus datos personales mientras su cuenta esté activa o
+                    mientras sea necesario para cumplir con las finalidades descritas. Los
+                    registros de transacciones se conservan por el tiempo necesario para
+                    cumplir con obligaciones legales y contables.
+                </p>
+                <p>
+                    Cuando ya no sean necesarios, los datos serán eliminados o anonimizados
+                    de forma segura.
+                </p>
+
+                <h2>7. Compartir Datos con Terceros</h2>
+                <p>Compartimos sus datos únicamente con:</p>
+                <ul>
+                    <li><strong>Los comercios:</strong> para que puedan procesar y entregar sus pedidos (nombre, dirección de entrega, teléfono de contacto).</li>
+                    <li><strong>Proveedores de servicios técnicos:</strong> hosting (Render), almacenamiento de imágenes (Cloudinary) y servicios de correo electrónico.</li>
+                    <li><strong>Autoridades competentes:</strong> cuando sea requerido por ley o por orden judicial.</li>
+                </ul>
+                <p>
+                    Todos nuestros proveedores están obligados contractualmente a proteger
+                    sus datos y a utilizarlos únicamente para los fines autorizados.
+                </p>
+
+                <h2>8. Sus Derechos (Habeas Data)</h2>
+                <p>
+                    De conformidad con el artículo 28 de la Constitución de la República
+                    Bolivariana de Venezuela, usted tiene derecho a:
+                </p>
+                <ul>
+                    <li><strong>Acceder</strong> a los datos personales que tenemos sobre usted.</li>
+                    <li><strong>Rectificar</strong> datos inexactos, incompletos o desactualizados.</li>
+                    <li><strong>Cancelar</strong> sus datos cuando ya no sean necesarios o cuando retire su consentimiento.</li>
+                    <li><strong>Oponerse</strong> al tratamiento de sus datos para fines específicos.</li>
+                    <li><strong>Revocar</strong> su consentimiento en cualquier momento.</li>
+                </ul>
+                <p>
+                    Para ejercer estos derechos, puede contactarnos a través de:
+                    <a href="mailto:Intartmp@gmail.com">Intartmp@gmail.com</a>.
+                    Responderemos a su solicitud en un plazo máximo de 15 días hábiles.
+                </p>
+                <p>
+                    Asimismo, puede ejercer el <strong>Habeas Data</strong> ante los
+                    tribunales competentes de la República Bolivariana de Venezuela, conforme
+                    a lo establecido en la Constitución y la jurisprudencia del Tribunal
+                    Supremo de Justicia.
+                </p>
+
+                <h2>9. Seguridad de los Datos</h2>
+                <p>
+                    Aplicamos medidas técnicas y organizativas razonables para proteger sus
+                    datos personales, incluyendo:
+                </p>
+                <ul>
+                    <li>Cifrado de contraseñas mediante algoritmos seguros (Argon2).</li>
+                    <li>Comunicaciones cifradas mediante HTTPS/SSL.</li>
+                    <li>Acceso restringido a los datos personales.</li>
+                    <li>Auditoría de accesos y acciones sobre los datos.</li>
+                </ul>
+                <p>
+                    Sin embargo, ningún sistema en Internet es completamente invulnerable.
+                    Si detectamos una brecha de seguridad que afecte sus datos, le
+                    notificaremos conforme a la ley.
+                </p>
+
+                <h2>10. Cookies y Tecnologías Similares</h2>
+                <p>
+                    Utilizamos cookies para:
+                </p>
+                <ul>
+                    <li>Mantener su sesión activa.</li>
+                    <li>Recordar sus preferencias.</li>
+                    <li>Analizar el uso de la plataforma para mejorar el servicio.</li>
+                </ul>
+                <p>
+                    Puede configurar su navegador para rechazar cookies, aunque algunas
+                    funciones de la plataforma podrían verse afectadas. Para más detalles,
+                    consulte nuestra <a href="{% url 'legal:cookies' %}">Política de Cookies</a>.
+                </p>
+
+                <h2>11. Enlaces a Sitios de Terceros</h2>
+                <p>
+                    Nuestra plataforma puede contener enlaces a sitios web de terceros.
+                    No somos responsables de las prácticas de privacidad de dichos sitios.
+                    Le recomendamos revisar sus políticas antes de proporcionar datos.
+                </p>
+
+                <h2>12. Menores de Edad</h2>
+                <p>
+                    Nuestra plataforma no está dirigida a menores de 18 años. No
+                    recopilamos intencionalmente datos de menores. Si usted es padre o tutor
+                    y descubre que su hijo nos ha proporcionado datos, contáctenos para
+                    eliminarlos.
+                </p>
+
+                <h2>13. Cambios en esta Política</h2>
+                <p>
+                    Podemos actualizar esta Política de Privacidad en cualquier momento.
+                    Le notificaremos sobre cambios significativos a través de la plataforma
+                    o por correo electrónico. El uso continuado de la plataforma después de
+                    dichos cambios constituye su aceptación.
+                </p>
+
+                <h2>14. Legislación Aplicable</h2>
+                <p>
+                    Esta Política de Privacidad se rige por las leyes de la República
+                    Bolivariana de Venezuela, incluyendo la Constitución, la Ley de
+                    Infogobierno y la Ley Especial contra los Delitos Informáticos.
+                </p>
+                <p>
+                    Cualquier controversia relacionada con esta política será resuelta por
+                    los tribunales competentes de la República Bolivariana de Venezuela.
+                </p>
+
+                <h2>15. Contacto</h2>
+                <p>
+                    Si tiene preguntas, comentarios o desea ejercer sus derechos, puede
+                    contactarnos a:
+                </p>
+                <p>
+                    <strong>Correo electrónico:</strong>
+                    <a href="mailto:Intartmp@gmail.com">Intartmp@gmail.com</a>
+                </p>
+            </div>
+        </div>
+    </main>
+</body>
+</html>

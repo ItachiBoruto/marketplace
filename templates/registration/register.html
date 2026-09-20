@@ -125,6 +125,21 @@
             {% csrf_token %}
             {{ form.as_p }}
             <button type="submit">Registrarse</button>
+
+        <div class="terms-checkbox" style="margin: 14px 0; padding: 12px; background: #f8f9fa; border-radius: 8px; font-size: 0.85rem; line-height: 1.5;">
+            <label style="display: flex; align-items: flex-start; gap: 8px; cursor: pointer;">
+                {{ form.terms_accepted }}
+                <span>
+                    Acepto los <a href="/legal/terminos/" target="_blank">Términos y Condiciones</a>
+                    y la <a href="/legal/privacidad/" target="_blank">Política de Privacidad</a>
+                </span>
+            </label>
+            {% if form.terms_accepted.errors %}
+                <div style="color: #c0392b; margin-top: 6px; font-size: 0.82rem;">
+                    {{ form.terms_accepted.errors.0 }}
+                </div>
+            {% endif %}
+        </div>
         </form>
 
         <div class="login-link">

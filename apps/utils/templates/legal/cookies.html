@@ -1,0 +1,118 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ page_title }} - Mi Marketplace</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}?v=10">
+    <style>
+        .legal-page { max-width: 800px; margin: 30px auto; padding: 24px; background: white; border-radius: 12px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); }
+        .legal-page h1 { font-size: 1.6rem; color: #1a1a2e; margin: 0 0 8px; }
+        .legal-page .last-updated { font-size: 0.85rem; color: #7f8c8d; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid #eee; }
+        .legal-page h2 { font-size: 1.15rem; color: #1a1a2e; margin: 28px 0 10px; padding-bottom: 6px; border-bottom: 2px solid #e94560; }
+        .legal-page p { font-size: 0.92rem; color: #444; line-height: 1.7; margin: 8px 0; }
+        .legal-page ul { font-size: 0.92rem; color: #444; line-height: 1.7; padding-left: 22px; margin: 8px 0; }
+        .legal-page li { margin-bottom: 4px; }
+        .legal-page a { color: #e94560; text-decoration: none; }
+        .back-link { display: inline-block; margin-bottom: 16px; color: #6c757d; text-decoration: none; font-size: 0.9rem; }
+        .cookie-table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 0.85rem; }
+        .cookie-table th { background: #f8f9fa; padding: 8px; text-align: left; border-bottom: 2px solid #e9ecef; color: #1a1a2e; }
+        .cookie-table td { padding: 8px; border-bottom: 1px solid #f5f5f5; color: #555; }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>🛒 Mi Marketplace</h1>
+            <nav>
+                <a href="/">🏠 Inicio</a>
+                <a href="/stores/">📦 Comercios</a>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <div class="container">
+            <div class="legal-page">
+                <a href="/" class="back-link">← Volver al inicio</a>
+                <h1>{{ page_title }}</h1>
+                <p class="last-updated">Última actualización: {{ last_updated }}</p>
+
+                <h2>1. ¿Qué son las Cookies?</h2>
+                <p>
+                    Las cookies son pequeños archivos de texto que se almacenan en su
+                    dispositivo cuando visita un sitio web. Nos permiten recordar sus
+                    preferencias, mantener su sesión activa y mejorar su experiencia.
+                </p>
+
+                <h2>2. Cookies que Utilizamos</h2>
+                <table class="cookie-table">
+                    <thead>
+                        <tr>
+                            <th>Nombre</th>
+                            <th>Finalidad</th>
+                            <th>Duración</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>sessionid</code></td>
+                            <td>Mantener su sesión iniciada</td>
+                            <td>Sesión / 2 semanas</td>
+                        </tr>
+                        <tr>
+                            <td><code>csrftoken</code></td>
+                            <td>Protección contra ataques CSRF</td>
+                            <td>1 año</td>
+                        </tr>
+                        <tr>
+                            <td><code>ve_banner_closed</code></td>
+                            <td>Recordar si ocultó el banner de verificación</td>
+                            <td>Sesión</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h2>3. Tipos de Cookies</h2>
+                <ul>
+                    <li><strong>Cookies técnicas (esenciales):</strong> necesarias para el funcionamiento básico de la plataforma. No pueden desactivarse.</li>
+                    <li><strong>Cookies de preferencia:</strong> recuerdan sus preferencias (ej: idioma).</li>
+                </ul>
+                <p>
+                    <strong>No utilizamos cookies de publicidad ni de seguimiento de terceros.</strong>
+                </p>
+
+                <h2>4. Cómo Gestionar las Cookies</h2>
+                <p>
+                    Puede configurar su navegador para rechazar o eliminar cookies. A
+                    continuación, enlaces útiles:
+                </p>
+                <ul>
+                    <li>Chrome: Configuración → Privacidad y seguridad → Cookies</li>
+                    <li>Firefox: Preferencias → Privacidad y seguridad</li>
+                    <li>Safari: Preferencias → Privacidad</li>
+                    <li>Edge: Configuración → Cookies y permisos del sitio</li>
+                </ul>
+                <p>
+                    <strong>Atención:</strong> si bloquea las cookies esenciales, algunas
+                    funciones de la plataforma (como mantener su sesión activa) podrían no
+                    funcionar correctamente.
+                </p>
+
+                <h2>5. Cambios en esta Política</h2>
+                <p>
+                    Podemos actualizar esta Política de Cookies en cualquier momento. La
+                    versión vigente estará siempre publicada en esta página.
+                </p>
+
+                <h2>6. Contacto</h2>
+                <p>
+                    Si tiene preguntas sobre el uso de cookies:
+                    <a href="mailto:Intartmp@gmail.com">Intartmp@gmail.com</a>
+                </p>
+            </div>
+        </div>
+    </main>
+</body>
+</html>

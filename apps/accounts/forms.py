@@ -25,6 +25,15 @@ class CustomUserCreationForm(UserCreationForm):
         widget=forms.TextInput(attrs={"class": "form-control"})
     )
 
+    terms_accepted = forms.BooleanField(
+        required=True,
+        label="Acepto los Términos y la Política de Privacidad",
+        error_messages={
+            "required": "Debes aceptar los Términos y la Política de Privacidad para registrarte."
+        },
+        widget=forms.CheckboxInput(attrs={"class": "form-check-input"})
+    )
+
     class Meta:
         model = User
         fields = ("username", "email", "phone", "password1", "password2")
@@ -49,12 +58,19 @@ class CustomUserCreationForm(UserCreationForm):
         return email
 
     def save(self, commit=True):
+        from django.utils import timezone
+
         user = super().save(commit=False)
         user.email = self.cleaned_data["email"].lower()
         if commit:
             user.save()
             UserProfile.objects.update_or_create(
                 user=user,
-                defaults={"phone": self.cleaned_data["phone"]}
+                defaults={
+                    "phone": self.cleaned_data["phone"],
+                    "terms_accepted": True,
+                    "terms_accepted_at": timezone.now(),
+                    "terms_version": "v1.0",
+                }
             )
         return user

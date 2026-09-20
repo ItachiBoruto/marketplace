@@ -21,5 +21,6 @@ urlpatterns = [
     path('cart/', include('apps.cart.urls')),
     path('orders/', include('apps.orders.urls')),
     path('notifications/', include('apps.notifications.urls')),   # ← NUEVO
+    path('legal/', include('apps.utils.urls_legal')),
     path('', include('apps.products.urls')),
 ]

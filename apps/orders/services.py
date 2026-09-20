@@ -56,7 +56,7 @@ def create_order_from_cart(user, payment_data, cart, store=None):
     # Bloqueo de filas: nadie más puede leer/escribir hasta que termines
     locked_products = {
         p.id: p
-        for p in Product.objects.select_for_update().filter(id__in=product_ids)
+        for p in Product.objects.select_for_update(of=("self",)).filter(id__in=product_ids)
     }
 
     # Validar stock con las filas bloqueadas
@@ -148,7 +148,7 @@ def release_order_stock(order, reason='Liberación manual'):
     for item in order.items.select_related('product', 'store'):
         if item.product_id is None:
             continue
-        product = Product.objects.select_for_update().get(pk=item.product_id)
+        product = Product.objects.select_for_update(of=("self",)).get(pk=item.product_id)
         product.stock += item.quantity
         product.save(update_fields=['stock'])
 
@@ -171,9 +171,11 @@ def reject_order_item(item, reason='Rechazado por el vendedor'):
     """
     Rechaza un item específico: devuelve su stock.
     """
-    item = OrderItem.objects.select_for_update().select_related(
-        'product', 'store'
-    ).get(pk=item.pk)
+    # Solo bloquear la fila de OrderItem, no las tablas relacionadas
+    # (evita el error "FOR UPDATE cannot be applied to the nullable side of an outer join")
+    item = OrderItem.objects.select_for_update(
+        of=("self",)
+    ).select_related('product', 'store').get(pk=item.pk)
 
     if item.status == 'cancelled':
         return False

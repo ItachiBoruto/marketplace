@@ -32,6 +32,20 @@ class UserProfile(models.Model):
         verbose_name="Fecha de reenvíos"
     )
 
+    # ===== Aceptacion de terminos y privacidad =====
+    terms_accepted = models.BooleanField(
+        default=False,
+        verbose_name="Acepto Términos y Privacidad"
+    )
+    terms_accepted_at = models.DateTimeField(
+        null=True, blank=True,
+        verbose_name="Aceptado el"
+    )
+    terms_version = models.CharField(
+        max_length=20, blank=True,
+        verbose_name="Versión de términos"
+    )
+
     class Meta:
         db_table = "stores_userprofile"
         verbose_name = "Perfil de usuario"

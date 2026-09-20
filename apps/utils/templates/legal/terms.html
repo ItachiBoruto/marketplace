@@ -1,0 +1,170 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ page_title }} - Mi Marketplace</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}?v=10">
+    <style>
+        .legal-page { max-width: 800px; margin: 30px auto; padding: 24px; background: white; border-radius: 12px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); }
+        .legal-page h1 { font-size: 1.6rem; color: #1a1a2e; margin: 0 0 8px; }
+        .legal-page .last-updated { font-size: 0.85rem; color: #7f8c8d; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid #eee; }
+        .legal-page h2 { font-size: 1.15rem; color: #1a1a2e; margin: 28px 0 10px; padding-bottom: 6px; border-bottom: 2px solid #e94560; }
+        .legal-page p { font-size: 0.92rem; color: #444; line-height: 1.7; margin: 8px 0; }
+        .legal-page ul { font-size: 0.92rem; color: #444; line-height: 1.7; padding-left: 22px; margin: 8px 0; }
+        .legal-page li { margin-bottom: 4px; }
+        .legal-page a { color: #e94560; text-decoration: none; }
+        .back-link { display: inline-block; margin-bottom: 16px; color: #6c757d; text-decoration: none; font-size: 0.9rem; }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>🛒 Mi Marketplace</h1>
+            <nav>
+                <a href="/">🏠 Inicio</a>
+                <a href="/stores/">📦 Comercios</a>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <div class="container">
+            <div class="legal-page">
+                <a href="/" class="back-link">← Volver al inicio</a>
+                <h1>{{ page_title }}</h1>
+                <p class="last-updated">Última actualización: {{ last_updated }}</p>
+
+                <h2>1. Aceptación de los Términos</h2>
+                <p>
+                    Al registrarse y utilizar <strong>Mi Marketplace</strong>, usted acepta
+                    quedar vinculado por los presentes Términos y Condiciones. Si no está de
+                    acuerdo con alguna de las disposiciones, debe abstenerse de usar la
+                    plataforma.
+                </p>
+
+                <h2>2. Descripción del Servicio</h2>
+                <p>
+                    <strong>Mi Marketplace</strong> es una plataforma digital que actúa como
+                    intermediario entre comercios locales venezolanos y compradores. La
+                    plataforma facilita la exhibición de productos, la gestión de pedidos y
+                    el contacto entre las partes, pero <strong>no es propietaria de los
+                    productos</strong> ni participa directamente en la transacción comercial
+                    entre comprador y vendedor.
+                </p>
+
+                <h2>3. Requisitos de Uso</h2>
+                <p>Para usar la plataforma, usted debe:</p>
+                <ul>
+                    <li>Ser mayor de 18 años o tener capacidad legal para contratar.</li>
+                    <li>Proporcionar información veraz, exacta y actualizada al registrarse.</li>
+                    <li>Mantener la confidencialidad de su contraseña y cuenta.</li>
+                    <li>No utilizar la plataforma para actividades ilícitas o fraudulentas.</li>
+                </ul>
+
+                <h2>4. Cuentas de Usuario</h2>
+                <p>
+                    Usted es el único responsable de todas las actividades que ocurran bajo su
+                    cuenta. Si detecta un uso no autorizado, debe notificarlo de inmediato a
+                    <a href="mailto:Intartmp@gmail.com">Intartmp@gmail.com</a>.
+                </p>
+                <p>
+                    Nos reservamos el derecho de suspender o cancelar cuentas que violen estos
+                    términos, sin previo aviso.
+                </p>
+
+                <h2>5. Obligaciones del Comprador</h2>
+                <p>El comprador se compromete a:</p>
+                <ul>
+                    <li>Proporcionar información exacta para la entrega de productos.</li>
+                    <li>Realizar los pagos en los plazos y formas acordados.</li>
+                    <li>Reportar cualquier problema con el pedido en un plazo razonable.</li>
+                    <li>No realizar pedidos falsos o fraudulentos.</li>
+                </ul>
+
+                <h2>6. Obligaciones del Vendedor</h2>
+                <p>El vendedor se compromete a:</p>
+                <ul>
+                    <li>Publicar información veraz sobre los productos ofrecidos.</li>
+                    <li>Cumplir con los pedidos confirmados dentro de los plazos indicados.</li>
+                    <li>Mantener stock actualizado en la plataforma.</li>
+                    <li>Respetar las leyes venezolanas aplicables a su actividad comercial.</li>
+                </ul>
+
+                <h2>7. Proceso de Compra y Pago</h2>
+                <p>
+                    El proceso de compra se perfecciona cuando el cliente completa el
+                    formulario de pago y el comercio verifica la recepción del mismo. La
+                    plataforma <strong>no procesa pagos directamente</strong>; los pagos se
+                    realizan mediante transferencia bancaria o pago móvil directo al
+                    comercio.
+                </p>
+                <p>
+                    Los pedidos no pagados en el plazo indicado serán cancelados y el stock
+                    liberado automáticamente.
+                </p>
+
+                <h2>8. Envíos y Entregas</h2>
+                <p>
+                    Los envíos se realizan según lo acordado entre comprador y vendedor. Los
+                    plazos y costos de envío son responsabilidad del comercio. La plataforma
+                    no se hace responsable por retrasos o daños ocurridos durante el envío.
+                </p>
+
+                <h2>9. Devoluciones y Reembolsos</h2>
+                <p>
+                    Las políticas de devolución son definidas por cada comercio. En caso de
+                    disputas, la plataforma podrá mediar entre las partes pero no se
+                    responsabiliza por el resultado.
+                </p>
+
+                <h2>10. Propiedad Intelectual</h2>
+                <p>
+                    Todo el contenido de la plataforma (textos, gráficos, logos, código) está
+                    protegido por derechos de autor y propiedad intelectual. No está permitido
+                    reproducirlo sin autorización expresa.
+                </p>
+
+                <h2>11. Limitación de Responsabilidad</h2>
+                <p>
+                    La plataforma se proporciona "tal cual" y no garantiza disponibilidad
+                    ininterrumpida. No nos hacemos responsables por:
+                </p>
+                <ul>
+                    <li>Daños indirectos derivados del uso de la plataforma.</li>
+                    <li>Incumplimientos de comercios o compradores.</li>
+                    <li>Pérdida de datos por causas fuera de nuestro control.</li>
+                    <li>Problemas técnicos, interrupciones o errores del servicio.</li>
+                </ul>
+
+                <h2>12. Modificaciones</h2>
+                <p>
+                    Nos reservamos el derecho de modificar estos Términos en cualquier
+                    momento. Los cambios serán notificados en la plataforma. El uso continuado
+                    después de los cambios constituye su aceptación.
+                </p>
+
+                <h2>13. Terminación</h2>
+                <p>
+                    Podemos suspender o cancelar su acceso a la plataforma en cualquier
+                    momento, sin previo aviso, si viola estos términos.
+                </p>
+
+                <h2>14. Ley Aplicable y Jurisdicción</h2>
+                <p>
+                    Estos Términos se rigen por las leyes de la República Bolivariana de
+                    Venezuela. Cualquier controversia será resuelta por los tribunales
+                    competentes del país.
+                </p>
+
+                <h2>15. Contacto</h2>
+                <p>
+                    Para consultas sobre estos Términos:
+                    <a href="mailto:Intartmp@gmail.com">Intartmp@gmail.com</a>
+                </p>
+            </div>
+        </div>
+    </main>
+</body>
+</html>
