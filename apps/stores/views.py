@@ -19,7 +19,7 @@ def store_list(request):
 
 def store_detail(request, store_id):
     store = get_object_or_404(Store, id=store_id, is_active=True)
-    products = Product.objects.filter(store=store, is_available=True)
+    products = Product.objects.filter(store=store, is_available=True).select_related('store')
     return render(request, 'stores/detail.html', {
         'store': store,
         'products': products,

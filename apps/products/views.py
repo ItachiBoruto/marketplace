@@ -135,7 +135,9 @@ class StoreProductListAPI(APIView):
         if not store_id:
             return Response({"error": "Store ID required"}, status=400)
         
-        products = Product.objects.filter(store_id=store_id, is_available=True)
+        products = Product.objects.filter(
+            store_id=store_id, is_available=True
+        ).select_related('store')
         
         search = request.GET.get('search', '')
         if search:
