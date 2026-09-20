@@ -1,5 +1,6 @@
 from django.urls import path
 
+from apps.stores import views_payments as store_payment_views
 from . import views, views_panel
 
 app_name = 'orders'
@@ -20,4 +21,8 @@ urlpatterns = [
     path("panel/<int:order_id>/mark-delivered/", views_panel.superuser_mark_delivered, name="superuser_mark_delivered"),
     path("panel/<int:order_id>/revert-delivery/", views_panel.superuser_revert_delivery, name="superuser_revert_delivery"),
     path("panel/history/", views_panel.SalesHistoryView.as_view(), name="sales_history"),
+    # Solicitudes de cambio de datos bancarios (superuser)
+    path("panel/payment-requests/", store_payment_views.pending_payment_requests, name="payment_requests"),
+    path("panel/payment-requests/<int:request_id>/approve/", store_payment_views.approve_payment_request, name="payment_request_approve"),
+    path("panel/payment-requests/<int:request_id>/reject/", store_payment_views.reject_payment_request, name="payment_request_reject"),
 ]

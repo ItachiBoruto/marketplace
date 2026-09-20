@@ -1,0 +1,310 @@
+{% extends "stores/dashboard/base.html" %}
+
+{% block title %}Cambios de datos bancarios{% endblock %}
+
+{% block content %}
+<style>
+    .status-wrap { max-width: 800px; }
+    .pending-card {
+        background: #fef5e7;
+        border-left: 4px solid #f39c12;
+        border-radius: 10px;
+        padding: 20px 24px;
+        margin-bottom: 24px;
+    }
+    .pending-card h2 {
+        margin: 0 0 8px;
+        font-size: 1.05rem;
+        color: #856404;
+    }
+    .pending-card p {
+        margin: 0;
+        font-size: 0.9rem;
+        color: #856404;
+        line-height: 1.5;
+    }
+    .no-pending {
+        background: #eafaf1;
+        border-left: 4px solid #2ecc71;
+        border-radius: 10px;
+        padding: 20px 24px;
+        margin-bottom: 24px;
+    }
+    .no-pending h2 {
+        margin: 0 0 8px;
+        font-size: 1.05rem;
+        color: #155724;
+    }
+    .no-pending p {
+        margin: 0 0 14px;
+        font-size: 0.9rem;
+        color: #155724;
+    }
+    .btn-request {
+        display: inline-block;
+        padding: 10px 22px;
+        background: #3498db;
+        color: white;
+        text-decoration: none;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        font-weight: 600;
+    }
+    .btn-request:hover { background: #2980b9; }
+
+    .req-item {
+        background: white;
+        border-radius: 10px;
+        padding: 16px 20px;
+        margin-bottom: 12px;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+        border-left: 4px solid #ddd;
+    }
+    .req-item.approved { border-left-color: #2ecc71; }
+    .req-item.rejected { border-left-color: #e74c3c; }
+    .req-item.pending { border-left-color: #f39c12; }
+    .req-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 8px;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+    .req-id {
+        font-weight: 700;
+        color: #1a1a2e;
+        font-size: 0.95rem;
+    }
+    .req-date {
+        font-size: 0.82rem;
+        color: #7f8c8d;
+    }
+    .req-status {
+        padding: 3px 12px;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+    }
+    .req-status.pending { background: #fff3cd; color: #856404; }
+    .req-status.approved { background: #d4edda; color: #155724; }
+    .req-status.rejected { background: #f8d7da; color: #721c24; }
+    .req-reason {
+        font-size: 0.87rem;
+        color: #555;
+        margin-top: 6px;
+        line-height: 1.5;
+    }
+    .rejection-reason {
+        background: #fdedec;
+        border-radius: 6px;
+        padding: 10px 12px;
+        margin-top: 8px;
+        font-size: 0.85rem;
+        color: #721c24;
+    }
+
+    /* Tabla comparativa de cambios */
+    .change-compare {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.85rem;
+        margin: 12px 0;
+        background: #f8f9fa;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+    .change-compare th {
+        background: #e9ecef;
+        padding: 8px 12px;
+        text-align: left;
+        font-weight: 600;
+        color: #2c3e50;
+        font-size: 0.78rem;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+    }
+    .change-compare td {
+        padding: 8px 12px;
+        border-bottom: 1px solid #e9ecef;
+        color: #555;
+    }
+    .change-compare tr:last-child td { border-bottom: none; }
+    .change-compare .old {
+        color: #95a5a6;
+        text-decoration: line-through;
+    }
+    .change-compare .new {
+        color: #27ae60;
+        font-weight: 600;
+    }
+    .change-compare .arrow {
+        color: #3498db;
+        font-weight: 700;
+        padding: 0 6px;
+        text-decoration: none;
+    }
+    .pending-details {
+        background: white;
+        border-radius: 8px;
+        padding: 14px 16px;
+        margin-top: 14px;
+    }
+    .pending-details h3 {
+        margin: 0 0 10px;
+        font-size: 0.95rem;
+        color: #1a1a2e;
+    }
+</style>
+
+<div class="status-wrap">
+    <h1>💳 Cambios de datos bancarios</h1>
+
+    {% if pending %}
+        <div class="pending-card">
+            <h2>⏳ Tienes una solicitud pendiente</h2>
+            <p>
+                La solicitud <strong>#{{ pending.pk }}</strong> enviada el
+                {{ pending.created_at|date:"d/m/Y H:i" }} está esperando aprobación
+                del administrador. Te notificaremos cuando sea revisada.
+            </p>
+
+            <div class="pending-details">
+                <h3>📋 Cambios que solicitaste</h3>
+                <table class="change-compare">
+                    <thead>
+                        <tr>
+                            <th>Campo</th>
+                            <th>Actual</th>
+                            <th>Propuesto</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if pending.new_bank_name != pending.old_bank_name %}
+                            <tr>
+                                <td><strong>Banco</strong></td>
+                                <td class="old">{{ pending.old_bank_name|default:"—" }}</td>
+                                <td class="new">{{ pending.new_bank_name }}</td>
+                            </tr>
+                        {% endif %}
+                        {% if pending.new_account_number != pending.old_account_number %}
+                            <tr>
+                                <td><strong>Cuenta</strong></td>
+                                <td class="old">{{ pending.old_account_number|default:"—" }}</td>
+                                <td class="new">{{ pending.new_account_number }}</td>
+                            </tr>
+                        {% endif %}
+                        {% if pending.new_account_holder != pending.old_account_holder %}
+                            <tr>
+                                <td><strong>Titular</strong></td>
+                                <td class="old">{{ pending.old_account_holder|default:"—" }}</td>
+                                <td class="new">{{ pending.new_account_holder }}</td>
+                            </tr>
+                        {% endif %}
+                        {% if pending.new_document != pending.old_document %}
+                            <tr>
+                                <td><strong>Cédula/RIF</strong></td>
+                                <td class="old">{{ pending.old_document|default:"—" }}</td>
+                                <td class="new">{{ pending.new_document }}</td>
+                            </tr>
+                        {% endif %}
+                        {% if pending.new_payment_phone != pending.old_payment_phone %}
+                            <tr>
+                                <td><strong>Teléfono</strong></td>
+                                <td class="old">{{ pending.old_payment_phone|default:"—" }}</td>
+                                <td class="new">{{ pending.new_payment_phone }}</td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    {% else %}
+        <div class="no-pending">
+            <h2>✅ No tienes solicitudes pendientes</h2>
+            <p>
+                Si necesitas cambiar los datos bancarios de tu comercio, puedes
+                enviar una nueva solicitud.
+            </p>
+            <a href="{% url 'stores:payment_change_request' store.id %}" class="btn-request">
+                📝 Solicitar cambio
+            </a>
+        </div>
+    {% endif %}
+
+    {% if requests %}
+        <h2 style="margin: 24px 0 12px; font-size: 1.1rem; color: #1a1a2e;">Historial de solicitudes</h2>
+        {% for req in requests %}
+            <div class="req-item {{ req.status }}">
+                <div class="req-header">
+                    <div>
+                        <span class="req-id">Solicitud #{{ req.pk }}</span>
+                        <span class="req-date"> · {{ req.created_at|date:"d/m/Y H:i" }}</span>
+                    </div>
+                    <span class="req-status {{ req.status }}">{{ req.get_status_display }}</span>
+                </div>
+                <div class="req-reason">
+                    <strong>Motivo:</strong> {{ req.reason }}
+                </div>
+
+                <details style="margin-top:10px;">
+                    <summary style="cursor:pointer;color:#3498db;font-size:0.85rem;font-weight:600;">Ver cambios solicitados</summary>
+                    <table class="change-compare">
+                        <thead>
+                            <tr>
+                                <th>Campo</th>
+                                <th>Anterior</th>
+                                <th>Propuesto</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if req.new_bank_name != req.old_bank_name %}
+                                <tr>
+                                    <td><strong>Banco</strong></td>
+                                    <td class="old">{{ req.old_bank_name|default:"—" }}</td>
+                                    <td class="new">{{ req.new_bank_name }}</td>
+                                </tr>
+                            {% endif %}
+                            {% if req.new_account_number != req.old_account_number %}
+                                <tr>
+                                    <td><strong>Cuenta</strong></td>
+                                    <td class="old">{{ req.old_account_number|default:"—" }}</td>
+                                    <td class="new">{{ req.new_account_number }}</td>
+                                </tr>
+                            {% endif %}
+                            {% if req.new_account_holder != req.old_account_holder %}
+                                <tr>
+                                    <td><strong>Titular</strong></td>
+                                    <td class="old">{{ req.old_account_holder|default:"—" }}</td>
+                                    <td class="new">{{ req.new_account_holder }}</td>
+                                </tr>
+                            {% endif %}
+                            {% if req.new_document != req.old_document %}
+                                <tr>
+                                    <td><strong>Cédula/RIF</strong></td>
+                                    <td class="old">{{ req.old_document|default:"—" }}</td>
+                                    <td class="new">{{ req.new_document }}</td>
+                                </tr>
+                            {% endif %}
+                            {% if req.new_payment_phone != req.old_payment_phone %}
+                                <tr>
+                                    <td><strong>Teléfono</strong></td>
+                                    <td class="old">{{ req.old_payment_phone|default:"—" }}</td>
+                                    <td class="new">{{ req.new_payment_phone }}</td>
+                                </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </details>
+                {% if req.status == 'rejected' and req.rejection_reason %}
+                    <div class="rejection-reason">
+                        <strong>Motivo del rechazo:</strong> {{ req.rejection_reason }}
+                    </div>
+                {% endif %}
+            </div>
+        {% endfor %}
+    {% endif %}
+</div>
+{% endblock %}

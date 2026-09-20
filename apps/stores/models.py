@@ -96,3 +96,79 @@ class StoreUserPermission(models.Model):
     
     def __str__(self):
         return f"{self.user.username} - {self.store.name} ({self.get_role_display()})"
+
+
+class StorePaymentChangeRequest(models.Model):
+    """
+    Solicitud de cambio de datos bancarios de un comercio.
+    Requiere doble autorizacion: owner solicita + superuser aprueba.
+    """
+
+    STATUS_CHOICES = [
+        ('pending', 'Pendiente de aprobación'),
+        ('approved', 'Aprobada'),
+        ('rejected', 'Rechazada'),
+    ]
+
+    store = models.ForeignKey(
+        Store, on_delete=models.CASCADE,
+        related_name='payment_change_requests',
+        verbose_name='Comercio'
+    )
+    requested_by = models.ForeignKey(
+        User, on_delete=models.PROTECT,
+        related_name='payment_requests_made',
+        verbose_name='Solicitado por'
+    )
+
+    # Valores propuestos
+    new_bank_name = models.CharField(max_length=100, blank=True, verbose_name='Banco (nuevo)')
+    new_account_number = models.CharField(max_length=40, blank=True, verbose_name='Cuenta (nueva)')
+    new_account_holder = models.CharField(max_length=150, blank=True, verbose_name='Titular (nuevo)')
+    new_document = models.CharField(max_length=20, blank=True, verbose_name='Cédula/RIF (nuevo)')
+    new_payment_phone = models.CharField(max_length=20, blank=True, verbose_name='Teléfono (nuevo)')
+
+    # Snapshot del estado actual (para comparar)
+    old_bank_name = models.CharField(max_length=100, blank=True)
+    old_account_number = models.CharField(max_length=40, blank=True)
+    old_account_holder = models.CharField(max_length=150, blank=True)
+    old_document = models.CharField(max_length=20, blank=True)
+    old_payment_phone = models.CharField(max_length=20, blank=True)
+
+    reason = models.TextField(blank=True, verbose_name='Motivo del cambio')
+
+    status = models.CharField(
+        max_length=20, choices=STATUS_CHOICES, default='pending',
+        verbose_name='Estado'
+    )
+    reviewed_by = models.ForeignKey(
+        User, on_delete=models.SET_NULL, null=True, blank=True,
+        related_name='payment_requests_reviewed',
+        verbose_name='Revisado por'
+    )
+    reviewed_at = models.DateTimeField(null=True, blank=True)
+    rejection_reason = models.TextField(blank=True, verbose_name='Motivo del rechazo')
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = 'Solicitud de cambio de datos bancarios'
+        verbose_name_plural = 'Solicitudes de cambio de datos bancarios'
+        indexes = [
+            models.Index(fields=['store', 'status']),
+            models.Index(fields=['status', '-created_at']),
+        ]
+
+    def __str__(self):
+        return f"Solicitud #{self.pk} - {self.store.name} ({self.get_status_display()})"
+
+    def has_changes(self):
+        """True si al menos un campo propuesto difiere del actual."""
+        return any([
+            self.new_bank_name != self.old_bank_name,
+            self.new_account_number != self.old_account_number,
+            self.new_account_holder != self.old_account_holder,
+            self.new_document != self.old_document,
+            self.new_payment_phone != self.old_payment_phone,
+        ])

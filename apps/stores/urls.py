@@ -7,7 +7,7 @@ from apps.products.views_admin import (
     ProductUpdateView,
 )
 
-from . import views, views_orders, views_users
+from . import views, views_orders, views_payments, views_users
 
 app_name = "stores"
 
@@ -38,4 +38,7 @@ urlpatterns = [
     path("dashboard/<int:store_id>/users/<int:permission_id>/change-role/", views_users.change_user_role, name="users_change_role"),
     path("dashboard/<int:store_id>/users/<int:permission_id>/remove/", views_users.remove_store_user, name="users_remove"),
     path("dashboard/<int:store_id>/orders/<int:order_id>/items/<int:item_id>/deliver/", views_orders.mark_item_delivered, name="order_item_deliver"),
+    # Solicitudes de cambio de datos bancarios (owner)
+    path("dashboard/<int:store_id>/payment-change/", views_payments.request_payment_change, name="payment_change_request"),
+    path("dashboard/<int:store_id>/payment-change/status/", views_payments.payment_change_status, name="payment_change_status"),
 ]

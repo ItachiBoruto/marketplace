@@ -2,11 +2,15 @@ from django import forms
 
 from apps.utils.validators import validate_image
 
-from .models import Store
+from .models import Store, StorePaymentChangeRequest
 
 
 class StoreProfileForm(forms.ModelForm):
-    """Formulario para editar el perfil del comercio."""
+    """
+    Formulario para editar el perfil del comercio.
+    Los datos bancarios criticos NO se editan aqui (requieren aprobacion del superuser).
+    Solo se pueden editar los datos no criticos: payment_email y payment_notes.
+    """
 
     class Meta:
         model = Store
@@ -14,8 +18,7 @@ class StoreProfileForm(forms.ModelForm):
             "name", "logo", "description", "is_active",
             "legal_name", "rif", "address", "phone", "email",
             "offers_delivery", "delivery_fee",
-            "bank_name", "account_number", "account_holder",
-            "document", "payment_phone", "payment_email", "payment_notes",
+            "payment_email", "payment_notes",
         ]
         widgets = {
             "name": forms.TextInput(attrs={"class": "form-control"}),
@@ -28,11 +31,6 @@ class StoreProfileForm(forms.ModelForm):
             "email": forms.EmailInput(attrs={"class": "form-control"}),
             "offers_delivery": forms.CheckboxInput(attrs={"class": "form-check-input"}),
             "delivery_fee": forms.NumberInput(attrs={"class": "form-control", "step": "0.01", "min": "0"}),
-            "bank_name": forms.TextInput(attrs={"class": "form-control", "placeholder": "Ej: Banesco"}),
-            "account_number": forms.TextInput(attrs={"class": "form-control", "placeholder": "Ej: 0134-1234-56-78901234"}),
-            "account_holder": forms.TextInput(attrs={"class": "form-control", "placeholder": "Nombre completo"}),
-            "document": forms.TextInput(attrs={"class": "form-control", "placeholder": "V-12345678 o J-12345678-9"}),
-            "payment_phone": forms.TextInput(attrs={"class": "form-control", "placeholder": "0414-1234567"}),
             "payment_email": forms.EmailInput(attrs={"class": "form-control"}),
             "payment_notes": forms.Textarea(attrs={"rows": 2, "class": "form-control"}),
         }
@@ -48,13 +46,8 @@ class StoreProfileForm(forms.ModelForm):
             "email": "Correo electrónico (opcional)",
             "offers_delivery": "Ofrecer delivery a domicilio",
             "delivery_fee": "Tarifa de delivery (USD)",
-            "bank_name": "Banco",
-            "account_number": "Número de cuenta",
-            "account_holder": "Titular de la cuenta",
-            "document": "Cédula o RIF",
-            "payment_phone": "Teléfono para pago móvil",
             "payment_email": "Email para notificaciones de pago",
-            "payment_notes": "Notas adicionales",
+            "payment_notes": "Notas adicionales de pago",
         }
 
     def clean_logo(self):
@@ -72,6 +65,74 @@ class StoreProfileForm(forms.ModelForm):
             self.add_error(
                 'delivery_fee',
                 'Debes indicar una tarifa mayor a 0 si ofreces delivery.'
+            )
+
+        return cleaned
+
+
+class PaymentChangeRequestForm(forms.ModelForm):
+    """Formulario para que el owner solicite el cambio de datos bancarios."""
+
+    class Meta:
+        model = StorePaymentChangeRequest
+        fields = [
+            "new_bank_name", "new_account_number", "new_account_holder",
+            "new_document", "new_payment_phone", "reason",
+        ]
+        widgets = {
+            "new_bank_name": forms.TextInput(attrs={
+                "class": "form-control",
+                "placeholder": "Ej: Banesco",
+                "required": True,
+            }),
+            "new_account_number": forms.TextInput(attrs={
+                "class": "form-control",
+                "placeholder": "Ej: 0134-1234-56-78901234",
+                "required": True,
+            }),
+            "new_account_holder": forms.TextInput(attrs={
+                "class": "form-control",
+                "placeholder": "Nombre completo del titular",
+                "required": True,
+            }),
+            "new_document": forms.TextInput(attrs={
+                "class": "form-control",
+                "placeholder": "V-12345678 o J-12345678-9",
+                "required": True,
+            }),
+            "new_payment_phone": forms.TextInput(attrs={
+                "class": "form-control",
+                "placeholder": "0414-1234567 (opcional)",
+            }),
+            "reason": forms.Textarea(attrs={
+                "class": "form-control",
+                "rows": 3,
+                "placeholder": "Explica brevemente por qué cambias estos datos (ej: cambio de banco, actualización de cuenta, etc.)",
+                "required": True,
+            }),
+        }
+        labels = {
+            "new_bank_name": "Banco",
+            "new_account_number": "Número de cuenta",
+            "new_account_holder": "Titular de la cuenta",
+            "new_document": "Cédula o RIF",
+            "new_payment_phone": "Teléfono para pago móvil (opcional)",
+            "reason": "Motivo del cambio",
+        }
+
+    def clean(self):
+        cleaned = super().clean()
+
+        # Verificar que al menos un campo cambió
+        change_fields = [
+            'new_bank_name', 'new_account_number', 'new_account_holder',
+            'new_document', 'new_payment_phone',
+        ]
+        has_any = any(cleaned.get(f) for f in change_fields)
+
+        if not has_any:
+            raise forms.ValidationError(
+                'Debes indicar al menos un cambio en los datos bancarios.'
             )
 
         return cleaned

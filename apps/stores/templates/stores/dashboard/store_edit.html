@@ -260,45 +260,48 @@
             </div>
         </div>
 
-        <!-- ===== DATOS DE PAGO ===== -->
-        <div class="form-section payment-section">
-            <h3>💳 Datos de pago</h3>
+        <!-- ===== DATOS DE PAGO (PROTEGIDOS) ===== -->
+        <div class="form-section payment-section" style="background:#fef5e7;border:2px solid #fdebd0;">
+            <h3 style="color:#856404;">🔒 Datos bancarios protegidos</h3>
 
-            <p style="font-size:0.85rem; color:#555; margin:0 0 14px;">
-                Estos datos se mostrarán a los clientes al momento de pagar.
-                Si los dejas vacíos, se usarán los datos globales del marketplace.
+            <p style="font-size:0.85rem; color:#856404; margin:0 0 16px; line-height:1.5;">
+                Por seguridad, los datos bancarios (banco, cuenta, titular, cédula, teléfono)
+                <strong>no se pueden editar directamente</strong>. Necesitas solicitar la
+                aprobación del administrador del marketplace para cambiarlos.
             </p>
 
-            <div class="form-row">
-                <label for="{{ form.bank_name.id_for_label }}">{{ form.bank_name.label }}</label>
-                {{ form.bank_name }}
-                {% if form.bank_name.errors %}<div class="errors">{{ form.bank_name.errors }}</div>{% endif %}
+            <div style="background:white;padding:14px 16px;border-radius:8px;margin-bottom:14px;">
+                <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #f5f5f5;font-size:0.9rem;">
+                    <span style="color:#7f8c8d;">Banco:</span>
+                    <span style="font-weight:600;color:#2c3e50;">{{ store.bank_name|default:"No configurado" }}</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #f5f5f5;font-size:0.9rem;">
+                    <span style="color:#7f8c8d;">Cuenta:</span>
+                    <span style="font-weight:600;color:#2c3e50;">{{ store.account_number|default:"No configurado" }}</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #f5f5f5;font-size:0.9rem;">
+                    <span style="color:#7f8c8d;">Titular:</span>
+                    <span style="font-weight:600;color:#2c3e50;">{{ store.account_holder|default:"No configurado" }}</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #f5f5f5;font-size:0.9rem;">
+                    <span style="color:#7f8c8d;">Cédula/RIF:</span>
+                    <span style="font-weight:600;color:#2c3e50;">{{ store.document|default:"No configurado" }}</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;padding:6px 0;font-size:0.9rem;">
+                    <span style="color:#7f8c8d;">Teléfono:</span>
+                    <span style="font-weight:600;color:#2c3e50;">{{ store.payment_phone|default:"No configurado" }}</span>
+                </div>
             </div>
 
-            <div class="form-row">
-                <label for="{{ form.account_number.id_for_label }}">{{ form.account_number.label }}</label>
-                {{ form.account_number }}
-                {% if form.account_number.errors %}<div class="errors">{{ form.account_number.errors }}</div>{% endif %}
-            </div>
+            <a href="{% url 'stores:payment_change_request' store.id %}"
+               style="display:inline-block;padding:10px 20px;background:#3498db;color:white;text-decoration:none;border-radius:8px;font-size:0.88rem;font-weight:600;">
+                📝 Solicitar cambio de datos bancarios
+            </a>
+        </div>
 
-            <div class="form-row">
-                <label for="{{ form.account_holder.id_for_label }}">{{ form.account_holder.label }}</label>
-                {{ form.account_holder }}
-                {% if form.account_holder.errors %}<div class="errors">{{ form.account_holder.errors }}</div>{% endif %}
-            </div>
-
-            <div class="form-row">
-                <label for="{{ form.document.id_for_label }}">{{ form.document.label }}</label>
-                {{ form.document }}
-                {% if form.document.errors %}<div class="errors">{{ form.document.errors }}</div>{% endif %}
-            </div>
-
-            <div class="form-row">
-                <label for="{{ form.payment_phone.id_for_label }}">{{ form.payment_phone.label }}</label>
-                {{ form.payment_phone }}
-                <div class="help-text">Opcional. Se mostrará si aceptas pago móvil.</div>
-                {% if form.payment_phone.errors %}<div class="errors">{{ form.payment_phone.errors }}</div>{% endif %}
-            </div>
+        <!-- ===== DATOS DE PAGO NO CRITICOS ===== -->
+        <div class="form-section payment-section">
+            <h3>📧 Contacto de pagos</h3>
 
             <div class="form-row">
                 <label for="{{ form.payment_email.id_for_label }}">{{ form.payment_email.label }}</label>

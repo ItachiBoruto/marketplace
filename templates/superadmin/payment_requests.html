@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solicitudes de pago - Admin</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/style.css' %}?v=10">
+    <style>
+        .panel-wrap { max-width: 900px; margin: 24px auto; padding: 0 16px; }
+        .panel-header {
+            display: flex; justify-content: space-between; align-items: center;
+            flex-wrap: wrap; gap: 12px; margin-bottom: 20px;
+        }
+        .panel-header h1 { font-size: 1.5rem; color: #1a1a2e; margin: 0; }
+
+        .pending-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px 24px;
+            margin-bottom: 16px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            border-left: 4px solid #f39c12;
+        }
+        .pending-card h3 {
+            margin: 0 0 4px;
+            font-size: 1.05rem;
+            color: #1a1a2e;
+        }
+        .pending-card .meta {
+            font-size: 0.83rem;
+            color: #7f8c8d;
+            margin-bottom: 14px;
+        }
+        .change-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.88rem;
+            margin: 12px 0;
+            background: #f8f9fa;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .change-table th {
+            background: #e9ecef;
+            padding: 8px 12px;
+            text-align: left;
+            font-weight: 600;
+            color: #2c3e50;
+            font-size: 0.82rem;
+        }
+        .change-table td {
+            padding: 8px 12px;
+            border-bottom: 1px solid #e9ecef;
+            color: #555;
+        }
+        .change-table tr:last-child td { border-bottom: none; }
+        .change-table .old {
+            color: #95a5a6;
+            text-decoration: line-through;
+        }
+        .change-table .new {
+            color: #27ae60;
+            font-weight: 600;
+        }
+        .reason-block {
+            background: #f0f7ff;
+            border-radius: 8px;
+            padding: 10px 14px;
+            font-size: 0.85rem;
+            color: #21618c;
+            margin: 12px 0;
+            line-height: 1.5;
+        }
+
+        .actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 14px;
+            flex-wrap: wrap;
+        }
+        .btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 600;
+            font-family: inherit;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s;
+        }
+        .btn-approve { background: #2ecc71; color: white; }
+        .btn-approve:hover { background: #27ae60; }
+        .btn-reject { background: #e74c3c; color: white; }
+        .btn-reject:hover { background: #c0392b; }
+
+        .empty-state {
+            text-align: center;
+            padding: 50px 20px;
+            background: white;
+            border-radius: 12px;
+            color: #7f8c8d;
+        }
+        .empty-state .icon { font-size: 3rem; display: block; margin-bottom: 12px; }
+
+        .history-section {
+            margin-top: 40px;
+            padding-top: 24px;
+            border-top: 2px solid #eee;
+        }
+        .history-section h2 {
+            font-size: 1.1rem;
+            color: #1a1a2e;
+            margin-bottom: 16px;
+        }
+        .history-item {
+            background: white;
+            border-radius: 10px;
+            padding: 14px 18px;
+            margin-bottom: 10px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+            font-size: 0.88rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .history-item .id { font-weight: 700; color: #2c3e50; }
+        .history-item .meta { color: #95a5a6; font-size: 0.8rem; }
+        .badge-approved { background: #d4edda; color: #155724; padding: 2px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 600; }
+        .badge-rejected { background: #f8d7da; color: #721c24; padding: 2px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 600; }
+
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .modal-overlay.show { display: flex; }
+        .modal-box {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            max-width: 480px;
+            width: 100%;
+        }
+        .modal-box h3 { margin: 0 0 8px; color: #1a1a2e; }
+        .modal-box p { color: #7f8c8d; font-size: 0.9rem; margin: 0 0 14px; }
+        .modal-box textarea {
+            width: 100%;
+            padding: 10px 14px;
+            border: 2px solid #e1e5ea;
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 0.9rem;
+            box-sizing: border-box;
+            resize: vertical;
+            min-height: 80px;
+        }
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-top: 16px;
+        }
+        .btn-cancel {
+            background: #f0f2f5;
+            color: #2c3e50;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>🛒 Mi Marketplace - Admin</h1>
+            <nav>
+                <a href="/">🏠 Inicio</a>
+                <a href="/orders/panel/">📋 Panel</a>
+                <a href="/orders/panel/history/">📊 Historial</a>
+                <a href="/orders/panel/payment-requests/">💳 Pagos</a>
+                <span style="color: rgba(255,255,255,0.7); margin: 0 10px;">👤 {{ user.username }}</span>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <div class="panel-wrap">
+            <div class="panel-header">
+                <h1>💳 Solicitudes de cambio bancario</h1>
+                <a href="/orders/panel/" style="color:#6c757d;text-decoration:none;font-size:0.9rem;">← Volver al panel</a>
+            </div>
+
+            {% if messages %}
+                {% for message in messages %}
+                    <div style="padding:12px 18px;border-radius:8px;margin-bottom:12px;background:#d4edda;color:#155724;font-size:0.9rem;">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+
+            {% if requests %}
+                {% for req in requests %}
+                    <div class="pending-card">
+                        <h3>Solicitud #{{ req.pk }} · {{ req.store.name }}</h3>
+                        <div class="meta">
+                            Solicitada por <strong>{{ req.requested_by.username }}</strong>
+                            · {{ req.created_at|date:"d/m/Y H:i" }}
+                        </div>
+
+                        <table class="change-table">
+                            <thead>
+                                <tr>
+                                    <th>Campo</th>
+                                    <th>Valor actual</th>
+                                    <th>Valor propuesto</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% if req.new_bank_name != req.old_bank_name %}
+                                    <tr>
+                                        <td><strong>Banco</strong></td>
+                                        <td class="old">{{ req.old_bank_name|default:"—" }}</td>
+                                        <td class="new">{{ req.new_bank_name }}</td>
+                                    </tr>
+                                {% endif %}
+                                {% if req.new_account_number != req.old_account_number %}
+                                    <tr>
+                                        <td><strong>Cuenta</strong></td>
+                                        <td class="old">{{ req.old_account_number|default:"—" }}</td>
+                                        <td class="new">{{ req.new_account_number }}</td>
+                                    </tr>
+                                {% endif %}
+                                {% if req.new_account_holder != req.old_account_holder %}
+                                    <tr>
+                                        <td><strong>Titular</strong></td>
+                                        <td class="old">{{ req.old_account_holder|default:"—" }}</td>
+                                        <td class="new">{{ req.new_account_holder }}</td>
+                                    </tr>
+                                {% endif %}
+                                {% if req.new_document != req.old_document %}
+                                    <tr>
+                                        <td><strong>Cédula/RIF</strong></td>
+                                        <td class="old">{{ req.old_document|default:"—" }}</td>
+                                        <td class="new">{{ req.new_document }}</td>
+                                    </tr>
+                                {% endif %}
+                                {% if req.new_payment_phone != req.old_payment_phone %}
+                                    <tr>
+                                        <td><strong>Teléfono</strong></td>
+                                        <td class="old">{{ req.old_payment_phone|default:"—" }}</td>
+                                        <td class="new">{{ req.new_payment_phone }}</td>
+                                    </tr>
+                                {% endif %}
+                            </tbody>
+                        </table>
+
+                        <div class="reason-block">
+                            <strong>Motivo del cambio:</strong> {{ req.reason }}
+                        </div>
+
+                        <div class="actions">
+                            <form method="post" action="{% url 'orders:payment_request_approve' req.pk %}" style="display:inline;">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-approve">✅ Aprobar y aplicar</button>
+                            </form>
+                            <button type="button" class="btn btn-reject"
+                                    onclick="openReject({{ req.pk }}, '{{ req.store.name|escapejs }}')">
+                                ❌ Rechazar
+                            </button>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div class="empty-state">
+                    <span class="icon">✅</span>
+                    <h3>No hay solicitudes pendientes</h3>
+                    <p>Todas las solicitudes han sido procesadas.</p>
+                </div>
+            {% endif %}
+
+            {% if history %}
+                <div class="history-section">
+                    <h2>Historial reciente</h2>
+                    {% for h in history %}
+                        <div class="history-item">
+                            <div>
+                                <span class="id">#{{ h.pk }} · {{ h.store.name }}</span>
+                                <div class="meta">
+                                    {{ h.requested_by.username }}
+                                    · {{ h.reviewed_at|date:"d/m/Y H:i"|default:"—" }}
+                                    {% if h.reviewed_by %} · por {{ h.reviewed_by.username }}{% endif %}
+                                </div>
+                            </div>
+                            <span class="badge-{{ h.status }}">{{ h.get_status_display }}</span>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+    </main>
+
+    <!-- Modal de rechazo -->
+    <div class="modal-overlay" id="rejectModal">
+        <div class="modal-box">
+            <h3>Rechazar solicitud</h3>
+            <p id="rejectIntro">Explica brevemente por qué rechazas esta solicitud.</p>
+            <form method="post" id="rejectForm">
+                {% csrf_token %}
+                <textarea name="rejection_reason" placeholder="Motivo del rechazo (obligatorio)" required></textarea>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-cancel" onclick="closeModal()">Cancelar</button>
+                    <button type="submit" class="btn btn-reject">Confirmar rechazo</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function openReject(requestId, storeName) {
+            document.getElementById('rejectForm').action = '/orders/panel/payment-requests/' + requestId + '/reject/';
+            document.getElementById('rejectIntro').textContent =
+                'Explica brevemente por qué rechazas la solicitud de ' + storeName + '.';
+            document.getElementById('rejectModal').classList.add('show');
+        }
+        function closeModal() {
+            document.getElementById('rejectModal').classList.remove('show');
+        }
+        document.getElementById('rejectModal').addEventListener('click', function(e) {
+            if (e.target === this) closeModal();
+        });
+    </script>
+</body>
+</html>
