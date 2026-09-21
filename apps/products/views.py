@@ -85,9 +85,18 @@ def product_detail(request, product_id):
             )
             related = related + extra
 
+    # Meta tags para compartir
+    og_title = f"{product.name} - ${product.price}"
+    og_description = f"Vendido por {product.store.name} en Mi Marketplace"
+    og_image = product.image.url if product.image else None
+
     return render(request, 'products/detail.html', {
         'product': product,
         'related_products': related,
+        'og_title': og_title,
+        'og_description': og_description,
+        'og_image': og_image,
+        'og_type': 'product',
     })
 
 

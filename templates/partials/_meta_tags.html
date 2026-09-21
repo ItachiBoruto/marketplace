@@ -1,0 +1,20 @@
+{% load static %}
+<!-- ===== FAVICON ===== -->
+<link rel="icon" type="image/svg+xml" href="{% static 'img/favicon.svg' %}">
+
+<!-- ===== META DESCRIPCION ===== -->
+<meta name="description" content="{{ og_description|default:'Mi Marketplace — el marketplace de los comercios venezolanos. Compra local, paga directo al comercio, recibe en tu puerta.' }}">
+
+<!-- ===== OPEN GRAPH (WhatsApp, Facebook, Telegram) ===== -->
+<meta property="og:type" content="{{ og_type|default:'website' }}">
+<meta property="og:url" content="{{ request.build_absolute_uri }}">
+<meta property="og:title" content="{{ og_title|default:'Mi Marketplace' }}">
+<meta property="og:description" content="{{ og_description|default:'Encuentra productos de comercios locales en Venezuela.' }}">
+<meta property="og:image" content="{{ og_image|default_if_none:'' }}">
+<meta property="og:site_name" content="Mi Marketplace">
+
+<!-- ===== TWITTER CARD ===== -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="{{ og_title|default:'Mi Marketplace' }}">
+<meta name="twitter:description" content="{{ og_description|default:'Encuentra productos de comercios locales en Venezuela.' }}">
+<meta name="twitter:image" content="{{ og_image|default_if_none:'' }}">

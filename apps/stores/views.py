@@ -26,10 +26,18 @@ def store_detail(request, store_id):
     ).select_related('store')
     store_status = get_store_status(store)
 
+    # Meta tags para compartir
+    og_title = f"{store.name} - Mi Marketplace"
+    og_description = store.description[:150] if store.description else f"Productos de {store.name}"
+    og_image = store.logo.url if store.logo else None
+
     return render(request, 'stores/detail.html', {
         'store': store,
         'products': products,
         'store_status': store_status,
+        'og_title': og_title,
+        'og_description': og_description,
+        'og_image': og_image,
     })
 
 # ===================== REGISTRO DE USUARIOS =====================
