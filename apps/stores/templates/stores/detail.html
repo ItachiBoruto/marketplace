@@ -6,6 +6,72 @@
     <title>{{ store.name }} - Mi Marketplace</title>
     {% load static %}
     <link rel="stylesheet" href="{% static 'css/style.css' %}?v=8">
+
+    <style id="store-status-badges-styles">
+        .store-status-badges {
+            display: flex !important;
+            gap: 10px !important;
+            flex-wrap: wrap !important;
+            margin-top: 12px !important;
+        }
+        .store-status-badge {
+            display: inline-flex !important;
+            align-items: center !important;
+            gap: 10px !important;
+            padding: 10px 16px !important;
+            border-radius: 12px !important;
+            font-size: 0.8rem !important;
+            font-weight: 600 !important;
+            line-height: 1.35 !important;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.08) !important;
+        }
+        .store-status-badge.open {
+            background: #d5f4e6 !important;
+            color: #0f5132 !important;
+            border: 2px solid #6dba95 !important;
+        }
+        .store-status-badge.scheduled {
+            background: #fff3cd !important;
+            color: #664d03 !important;
+            border: 2px solid #ffca2c !important;
+        }
+        .store-status-badge.closed {
+            background: #f8d7da !important;
+            color: #842029 !important;
+            border: 2px solid #dc3545 !important;
+        }
+        .store-status-badge .dot {
+            width: 10px !important;
+            height: 10px !important;
+            border-radius: 50% !important;
+            display: inline-block !important;
+            flex-shrink: 0 !important;
+        }
+        .store-status-badge.open .dot {
+            background: #198754 !important;
+            box-shadow: 0 0 0 3px rgba(25, 135, 84, 0.25) !important;
+        }
+        .store-status-badge.scheduled .dot {
+            background: #fd7e14 !important;
+            box-shadow: 0 0 0 3px rgba(253, 126, 20, 0.25) !important;
+        }
+        .store-status-badge.closed .dot {
+            background: #dc3545 !important;
+            box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.2) !important;
+        }
+        .store-status-badge .badge-title {
+            display: block !important;
+            font-weight: 700 !important;
+            font-size: 0.82rem !important;
+        }
+        .store-status-badge .badge-sub {
+            display: block !important;
+            font-size: 0.75rem !important;
+            font-weight: 500 !important;
+            opacity: 0.9 !important;
+            margin-top: 2px !important;
+        }
+    </style>
 </head>
 <body>
     <header>
@@ -53,9 +119,79 @@
                             <span>📦 {{ products|length }} productos</span>
                             <span>📅 Desde {{ store.created_at|date:"M Y" }}</span>
                             {% if store.offers_delivery %}
-                                <span>🛵 Delivery disponible (${{ store.delivery_fee }})</span>
+                                <span>🛵 Delivery (${{ store.delivery_fee }})</span>
                             {% endif %}
                         </div>
+
+                        {% if store_status.has_schedule %}
+                            <div class="store-status-badges">
+                                <!-- RETIRO EN TIENDA -->
+                                {% if store_status.pickup.is_open %}
+                                    <span class="store-status-badge open">
+                                        <span class="dot"></span>
+                                        <span>
+                                            <span class="badge-title">🏪 Retiro en tienda</span>
+                                            <span class="badge-sub">Disponible ahora</span>
+                                        </span>
+                                    </span>
+                                {% elif store_status.pickup.today_open and store_status.pickup.today_close %}
+                                    <span class="store-status-badge scheduled">
+                                        <span class="dot"></span>
+                                        <span>
+                                            <span class="badge-title">🏪 Retiro en tienda</span>
+                                            <span class="badge-sub">Disponible de {{ store_status.pickup.today_open|time:'H:i' }} a {{ store_status.pickup.today_close|time:'H:i' }}</span>
+                                        </span>
+                                    </span>
+                                {% else %}
+                                    <span class="store-status-badge closed">
+                                        <span class="dot"></span>
+                                        <span>
+                                            <span class="badge-title">🏪 Retiro en tienda</span>
+                                            <span class="badge-sub">
+                                                Cerrado hoy
+                                                {% if store_status.pickup.next_open %}
+                                                    · Abre {{ store_status.pickup.next_open }}
+                                                {% endif %}
+                                            </span>
+                                        </span>
+                                    </span>
+                                {% endif %}
+
+                                <!-- DELIVERY -->
+                                {% if store.offers_delivery %}
+                                    {% if store_status.delivery.is_open %}
+                                        <span class="store-status-badge open">
+                                            <span class="dot"></span>
+                                            <span>
+                                                <span class="badge-title">🛵 Delivery</span>
+                                                <span class="badge-sub">Disponible ahora</span>
+                                            </span>
+                                        </span>
+                                    {% elif store_status.delivery.today_open and store_status.delivery.today_close %}
+                                        <span class="store-status-badge scheduled">
+                                            <span class="dot"></span>
+                                            <span>
+                                                <span class="badge-title">🛵 Delivery</span>
+                                                <span class="badge-sub">Disponible de {{ store_status.delivery.today_open|time:'H:i' }} a {{ store_status.delivery.today_close|time:'H:i' }}</span>
+                                            </span>
+                                        </span>
+                                    {% else %}
+                                        <span class="store-status-badge closed">
+                                            <span class="dot"></span>
+                                            <span>
+                                                <span class="badge-title">🛵 Delivery</span>
+                                                <span class="badge-sub">
+                                                    Cerrado hoy
+                                                    {% if store_status.delivery.next_open %}
+                                                        · Abre {{ store_status.delivery.next_open }}
+                                                    {% endif %}
+                                                </span>
+                                            </span>
+                                        </span>
+                                    {% endif %}
+                                {% endif %}
+                            </div>
+                        {% endif %}
                     </div>
                     <div class="profile-actions">
                         <a href="/stores/" class="btn-back">← Volver</a>

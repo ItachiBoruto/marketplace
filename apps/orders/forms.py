@@ -56,12 +56,27 @@ class PaymentForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         self.delivery_available = kwargs.pop('delivery_available', False)
+        self.pickup_available = kwargs.pop('pickup_available', True)
         super().__init__(*args, **kwargs)
 
-        # Si no hay delivery disponible, ocultar esa opcion
+        # Construir dinamicamente las opciones disponibles
+        choices = []
+        if self.pickup_available:
+            choices.append(('pickup', 'Retiro en tienda'))
+        if self.delivery_available:
+            choices.append(('delivery', 'Delivery a domicilio'))
+
+        # Si no hay ninguna, dejar pickup por defecto (aunque se bloqueara antes)
+        if not choices:
+            choices = [('pickup', 'Retiro en tienda')]
+
+        self.fields['shipping_method'].choices = choices
+
+        # Seleccionar el primer metodo disponible por defecto
+        self.fields['shipping_method'].initial = choices[0][0]
+
+        # Ocultar el campo de direccion si no hay delivery
         if not self.delivery_available:
-            self.fields['shipping_method'].choices = [('pickup', 'Retiro en tienda')]
-            self.fields['shipping_method'].initial = 'pickup'
             self.fields['delivery_address'].widget = forms.HiddenInput()
 
     def clean_payment_reference(self):
@@ -81,18 +96,30 @@ class PaymentForm(forms.ModelForm):
         method = cleaned.get('shipping_method')
         address = (cleaned.get('delivery_address') or '').strip()
 
+        # ===== VALIDACION DE SEGURIDAD =====
+        # Verificar que el metodo elegido este disponible AHORA
         if method == 'delivery':
             if not self.delivery_available:
                 raise forms.ValidationError(
-                    'Delivery no está disponible para este pedido.'
+                    '❌ Delivery no está disponible para este pedido. '
+                    'El comercio está cerrado para delivery en este momento.'
                 )
             if len(address) < 10:
                 self.add_error(
                     'delivery_address',
                     'Ingresa una dirección más detallada (mínimo 10 caracteres).'
                 )
-        else:
-            # Si es pickup, vaciar dirección
+        elif method == 'pickup':
+            if not self.pickup_available:
+                raise forms.ValidationError(
+                    '❌ Retiro en tienda no está disponible para este pedido. '
+                    'El comercio está cerrado en este momento.'
+                )
+            # Vaciar direccion si es pickup
             cleaned['delivery_address'] = ''
+        else:
+            raise forms.ValidationError(
+                '❌ Método de entrega no válido.'
+            )
 
         return cleaned

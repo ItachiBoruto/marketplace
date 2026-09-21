@@ -18,11 +18,18 @@ def store_list(request):
     return render(request, 'stores/list.html', {'stores': stores})
 
 def store_detail(request, store_id):
+    from .schedule_utils import get_store_status
+
     store = get_object_or_404(Store, id=store_id, is_active=True)
-    products = Product.objects.filter(store=store, is_available=True).select_related('store')
+    products = Product.objects.filter(
+        store=store, is_available=True
+    ).select_related('store')
+    store_status = get_store_status(store)
+
     return render(request, 'stores/detail.html', {
         'store': store,
         'products': products,
+        'store_status': store_status,
     })
 
 # ===================== REGISTRO DE USUARIOS =====================

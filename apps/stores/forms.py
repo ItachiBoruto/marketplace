@@ -136,3 +136,56 @@ class PaymentChangeRequestForm(forms.ModelForm):
             )
 
         return cleaned
+
+
+class ScheduleForm(forms.ModelForm):
+    """Formulario para editar un dia de horario."""
+
+    class Meta:
+        from .models import StoreSchedule
+        model = StoreSchedule
+        fields = [
+            'is_closed',
+            'pickup_open', 'pickup_close',
+            'delivery_open', 'delivery_close',
+        ]
+        widgets = {
+            'is_closed': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'pickup_open': forms.TimeInput(attrs={'class': 'form-control', 'type': 'time'}),
+            'pickup_close': forms.TimeInput(attrs={'class': 'form-control', 'type': 'time'}),
+            'delivery_open': forms.TimeInput(attrs={'class': 'form-control', 'type': 'time'}),
+            'delivery_close': forms.TimeInput(attrs={'class': 'form-control', 'type': 'time'}),
+        }
+        labels = {
+            'is_closed': 'Cerrado este día',
+            'pickup_open': 'Retiro abre',
+            'pickup_close': 'Retiro cierra',
+            'delivery_open': 'Delivery abre',
+            'delivery_close': 'Delivery cierra',
+        }
+
+    def clean(self):
+        cleaned = super().clean()
+        is_closed = cleaned.get('is_closed')
+
+        if is_closed:
+            # Si esta cerrado, ignorar horarios
+            return cleaned
+
+        # Validar rangos de retiro
+        p_open = cleaned.get('pickup_open')
+        p_close = cleaned.get('pickup_close')
+        if p_open and p_close:
+            # Permitimos rangos que cruzan medianoche
+            pass  # Sin restriccion estricta
+
+        # Validar que si pone un campo, ponga el otro
+        if (p_open and not p_close) or (p_close and not p_open):
+            self.add_error('pickup_close', 'Debes especificar ambas horas de retiro.')
+
+        d_open = cleaned.get('delivery_open')
+        d_close = cleaned.get('delivery_close')
+        if (d_open and not d_close) or (d_close and not d_open):
+            self.add_error('delivery_close', 'Debes especificar ambas horas de delivery.')
+
+        return cleaned

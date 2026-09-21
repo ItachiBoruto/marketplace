@@ -73,8 +73,37 @@ def checkout(request):
             )
             return redirect('cart:view')
 
-    # Calcular envío solo para este comercio
-    delivery_available = store.offers_delivery
+    # ===== Verificar horario del comercio =====
+    from apps.stores.schedule_utils import get_store_status
+    store_status = get_store_status(store)
+
+    # Verificar si esta abierto para retiro y delivery
+    pickup_available = store_status['pickup']['is_open']
+    delivery_available = store.offers_delivery and store_status['delivery']['is_open']
+
+    # Si NO esta abierto para NINGUN metodo -> bloquear
+    if not pickup_available and not delivery_available:
+        # Determinar el mejor mensaje
+        if not store.offers_delivery:
+            reason = store_status['pickup']['reason'] or 'El comercio está cerrado.'
+            next_open = store_status['pickup']['next_open']
+        else:
+            # Ambos estan cerrados
+            reason = store_status['pickup']['reason'] or 'El comercio está cerrado.'
+            next_open = store_status['pickup']['next_open'] or store_status['delivery']['next_open']
+
+        messages.warning(
+            request,
+            f'🕐 {reason}'
+            + (f' Vuelve a intentarlo cuando abra ({next_open}).' if next_open else '')
+        )
+        return redirect('cart:view')
+
+    # Ajustar delivery_available segun horario
+    if store.offers_delivery and not delivery_available:
+        # Delivery cerrado, pero pickup abierto
+        delivery_available = False  # Solo permitir retiro
+
     total_delivery_fee = store.delivery_fee if delivery_available else 0
 
     # Subtotal solo de estos items
@@ -83,11 +112,32 @@ def checkout(request):
     if request.method == 'POST':
         form = PaymentForm(
             request.POST, request.FILES,
-            delivery_available=delivery_available
+            delivery_available=delivery_available,
+            pickup_available=pickup_available,
         )
         if form.is_valid():
             method = form.cleaned_data['shipping_method']
             shipping_fee = total_delivery_fee if method == 'delivery' else 0
+
+            # ===== RE-VALIDAR HORARIO (por si cerro entre GET y POST) =====
+            from apps.stores.schedule_utils import get_store_status
+            current_status = get_store_status(store)
+
+            if method == 'delivery' and not current_status['delivery']['is_open']:
+                messages.error(
+                    request,
+                    '⚠️ El comercio dejó de aceptar pedidos por delivery. '
+                    'Intenta con retiro en tienda o vuelve cuando abra.'
+                )
+                return redirect('cart:view')
+
+            if method == 'pickup' and not current_status['pickup']['is_open']:
+                messages.error(
+                    request,
+                    '⚠️ El comercio dejó de aceptar retiro en tienda. '
+                    'Intenta con delivery o vuelve cuando abra.'
+                )
+                return redirect('cart:view')
 
             payment_data = {
                 'shipping_method': method,
@@ -118,7 +168,10 @@ def checkout(request):
                 messages.warning(request, 'No hay productos para procesar.')
                 return redirect('cart:view')
     else:
-        form = PaymentForm(delivery_available=delivery_available)
+        form = PaymentForm(
+            delivery_available=delivery_available,
+            pickup_available=pickup_available,
+        )
 
     return render(request, 'orders/checkout.html', {
         'cart': cart,
@@ -128,7 +181,9 @@ def checkout(request):
         'subtotal': subtotal,
         'bank_info': settings.BANK_INFO,
         'delivery_available': delivery_available,
+        'pickup_available': pickup_available,
         'total_delivery_fee': total_delivery_fee,
+        'store_status': store_status,
     })
 
 

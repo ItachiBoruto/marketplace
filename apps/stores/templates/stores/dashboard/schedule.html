@@ -1,0 +1,214 @@
+{% extends "stores/dashboard/base.html" %}
+
+{% block title %}Horario de atención{% endblock %}
+
+{% block content %}
+<style>
+    .schedule-wrap { max-width: 900px; }
+    .info-box {
+        background: #eaf2f8;
+        border-left: 4px solid #3498db;
+        padding: 14px 18px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        font-size: 0.9rem;
+        color: #21618c;
+        line-height: 1.5;
+    }
+    .schedule-table {
+        background: white;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+    .day-row {
+        display: grid;
+        grid-template-columns: 130px 1fr 1fr 100px;
+        gap: 12px;
+        padding: 14px 20px;
+        border-bottom: 1px solid #f5f5f5;
+        align-items: center;
+    }
+    .day-row:last-child { border-bottom: none; }
+    .day-row.header {
+        background: #fafbfc;
+        font-weight: 700;
+        color: #1a1a2e;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+    }
+    .day-row.closed {
+        background: #fafafa;
+        opacity: 0.75;
+    }
+    .day-name {
+        font-weight: 700;
+        color: #1a1a2e;
+        font-size: 0.95rem;
+    }
+    .time-inputs {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 0.85rem;
+    }
+    .time-inputs input[type="time"] {
+        padding: 6px 8px;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        font-family: inherit;
+        font-size: 0.85rem;
+        width: 100px;
+    }
+    .time-inputs input[type="time"]:focus {
+        outline: none;
+        border-color: #3498db;
+    }
+    .time-inputs .dash { color: #95a5a6; font-size: 0.85rem; }
+    .closed-check {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 0.85rem;
+    }
+    .closed-check input[type="checkbox"] {
+        width: 18px;
+        height: 18px;
+        accent-color: #e94560;
+        cursor: pointer;
+    }
+    .closed-check label {
+        cursor: pointer;
+        color: #555;
+    }
+    .day-row.closed .time-inputs {
+        opacity: 0.4;
+        pointer-events: none;
+    }
+    .actions {
+        display: flex;
+        gap: 12px;
+        margin-top: 24px;
+        flex-wrap: wrap;
+    }
+    .btn-save {
+        padding: 12px 32px;
+        background: #2ecc71;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 0.95rem;
+        font-weight: 700;
+        cursor: pointer;
+        font-family: inherit;
+    }
+    .btn-save:hover { background: #27ae60; }
+    .btn-cancel {
+        padding: 12px 24px;
+        color: #7f8c8d;
+        text-decoration: none;
+        font-size: 0.9rem;
+        align-self: center;
+    }
+    @media (max-width: 768px) {
+        .day-row {
+            grid-template-columns: 1fr;
+            gap: 8px;
+        }
+        .day-row.header { display: none; }
+        .day-row .label-mobile {
+            display: block;
+            font-size: 0.75rem;
+            color: #95a5a6;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            margin-bottom: 4px;
+        }
+        .time-inputs input[type="time"] { width: 100%; }
+    }
+    @media (min-width: 769px) {
+        .day-row .label-mobile { display: none; }
+    }
+</style>
+
+<div class="schedule-wrap">
+    <h1>🕐 Horario de atención</h1>
+
+    <div class="info-box">
+        <strong>ℹ️ Cómo funciona:</strong> Configura tu horario semanal para retiro en tienda
+        y delivery. Los clientes solo podrán hacer pedidos dentro del horario configurado.
+        Si dejas un día sin horario, se considerará <strong>cerrado</strong>.
+    </div>
+
+    <form method="post">
+        {% csrf_token %}
+
+        <div class="schedule-table">
+            <div class="day-row header">
+                <div>Día</div>
+                <div>🏪 Retiro en tienda</div>
+                <div>🛵 Delivery</div>
+                <div>Estado</div>
+            </div>
+
+            {% for sched in schedules %}
+                <div class="day-row {% if sched.is_closed %}closed{% endif %}" id="row-{{ sched.day_of_week }}">
+                    <div class="day-name">{{ sched.get_day_of_week_display }}</div>
+
+                    <div>
+                        <span class="label-mobile">Retiro</span>
+                        <div class="time-inputs">
+                            <input type="time"
+                                   name="day_{{ sched.day_of_week }}_pickup_open"
+                                   value="{% if sched.pickup_open %}{{ sched.pickup_open|time:'H:i' }}{% endif %}">
+                            <span class="dash">→</span>
+                            <input type="time"
+                                   name="day_{{ sched.day_of_week }}_pickup_close"
+                                   value="{% if sched.pickup_close %}{{ sched.pickup_close|time:'H:i' }}{% endif %}">
+                        </div>
+                    </div>
+
+                    <div>
+                        <span class="label-mobile">Delivery</span>
+                        <div class="time-inputs">
+                            <input type="time"
+                                   name="day_{{ sched.day_of_week }}_delivery_open"
+                                   value="{% if sched.delivery_open %}{{ sched.delivery_open|time:'H:i' }}{% endif %}">
+                            <span class="dash">→</span>
+                            <input type="time"
+                                   name="day_{{ sched.day_of_week }}_delivery_close"
+                                   value="{% if sched.delivery_close %}{{ sched.delivery_close|time:'H:i' }}{% endif %}">
+                        </div>
+                    </div>
+
+                    <div>
+                        <span class="label-mobile">Estado</span>
+                        <div class="closed-check">
+                            <input type="checkbox"
+                                   id="closed_{{ sched.day_of_week }}"
+                                   name="day_{{ sched.day_of_week }}_is_closed"
+                                   {% if sched.is_closed %}checked{% endif %}
+                                   onchange="toggleDay({{ sched.day_of_week }})">
+                            <label for="closed_{{ sched.day_of_week }}">Cerrado</label>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+
+        <div class="actions">
+            <button type="submit" class="btn-save">💾 Guardar horario</button>
+            <a href="{% url 'stores:dashboard' store.id %}" class="btn-cancel">Cancelar</a>
+        </div>
+    </form>
+</div>
+
+<script>
+    function toggleDay(dayNum) {
+        var row = document.getElementById('row-' + dayNum);
+        var isClosed = document.getElementById('closed_' + dayNum).checked;
+        row.classList.toggle('closed', isClosed);
+    }
+</script>
+{% endblock %}

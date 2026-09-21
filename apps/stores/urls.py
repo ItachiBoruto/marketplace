@@ -7,7 +7,7 @@ from apps.products.views_admin import (
     ProductUpdateView,
 )
 
-from . import views, views_orders, views_payments, views_users
+from . import views, views_orders, views_payments, views_schedule, views_users
 
 app_name = "stores"
 
@@ -41,4 +41,7 @@ urlpatterns = [
     # Solicitudes de cambio de datos bancarios (owner)
     path("dashboard/<int:store_id>/payment-change/", views_payments.request_payment_change, name="payment_change_request"),
     path("dashboard/<int:store_id>/payment-change/status/", views_payments.payment_change_status, name="payment_change_status"),
+    # Horario del comercio
+    path("dashboard/<int:store_id>/schedule/", views_schedule.ScheduleConfigView.as_view(), name="schedule_config"),
+    path("dashboard/<int:store_id>/schedule/toggle/<int:day>/", views_schedule.toggle_day, name="schedule_toggle_day"),
 ]

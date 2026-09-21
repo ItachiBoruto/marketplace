@@ -1,12 +1,12 @@
+{% load static %}
+{% load exchange_filters %}
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Finalizar compra - Mi Marketplace</title>
-    {% load static %}
-    {% load exchange_filters %}
-    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}?v=9">
     <style>
         .checkout-wrapper {
             max-width: 1000px;
@@ -42,7 +42,6 @@
         .order-item:last-child { border-bottom: none; }
         .order-item .name { font-weight: 600; color: #2c3e50; }
         .order-item .store { font-size: 0.78rem; color: #7f8c8d; display: block; }
-        .order-item .qty { color: #7f8c8d; }
         .summary-line {
             display: flex;
             justify-content: space-between;
@@ -141,7 +140,7 @@
         }
         .btn-copy-all:hover { background: #16213e; }
 
-        /* ===== SELECTOR DE ENVIO (arriba del total) ===== */
+        /* ===== SELECTOR DE ENVIO ===== */
         .shipping-section {
             margin: 20px 0;
             padding: 16px;
@@ -204,7 +203,6 @@
             border-color: #e94560;
             background: #fff5f7;
         }
-
         .notice {
             background: #fef5e7;
             color: #856404;
@@ -214,7 +212,6 @@
             margin-bottom: 10px;
             border-left: 3px solid #f39c12;
         }
-
         .delivery-address-block {
             display: none;
             margin-top: 12px;
@@ -273,25 +270,6 @@
             .checkout-wrapper { grid-template-columns: 1fr; }
             .shipping-options { grid-template-columns: 1fr; }
         }
-
-        .store-badge {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 10px 14px;
-            background: #f0f7ff;
-            border: 1px solid #d6eaf8;
-            border-radius: 8px;
-            margin-bottom: 16px;
-            font-size: 0.9rem;
-            color: #1a1a2e;
-            flex-wrap: wrap;
-        }
-        .store-badge .store-badge-note {
-            font-size: 0.78rem;
-            color: #7f8c8d;
-            font-style: italic;
-        }
     </style>
 </head>
 <body>
@@ -316,18 +294,19 @@
                 </div>
             {% endif %}
 
-            <!-- FORM GLOBAL QUE ENVUELVE AMBAS COLUMNAS -->
             <form method="post" enctype="multipart/form-data" id="checkoutForm">
                 {% csrf_token %}
+                {% if store %}<input type="hidden" name="store_id" value="{{ store.id }}">{% endif %}
 
                 <div class="checkout-wrapper">
-                    <!-- ============ COLUMNA IZQUIERDA: RESUMEN + ENVIO + TOTAL ============ -->
+                    <!-- ============ COLUMNA IZQUIERDA: RESUMEN + ENVIO + TOTALES ============ -->
                     <div class="checkout-card">
                         <h2>📦 Resumen del pedido</h2>
+
                         {% if store %}
-                            <div class="store-badge">
+                            <div style="background:#f0f7ff;padding:10px 14px;border-radius:8px;margin-bottom:14px;font-size:0.88rem;color:#1a1a2e;border:1px solid #d6eaf8;">
                                 🏪 <strong>{{ store.name }}</strong>
-                                <span class="store-badge-note">Este carrito es solo de este comercio</span>
+                                <span style="font-size:0.78rem;color:#7f8c8d;display:block;margin-top:2px;">Este pedido es solo de este comercio</span>
                             </div>
                         {% endif %}
 
@@ -338,23 +317,40 @@
                                     <span class="store">🏪 {{ item.product.store.name }}</span>
                                 </div>
                                 <div style="text-align: right;">
-                                    <div class="qty">{{ item.quantity }} × ${{ item.price|floatformat:2 }}</div>
+                                    <div style="color: #7f8c8d;font-size:0.85rem;">{{ item.quantity }} × ${{ item.price|floatformat:2 }}</div>
                                     <div style="font-weight: 600;">${{ item.get_total|floatformat:2 }}</div>
                                 </div>
                             </div>
                         {% endfor %}
 
-                        <!-- SELECTOR DE ENVIO (arriba del total) -->
+                        <!-- SELECTOR DE ENVIO -->
                         <div class="shipping-section">
                             <h3>🚚 ¿Cómo quieres recibir tu pedido?</h3>
 
-                            {% if not delivery_available %}
+                            {% if not delivery_available and not pickup_available %}
+                                <div class="notice" style="background:#f8d7da;color:#842029;border-left-color:#dc3545;">
+                                    🚫 El comercio no está disponible en este momento. Vuelve más tarde.
+                                </div>
+                            {% elif not delivery_available %}
                                 <div class="notice">
-                                    ⚠️ Uno o más productos no ofrecen delivery. Solo puedes retirar en tienda.
+                                    🕐 Delivery no disponible ahora
+                                    {% if store_status.delivery.today_open and store_status.delivery.today_close %}
+                                        · Disponible de {{ store_status.delivery.today_open|time:'H:i' }} a {{ store_status.delivery.today_close|time:'H:i' }}
+                                    {% endif %}
+                                    <br>Solo puedes <strong>retirar en tienda</strong> por ahora.
+                                </div>
+                            {% elif not pickup_available %}
+                                <div class="notice">
+                                    🕐 Retiro en tienda no disponible ahora
+                                    {% if store_status.pickup.today_open and store_status.pickup.today_close %}
+                                        · Disponible de {{ store_status.pickup.today_open|time:'H:i' }} a {{ store_status.pickup.today_close|time:'H:i' }}
+                                    {% endif %}
+                                    <br>Solo puedes pedir <strong>delivery a domicilio</strong> por ahora.
                                 </div>
                             {% endif %}
 
                             <div class="shipping-options">
+                                {% if pickup_available %}
                                 <label class="shipping-option">
                                     <input type="radio" name="shipping_method" value="pickup"
                                            {% if form.shipping_method.value != 'delivery' %}checked{% endif %}>
@@ -364,6 +360,7 @@
                                         <span class="fee free">Gratis</span>
                                     </div>
                                 </label>
+                                {% endif %}
 
                                 {% if delivery_available %}
                                 <label class="shipping-option">
@@ -395,7 +392,7 @@
                             </div>
                         </div>
 
-                        <!-- TOTALES (dinámicos) -->
+                        <!-- TOTALES -->
                         <div class="summary-line" style="border-top: 1px solid #eee; padding-top: 12px;">
                             <span>Subtotal</span>
                             <span>${{ subtotal|floatformat:2 }}</span>

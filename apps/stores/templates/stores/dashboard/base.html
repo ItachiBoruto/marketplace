@@ -86,6 +86,7 @@
 
             {% if user.is_superuser or user_role == 'owner' %}
                 <a href="{% url 'stores:movements' store.id %}">📈 Movimientos</a>
+                <a href="{% url 'stores:schedule_config' store.id %}">🕐 Horario</a>
                 <a href="{% url 'stores:payment_change_status' store.id %}">💳 Cambios bancarios</a>
                 <a href="{% url 'stores:store_edit' store.id %}">⚙️ Perfil</a>
             {% endif %}

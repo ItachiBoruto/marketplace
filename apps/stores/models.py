@@ -172,3 +172,71 @@ class StorePaymentChangeRequest(models.Model):
             self.new_document != self.old_document,
             self.new_payment_phone != self.old_payment_phone,
         ])
+
+
+class StoreSchedule(models.Model):
+    """Horario de atencion por dia de la semana para un comercio.
+
+    Si el comercio no tiene horarios configurados, se asume ABIERTO 24/7
+    (comportamiento por defecto para no romper comercios sin configurar).
+    """
+
+    DAY_CHOICES = [
+        (0, 'Lunes'),
+        (1, 'Martes'),
+        (2, 'Miércoles'),
+        (3, 'Jueves'),
+        (4, 'Viernes'),
+        (5, 'Sábado'),
+        (6, 'Domingo'),
+    ]
+
+    store = models.ForeignKey(
+        Store, on_delete=models.CASCADE,
+        related_name='schedules',
+        verbose_name='Comercio'
+    )
+    day_of_week = models.PositiveSmallIntegerField(
+        choices=DAY_CHOICES,
+        verbose_name='Día'
+    )
+    is_closed = models.BooleanField(
+        default=False,
+        verbose_name='Cerrado este día'
+    )
+
+    # Horario de retiro en tienda
+    pickup_open = models.TimeField(null=True, blank=True, verbose_name='Retiro: abre')
+    pickup_close = models.TimeField(null=True, blank=True, verbose_name='Retiro: cierra')
+
+    # Horario de delivery
+    delivery_open = models.TimeField(null=True, blank=True, verbose_name='Delivery: abre')
+    delivery_close = models.TimeField(null=True, blank=True, verbose_name='Delivery: cierra')
+
+    class Meta:
+        unique_together = ('store', 'day_of_week')
+        ordering = ['day_of_week']
+        verbose_name = 'Horario del comercio'
+        verbose_name_plural = 'Horarios del comercio'
+
+    def __str__(self):
+        day_name = self.get_day_of_week_display()
+        if self.is_closed:
+            return f"{self.store.name} - {day_name}: Cerrado"
+        return f"{self.store.name} - {day_name}"
+
+    def pickup_range(self):
+        """Devuelve '08:00 - 20:00' o 'Cerrado' o '--'."""
+        if self.is_closed:
+            return 'Cerrado'
+        if self.pickup_open and self.pickup_close:
+            return f"{self.pickup_open.strftime('%H:%M')} - {self.pickup_close.strftime('%H:%M')}"
+        return '--'
+
+    def delivery_range(self):
+        """Devuelve '08:00 - 20:00' o 'Cerrado' o '--'."""
+        if self.is_closed:
+            return 'Cerrado'
+        if self.delivery_open and self.delivery_close:
+            return f"{self.delivery_open.strftime('%H:%M')} - {self.delivery_close.strftime('%H:%M')}"
+        return '--'
