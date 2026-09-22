@@ -7,29 +7,16 @@ from .models import Cart, CartItem
 
 
 def get_or_create_cart(request):
-    if request.user.is_authenticated:
-        cart, created = Cart.objects.get_or_create(user=request.user)
-        session_key = request.session.session_key
-        if session_key:
-            try:
-                session_cart = Cart.objects.get(session_key=session_key)
-                for item in session_cart.items.all():
-                    item.cart = cart
-                    item.save()
-                session_cart.delete()
-                request.session.delete()
-            except Cart.DoesNotExist:
-                pass
-        return cart
-    else:
-        session_key = request.session.session_key
-        if not session_key:
-            request.session.create()
-            session_key = request.session.session_key
-        cart, created = Cart.objects.get_or_create(session_key=session_key)
-        return cart
+    """
+    Devuelve el carrito del usuario autenticado.
+    Solo se llama desde vistas con @login_required.
+    """
+    cart, created = Cart.objects.get_or_create(user=request.user)
+    return cart
 
 
+
+@login_required(login_url='login')
 def add_to_cart(request, product_id):
     is_ajax = (
         request.headers.get('X-Requested-With') == 'XMLHttpRequest'
@@ -84,6 +71,7 @@ def add_to_cart(request, product_id):
     return redirect(request.META.get('HTTP_REFERER', '/'))
 
 
+@login_required(login_url='login')
 def view_cart(request):
     """Carrito segmentado por comercio."""
     cart = get_or_create_cart(request)
@@ -126,6 +114,7 @@ def view_cart(request):
     })
 
 
+@login_required(login_url='login')
 def update_cart_item(request, item_id):
     cart = get_or_create_cart(request)
     cart_item = get_object_or_404(CartItem, id=item_id, cart=cart)
@@ -146,6 +135,7 @@ def update_cart_item(request, item_id):
     return redirect('cart:view')
 
 
+@login_required(login_url='login')
 def remove_from_cart(request, item_id):
     cart = get_or_create_cart(request)
     cart_item = get_object_or_404(CartItem, id=item_id, cart=cart)

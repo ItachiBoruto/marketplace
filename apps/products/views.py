@@ -10,7 +10,6 @@ from apps.stores.models import Store
 
 
 # ===== PÁGINA PRINCIPAL (PROTEGIDA) =====
-@login_required(login_url='login')
 def product_list(request):
     """Página principal: muestra todos los productos disponibles (solo para usuarios autenticados)."""
     products = Product.objects.filter(is_available=True).select_related('store')
@@ -54,7 +53,6 @@ def product_list(request):
 
 
 # ===== DETALLE DE PRODUCTO (PROTEGIDO) =====
-@login_required(login_url='login')
 def product_detail(request, product_id):
     """Muestra el detalle del producto + productos similares."""
     product = get_object_or_404(Product, id=product_id, is_available=True)

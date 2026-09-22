@@ -29,6 +29,10 @@ def is_store_open(store, method='delivery'):
           - reason: str (motivo si cerrado)
           - next_open: str opcional (cuando abre proximo)
     """
+    # Si el comercio atiende 24/7 -> siempre abierto
+    if getattr(store, 'has_24_7_schedule', False):
+        return {'is_open': True, 'reason': None, 'next_open': None}
+
     # Si el comercio no tiene horarios configurados -> siempre abierto
     if not store.schedules.exists():
         return {'is_open': True, 'reason': None, 'next_open': None}
@@ -113,6 +117,26 @@ def get_store_status(store):
             'is_fully_open': bool,  # abierto para pickup y/o delivery
         }
     """
+    is_247 = getattr(store, 'has_24_7_schedule', False)
+
+    # Si es 24/7, devolver estado "abierto" sin importar horarios
+    if is_247:
+        return {
+            'has_schedule': True,
+            'is_247': True,
+            'pickup': {
+                'is_open': True, 'reason': None, 'next_open': None,
+                'today_open': None, 'today_close': None, 'is_closed_today': False,
+            },
+            'delivery': {
+                'is_open': store.offers_delivery,
+                'reason': None if store.offers_delivery else 'Delivery no disponible',
+                'next_open': None,
+                'today_open': None, 'today_close': None, 'is_closed_today': False,
+            },
+            'is_fully_open': True,
+        }
+
     has_schedule = store.schedules.exists()
 
     if not has_schedule:
@@ -143,6 +167,7 @@ def get_store_status(store):
 
     return {
         'has_schedule': True,
+        'is_247': False,
         'pickup': pickup_status,
         'delivery': delivery_status,
         'is_fully_open': pickup_status['is_open'] or delivery_status['is_open'],
@@ -167,6 +192,11 @@ def get_today_schedule_info(store, method='delivery'):
         'close_time': None,
         'is_closed_today': False,
     }
+
+    # Si atiende 24/7 -> siempre abierto
+    if getattr(store, 'has_24_7_schedule', False):
+        result['is_open_now'] = True
+        return result
 
     # Sin horarios configurados -> siempre abierto
     if not store.schedules.exists():

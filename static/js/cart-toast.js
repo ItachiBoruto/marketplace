@@ -40,8 +40,22 @@
             },
             credentials: 'same-origin',
         })
-        .then(function (r) { return r.json().then(function (d) { return { ok: r.ok, data: d }; }); })
+        .then(function (r) {
+            // Si el servidor redirige a login (no autenticado)
+            if (r.redirected && r.url.indexOf('/accounts/login') !== -1) {
+                window.location.href = r.url;
+                return null;
+            }
+            // Si no es JSON, probablemente es un redirect
+            var contentType = r.headers.get('content-type') || '';
+            if (contentType.indexOf('application/json') === -1) {
+                window.location.href = '/accounts/login/?next=' + encodeURIComponent(window.location.pathname);
+                return null;
+            }
+            return r.json().then(function (d) { return { ok: r.ok, data: d }; });
+        })
         .then(function (res) {
+            if (res === null) return;  // Fue redirigido a login
             var data = res.data;
             if (data.success) {
                 btn.textContent = '\u2705 Agregado';

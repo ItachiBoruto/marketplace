@@ -24,6 +24,14 @@ class Store(models.Model):
         help_text="Monto en dólares que se cobrará por el envío."
     )
 
+    # ===== Horario 24/7 =====
+    has_24_7_schedule = models.BooleanField(
+        default=False,
+        verbose_name="¿Atiende 24/7?",
+        help_text="Si está activo, el comercio se considera siempre abierto "
+                  "(ignora los horarios por día)."
+    )
+
     # ===== Datos bancarios (para pagos directos al comercio) =====
     bank_name = models.CharField(
         max_length=100, blank=True,
