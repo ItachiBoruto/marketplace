@@ -2,6 +2,7 @@ from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
+from rest_framework.throttling import AnonRateThrottle, UserRateThrottle
 from rest_framework.views import APIView
 from django.db.models import Q
 from .models import Product
@@ -99,11 +100,24 @@ def product_detail(request, product_id):
 
 
 # ===== API PARA SCROLL INFINITO =====
+# ===== THROTTLES PERSONALIZADOS =====
+class CatalogAnonThrottle(AnonRateThrottle):
+    """Throttle para anonimos en el catalogo (30/min)."""
+    scope = 'catalog'
+
+
+class CatalogUserThrottle(UserRateThrottle):
+    """Throttle para usuarios autenticados en el catalogo (120/min)."""
+    scope = 'user'
+
+
 class ProductPagination(PageNumberPagination):
     page_size = 12
 
 
 class ProductListAPI(APIView):
+    throttle_classes = [CatalogAnonThrottle, CatalogUserThrottle]
+
     def get(self, request):
         products = Product.objects.filter(is_available=True).select_related('store')
         
@@ -137,6 +151,8 @@ class ProductListAPI(APIView):
 
 
 class StoreProductListAPI(APIView):
+    throttle_classes = [CatalogAnonThrottle, CatalogUserThrottle]
+
     def get(self, request):
         store_id = request.GET.get('store')
         if not store_id:

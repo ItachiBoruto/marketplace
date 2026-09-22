@@ -312,3 +312,21 @@ LOGGING = {
         },
     },
 }
+
+# ============================================================
+# ===== DJANGO REST FRAMEWORK =====
+# ============================================================
+REST_FRAMEWORK = {
+    'DEFAULT_THROTTLE_CLASSES': [
+        'rest_framework.throttling.AnonRateThrottle',
+        'rest_framework.throttling.UserRateThrottle',
+    ],
+    'DEFAULT_THROTTLE_RATES': {
+        # Anonimos: 60 requests por minuto (scrapers normales se pasan)
+        'anon': '60/min',
+        # Usuarios autenticados: 120 requests por minuto
+        'user': '120/min',
+        # Scope especifico para APIs de catalogo
+        'catalog': '30/min',
+    },
+}
