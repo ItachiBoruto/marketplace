@@ -1033,13 +1033,7 @@ header nav a:hover {
 
     .filters-toggle { display: block; padding: 9px 14px; font-size: 0.85rem; }
 
-    .header-filters {
-        display: none;
-        flex-direction: column;
-        gap: 8px;
-        padding: 10px 0;
-        border-top: 1px solid rgba(255,255,255,0.15);
-    }
+    
 
     .header-filters.open { display: flex; }
 
@@ -1694,14 +1688,7 @@ header nav a:hover {
 
     .filters-toggle { display: block; padding: 9px 14px; font-size: 0.85rem; }
 
-    .header-filters {
-        display: none;
-        flex-direction: column;
-        gap: 8px;
-        padding: 10px 0;
-        border-top: 1px solid rgba(255,255,255,0.15);
-        width: 100%;
-    }
+    
     .header-filters.open { display: flex; }
     .header-filters .filter { width: 100%; }
     .header-filters .filter select { width: 100%; }
@@ -2006,15 +1993,7 @@ header nav a:hover {
         display: block;
         flex-shrink: 0;
     }
-    .header-actions-row .header-filters {
-        display: none;
-        flex-direction: column;
-        width: 100%;
-        gap: 8px;
-        padding: 10px 0;
-        border-top: 1px solid rgba(255,255,255,0.15);
-        margin-top: 6px;
-    }
+    .header-actions-row 
     .header-actions-row .header-filters.open {
         display: flex;
     }
@@ -2574,5 +2553,682 @@ header nav a:hover {
         grid-template-columns: repeat(2, 1fr) !important;
         gap: 10px !important;
         padding: 12px 0 !important;
+    }
+}
+
+/* ============================================================
+   MODAL DE CATEGORIAS v1
+   ============================================================ */
+
+/* --- Boton que abre el modal --- */
+.category-filter-wrap {
+    position: relative;
+    display: inline-block;
+}
+.category-open-btn {
+    height: 40px;
+    padding: 0 18px;
+    background: linear-gradient(135deg, #e94560, #c0392b);
+    color: white;
+    border: none;
+    border-radius: 50px;
+    font-size: 0.88rem;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(233, 69, 96, 0.3);
+    transition: transform 0.2s, box-shadow 0.2s, background 0.2s;
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+.category-open-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(233, 69, 96, 0.45);
+}
+.category-open-btn.has-filter {
+    background: linear-gradient(135deg, #27ae60, #16a085);
+    box-shadow: 0 2px 8px rgba(46, 204, 113, 0.3);
+}
+.hidden-category-select {
+    display: none !important;
+}
+
+/* --- Overlay + modal --- */
+.cat-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(26, 26, 46, 0.75);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    z-index: 99998;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    opacity: 0;
+    transition: opacity 0.25s;
+}
+.cat-modal-overlay.open {
+    display: flex;
+    opacity: 1;
+}
+.cat-modal {
+    background: white;
+    border-radius: 20px;
+    width: 100%;
+    max-width: 900px;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+    overflow: hidden;
+    animation: catModalPop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+@keyframes catModalPop {
+    0%   { transform: scale(0.9); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+}
+.cat-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 24px;
+    border-bottom: 1px solid #eee;
+    flex-shrink: 0;
+}
+.cat-modal-header h2 {
+    margin: 0;
+    font-size: 1.15rem;
+    color: #1a1a2e;
+    font-weight: 700;
+}
+.cat-modal-close {
+    background: none;
+    border: none;
+    font-size: 1.3rem;
+    color: #7f8c8d;
+    cursor: pointer;
+    padding: 4px 10px;
+    border-radius: 8px;
+    font-family: inherit;
+    line-height: 1;
+    transition: background 0.15s, color 0.15s;
+}
+.cat-modal-close:hover {
+    background: #f0f2f5;
+    color: #1a1a2e;
+}
+.cat-modal-search {
+    padding: 12px 24px;
+    border-bottom: 1px solid #f5f5f5;
+    flex-shrink: 0;
+}
+.cat-modal-search input {
+    width: 100%;
+    padding: 10px 16px;
+    border: 1px solid #e1e4e8;
+    border-radius: 50px;
+    font-size: 0.9rem;
+    font-family: inherit;
+    outline: none;
+    transition: border-color 0.2s;
+    box-sizing: border-box;
+}
+.cat-modal-search input:focus {
+    border-color: #e94560;
+}
+.cat-modal-body {
+    padding: 20px 24px;
+    overflow-y: auto;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+    gap: 12px;
+    flex: 1;
+}
+.cat-card {
+    cursor: pointer;
+    border-radius: 14px;
+    overflow: hidden;
+    background: white;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    transition: transform 0.2s, box-shadow 0.2s;
+    display: flex;
+    flex-direction: column;
+    border: 2px solid transparent;
+    -webkit-tap-highlight-color: transparent;
+}
+.cat-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+}
+.cat-card.selected {
+    border-color: #e94560;
+    box-shadow: 0 4px 16px rgba(233, 69, 96, 0.4);
+}
+.cat-card.hidden {
+    display: none !important;
+}
+.cat-card-bg {
+    height: 90px;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+.cat-card-bg::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(0,0,0,0.05) 0%, rgba(0,0,0,0.35) 100%);
+}
+.cat-card-emoji {
+    font-size: 2.6rem;
+    filter: drop-shadow(0 3px 6px rgba(0,0,0,0.3));
+    position: relative;
+    z-index: 1;
+    line-height: 1;
+}
+.cat-card-name {
+    padding: 8px 10px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-align: center;
+    color: #1a1a2e;
+    line-height: 1.2;
+    background: white;
+    min-height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.cat-modal-footer {
+    padding: 14px 24px;
+    border-top: 1px solid #f5f5f5;
+    text-align: center;
+    flex-shrink: 0;
+}
+.cat-clear-btn {
+    background: #f0f2f5;
+    color: #7f8c8d;
+    border: none;
+    padding: 8px 20px;
+    border-radius: 50px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background 0.15s, color 0.15s;
+}
+.cat-clear-btn:hover {
+    background: #e1e4e8;
+    color: #1a1a2e;
+}
+.cat-no-results {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 30px;
+    color: #95a5a6;
+    font-size: 0.9rem;
+}
+
+/* --- Responsive --- */
+@media (max-width: 600px) {
+    .cat-modal {
+        max-height: 92vh;
+        border-radius: 16px;
+    }
+    .cat-modal-header { padding: 14px 16px; }
+    .cat-modal-header h2 { font-size: 1rem; }
+    .cat-modal-search { padding: 10px 16px; }
+    .cat-modal-body {
+        padding: 14px 16px;
+        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+        gap: 8px;
+    }
+    .cat-card-bg { height: 70px; }
+    .cat-card-emoji { font-size: 2rem; }
+    .cat-card-name { font-size: 0.72rem; padding: 6px 6px; min-height: 34px; }
+    .cat-modal-overlay { padding: 10px; }
+}
+
+/* ============================================================
+   CAT-CARD TOOLTIP v1
+   ============================================================ */
+.cat-card {
+    position: relative;
+}
+.cat-card::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(-50%) translateY(4px);
+    background: rgba(26, 26, 46, 0.95);
+    color: white;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    white-space: nowrap;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.2s, transform 0.2s;
+    z-index: 100;
+    box-shadow: 0 6px 16px rgba(0,0,0,0.25);
+    letter-spacing: 0.2px;
+}
+.cat-card::before {
+    content: "";
+    position: absolute;
+    bottom: calc(100% + 2px);
+    left: 50%;
+    transform: translateX(-50%) translateY(4px);
+    border: 5px solid transparent;
+    border-top-color: rgba(26, 26, 46, 0.95);
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.2s, transform 0.2s;
+    z-index: 100;
+}
+.cat-card:hover::after,
+.cat-card:hover::before {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
+
+/* En mobile, un pequeno delay para no molestar con el tap */
+@media (max-width: 600px) {
+    .cat-card::after { font-size: 0.72rem; padding: 5px 10px; }
+    .cat-card-name { display: none; } /* El nombre ya aparece en el tooltip */
+    .cat-card { min-height: 70px; }
+}
+
+/* ============================================================
+   TOOLTIP FIX v1 - Permitir que el tooltip salga de la tarjeta
+   ============================================================ */
+/* El .cat-card tenia overflow:hidden (por el border-radius) que
+   recortaba el ::after del tooltip. Lo pasamos a los hijos. */
+.cat-card {
+    overflow: visible !important;
+    position: relative !important;
+}
+.cat-card .cat-card-bg {
+    border-radius: 12px 12px 0 0 !important;
+    overflow: hidden !important;
+}
+.cat-card .cat-card-name {
+    border-radius: 0 0 12px 12px !important;
+}
+.cat-card.selected .cat-card-bg {
+    border-radius: 10px 10px 0 0 !important;
+}
+
+/* ============================================================
+   CAT-CARD TOOLTIP OFF v1
+   Desactivamos el tooltip flotante (se recortaba en el modal)
+   y dejamos el nombre SIEMPRE visible dentro de la tarjeta.
+   ============================================================ */
+.cat-card::before,
+.cat-card::after {
+    display: none !important;
+    content: none !important;
+}
+
+/* Nombre visible siempre - desktop y mobile */
+.cat-card .cat-card-name {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-weight: 700 !important;
+    color: #1a1a2e !important;
+    text-align: center !important;
+    line-height: 1.2 !important;
+    background: white !important;
+}
+
+/* ============================================================
+   MOBILE - tarjeta compacta con emoji + nombre dentro
+   ============================================================ */
+@media (max-width: 600px) {
+    .cat-modal-body {
+        grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)) !important;
+        gap: 8px !important;
+        padding: 12px 14px !important;
+    }
+    .cat-card {
+        border-radius: 12px !important;
+    }
+    .cat-card .cat-card-bg {
+        height: 55px !important;
+        border-radius: 10px 10px 0 0 !important;
+    }
+    .cat-card .cat-card-emoji {
+        font-size: 1.8rem !important;
+    }
+    .cat-card .cat-card-name {
+        font-size: 0.72rem !important;
+        padding: 6px 6px 7px !important;
+        min-height: 32px !important;
+        border-radius: 0 0 10px 10px !important;
+    }
+}
+
+/* Mobile muy chico */
+@media (max-width: 380px) {
+    .cat-modal-body {
+        grid-template-columns: repeat(auto-fill, minmax(84px, 1fr)) !important;
+    }
+    .cat-card .cat-card-bg {
+        height: 48px !important;
+    }
+    .cat-card .cat-card-emoji {
+        font-size: 1.55rem !important;
+    }
+    .cat-card .cat-card-name {
+        font-size: 0.68rem !important;
+        min-height: 30px !important;
+    }
+}
+
+/* ============================================================
+   MOBILE - los pills pueden volver a ser mas grandes (touch)
+   ============================================================ */
+@media (max-width: 768px) {
+    .header-actions-row .search-bar {
+        height: 38px !important;
+        max-width: none !important;
+    }
+    .header-actions-row .search-bar input {
+        font-size: 0.85rem !important;
+    }
+    .header-actions-row .header-filters .filter select {
+        height: 38px !important;
+        font-size: 0.85rem !important;
+    }
+    .header-cart-link {
+        padding: 6px 14px !important;
+        font-size: 0.85rem !important;
+    }
+    .header-cart-link .cart-count-badge {
+        font-size: 0.72rem !important;
+    }
+}
+
+/* ============================================================
+   MOBILE HEADER CLEAN FINAL
+   Fila 1: buscador + boton Filtros
+   Panel: select comercios + boton categorias (ancho completo)
+   ============================================================ */
+@media (max-width: 768px) {
+
+    /* ============ FILA 1 ============ */
+    header .container.header-container .header-actions-row,
+    .header-actions-row {
+        display: flex !important;
+        flex-wrap: wrap !important;
+        align-items: center !important;
+        gap: 6px !important;
+        width: 100% !important;
+    }
+
+    /* Buscador: se queda con el espacio disponible */
+    header .container.header-container .header-actions-row .search-bar,
+    .header-actions-row .search-bar {
+        flex: 1 1 auto !important;
+        min-width: 0 !important;
+        max-width: none !important;
+        width: auto !important;
+        height: 34px !important;
+    }
+    .header-actions-row .search-bar input {
+        font-size: 0.75rem !important;
+        padding: 0 10px !important;
+    }
+    .header-actions-row .search-bar button {
+        font-size: 0.78rem !important;
+        padding: 0 10px !important;
+    }
+
+    /* Boton Filtros: tamano justo */
+    header .container.header-container .header-actions-row .filters-toggle,
+    .header-actions-row .filters-toggle {
+        display: block !important;
+        flex: 0 0 auto !important;
+        height: 34px !important;
+        padding: 0 12px !important;
+        font-size: 0.75rem !important;
+        white-space: nowrap !important;
+    }
+
+    /* Visible al abrir: SIEMPRE fila 2, ancho completo */
+    header .container.header-container .header-actions-row .header-filters.open,
+    .header-actions-row .header-filters.open {
+        display: flex !important;
+        flex-direction: column !important;
+        flex-wrap: nowrap !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        flex: 0 0 100% !important;
+        gap: 6px !important;
+        padding: 8px 0 0 0 !important;
+        margin-top: 4px !important;
+        border-top: 1px solid rgba(255,255,255,0.15) !important;
+        box-sizing: border-box !important;
+    }
+
+    /* Cada filter: ancho completo */
+    .header-filters.open .filter,
+    .header-filters.open .filter.category-filter-wrap {
+        width: 100% !important;
+        max-width: 100% !important;
+        flex: 0 0 100% !important;
+        display: block !important;
+    }
+
+    /* Select comercios: ancho completo */
+    .header-filters.open .filter select,
+    .header-filters.open #storeFilter {
+        width: 100% !important;
+        max-width: 100% !important;
+        height: 36px !important;
+        font-size: 0.82rem !important;
+        padding: 0 12px !important;
+        box-sizing: border-box !important;
+    }
+
+    /* Boton categorias: ancho completo */
+    .header-filters.open .category-open-btn,
+    .header-filters.open .category-filter-wrap .category-open-btn {
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        height: 36px !important;
+        padding: 0 14px !important;
+        font-size: 0.82rem !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        box-sizing: border-box !important;
+        border-radius: 50px !important;
+        flex: 0 0 auto !important;
+    }
+
+    /* Texto del boton categorias */
+    .header-filters.open .category-open-btn #categoryBtnLabel {
+        font-size: 0.82rem !important;
+        color: white !important;
+        white-space: nowrap !important;
+        overflow: visible !important;
+        max-width: none !important;
+    }
+}
+
+/* ============================================================
+   MOBILE FINAL 3-IN-ROW
+   Fila unica: [Buscador] [Comercios] [Categorias]
+   Sin boton "Filtros" (no se necesita)
+   ============================================================ */
+@media (max-width: 768px) {
+
+    /* === FILA PRINCIPAL === */
+    header .container.header-container .header-actions-row,
+    .header-actions-row {
+        display: flex !important;
+        flex-direction: row !important;
+        flex-wrap: nowrap !important;
+        align-items: center !important;
+        gap: 4px !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+    }
+
+    /* === BUSCADOR: toma el espacio sobrante === */
+    header .container.header-container .header-actions-row .search-bar,
+    .header-actions-row .search-bar {
+        flex: 1 1 0 !important;
+        width: auto !important;
+        min-width: 80px !important;
+        max-width: none !important;
+        height: 34px !important;
+        box-sizing: border-box !important;
+    }
+    .header-actions-row .search-bar input {
+        font-size: 0.7rem !important;
+        padding: 0 8px !important;
+        min-width: 0 !important;
+    }
+    .header-actions-row .search-bar button {
+        font-size: 0.72rem !important;
+        padding: 0 8px !important;
+    }
+
+    /* === BOTON FILTROS: OCULTO === */
+    header .container.header-container .header-actions-row .filters-toggle,
+    .header-actions-row .filters-toggle {
+        display: none !important;
+    }
+
+    /* === PANEL DE FILTROS: NO es panel, es parte de la fila === */
+    header .container.header-container .header-actions-row .header-filters,
+    .header-actions-row .header-filters,
+    .header-actions-row .header-filters.open,
+    .header-filters,
+    .header-filters.open {
+        display: flex !important;
+        flex-direction: row !important;
+        flex-wrap: nowrap !important;
+        gap: 4px !important;
+        width: auto !important;
+        max-width: none !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        border: none !important;
+        flex: 0 0 auto !important;
+        box-sizing: border-box !important;
+    }
+
+    /* Cada filter dentro del panel: tamaño justo, sin estirarse */
+    .header-filters .filter,
+    .header-actions-row .header-filters .filter,
+    .header-filters .filter.category-filter-wrap,
+    .header-actions-row .header-filters .filter.category-filter-wrap {
+        display: inline-block !important;
+        width: auto !important;
+        max-width: none !important;
+        min-width: 0 !important;
+        flex: 0 0 auto !important;
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+
+    /* === SELECT COMERCIOS: 82px === */
+    .header-filters .filter:not(.category-filter-wrap) select,
+    .header-actions-row .header-filters .filter:not(.category-filter-wrap) select,
+    .header-filters #storeFilter,
+    .header-actions-row #storeFilter {
+        width: 82px !important;
+        min-width: 82px !important;
+        max-width: 82px !important;
+        height: 34px !important;
+        font-size: 0.68rem !important;
+        padding: 0 4px !important;
+        box-sizing: border-box !important;
+        border-radius: 50px !important;
+    }
+
+    /* === BOTON CATEGORIAS: 148px === */
+    .header-actions-row .header-filters .category-filter-wrap,
+    .header-filters .category-filter-wrap {
+        width: 148px !important;
+        min-width: 148px !important;
+        max-width: 148px !important;
+        flex: 0 0 148px !important;
+    }
+
+    .header-actions-row .header-filters .category-filter-wrap .category-open-btn,
+    .header-filters .category-filter-wrap .category-open-btn,
+    .header-actions-row .category-open-btn,
+    .header-filters .category-open-btn {
+        width: 100% !important;
+        min-width: 100% !important;
+        max-width: 100% !important;
+        height: 34px !important;
+        padding: 0 8px !important;
+        font-size: 0.68rem !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        box-sizing: border-box !important;
+        border-radius: 50px !important;
+        overflow: visible !important;
+        flex: 0 0 auto !important;
+    }
+
+    .header-actions-row .header-filters .category-filter-wrap .category-open-btn #categoryBtnLabel,
+    .header-filters .category-filter-wrap .category-open-btn #categoryBtnLabel {
+        font-size: 0.68rem !important;
+        font-weight: 600 !important;
+        color: white !important;
+        display: inline-block !important;
+        white-space: nowrap !important;
+        max-width: none !important;
+        overflow: visible !important;
+        line-height: 1 !important;
+    }
+}
+
+/* ============================================================
+   MOBILE FORCE PANEL VISIBLE
+   El panel de filtros es SIEMPRE visible en mobile.
+   ============================================================ */
+@media (max-width: 768px) {
+    header .container.header-container .header-actions-row .header-filters,
+    header .container.header-container .header-filters,
+    .header-actions-row .header-filters,
+    .header-filters,
+    .header-filters.open,
+    .header-filters:not(.open) {
+        display: flex !important;
+        flex-direction: row !important;
+        flex-wrap: nowrap !important;
+        align-items: center !important;
+        gap: 4px !important;
+        width: auto !important;
+        max-width: none !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        border: none !important;
+        flex: 0 0 auto !important;
+        box-sizing: border-box !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+    }
+    .filters-toggle {
+        display: none !important;
     }
 }

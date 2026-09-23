@@ -18,8 +18,10 @@ class ProductCreateView(RoleContextMixin, ManagerRequiredMixin, CreateView):
         return super().form_valid(form)
 
     def get_context_data(self, **kwargs):
+        from apps.products.models import Category
         context = super().get_context_data(**kwargs)
         context["store"] = self.get_store()
+        context["categories"] = Category.objects.filter(is_active=True).order_by('order', 'name')
         return context
 
 class ProductUpdateView(RoleContextMixin, ManagerRequiredMixin, UpdateView):
@@ -37,8 +39,10 @@ class ProductUpdateView(RoleContextMixin, ManagerRequiredMixin, UpdateView):
         return super().form_valid(form)
 
     def get_context_data(self, **kwargs):
+        from apps.products.models import Category
         context = super().get_context_data(**kwargs)
         context["store"] = self.get_store()
+        context["categories"] = Category.objects.filter(is_active=True).order_by('order', 'name')
         return context
 
 class ProductDeleteView(RoleContextMixin, OwnerRequiredMixin, DeleteView):
@@ -56,6 +60,8 @@ class ProductDeleteView(RoleContextMixin, OwnerRequiredMixin, DeleteView):
         return super().delete(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
+        from apps.products.models import Category
         context = super().get_context_data(**kwargs)
         context["store"] = self.get_store()
+        context["categories"] = Category.objects.filter(is_active=True).order_by('order', 'name')
         return context

@@ -4,22 +4,215 @@
 
 {% block content %}
 <style>
-    .schedule-wrap { max-width: 900px; }
-    .info-box {
-        background: #eaf2f8;
-        border-left: 4px solid #3498db;
-        padding: 14px 18px;
-        border-radius: 8px;
+    .schedule-wrap { max-width: 1000px; }
+
+    /* ============ TOGGLE 24/7 ============ */
+    .toggle-247-box {
+        background: linear-gradient(135deg, #eafaf1, #d5f4e6);
+        border: 2px solid #2ecc71;
+        border-radius: 12px;
+        padding: 16px 20px;
         margin-bottom: 20px;
-        font-size: 0.9rem;
-        color: #21618c;
-        line-height: 1.5;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        flex-wrap: wrap;
     }
+    .toggle-247-box.active {
+        background: linear-gradient(135deg, #2ecc71, #27ae60);
+        border-color: #27ae60;
+        color: white;
+        box-shadow: 0 6px 20px rgba(46, 204, 113, 0.35);
+    }
+    .toggle-247-label {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        cursor: pointer;
+        font-weight: 700;
+        font-size: 1rem;
+        color: #1e8449;
+        user-select: none;
+    }
+    .toggle-247-box.active .toggle-247-label { color: white; }
+    .toggle-247-label input[type="checkbox"] {
+        display: none;
+    }
+    .switch {
+        position: relative;
+        width: 56px;
+        height: 30px;
+        background: #ccc;
+        border-radius: 30px;
+        transition: background 0.3s;
+        flex-shrink: 0;
+    }
+    .switch::after {
+        content: "";
+        position: absolute;
+        top: 3px;
+        left: 3px;
+        width: 24px;
+        height: 24px;
+        background: white;
+        border-radius: 50%;
+        transition: transform 0.3s;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    }
+    .toggle-247-label input:checked + .switch {
+        background: #27ae60;
+    }
+    .toggle-247-label input:checked + .switch::after {
+        transform: translateX(26px);
+    }
+    .toggle-247-info {
+        font-size: 0.82rem;
+        opacity: 0.85;
+        line-height: 1.3;
+    }
+
+    /* ============ APLICAR RAPIDO (tipo alarma) ============ */
+    .quick-apply {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        padding: 16px 20px;
+        margin-bottom: 20px;
+        border-left: 4px solid #e94560;
+    }
+    .quick-apply h3 {
+        margin: 0 0 4px;
+        font-size: 1rem;
+        color: #1a1a2e;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .quick-apply .hint {
+        font-size: 0.8rem;
+        color: #7f8c8d;
+        margin: 0 0 14px;
+    }
+    .qa-row {
+        display: grid;
+        grid-template-columns: 110px 1fr;
+        gap: 12px;
+        align-items: center;
+        margin-bottom: 10px;
+    }
+    .qa-row label {
+        font-weight: 600;
+        font-size: 0.85rem;
+        color: #34495e;
+    }
+    .qa-times {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+    .qa-times input[type="time"] {
+        padding: 6px 8px;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        font-family: inherit;
+        font-size: 0.85rem;
+        width: 110px;
+    }
+    .qa-times .dash { color: #95a5a6; }
+
+    .qa-days {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+        margin: 14px 0 6px;
+    }
+    .qa-day {
+        padding: 7px 12px;
+        border: 2px solid #ddd;
+        background: white;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 700;
+        font-size: 0.82rem;
+        color: #7f8c8d;
+        transition: all 0.15s;
+        min-width: 42px;
+        text-align: center;
+        user-select: none;
+    }
+    .qa-day:hover { border-color: #e94560; color: #e94560; }
+    .qa-day.active {
+        background: #e94560;
+        border-color: #e94560;
+        color: white;
+        transform: translateY(-1px);
+        box-shadow: 0 3px 8px rgba(233, 69, 96, 0.3);
+    }
+    .qa-shortcuts {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin-bottom: 12px;
+    }
+    .qa-shortcut {
+        padding: 4px 10px;
+        background: #f0f2f5;
+        border: 1px solid #e1e4e8;
+        border-radius: 20px;
+        font-size: 0.74rem;
+        color: #555;
+        cursor: pointer;
+        font-family: inherit;
+        transition: background 0.15s;
+    }
+    .qa-shortcut:hover { background: #e1e4e8; }
+
+    .qa-actions {
+        display: flex;
+        gap: 10px;
+        margin-top: 6px;
+        flex-wrap: wrap;
+        align-items: center;
+    }
+    .btn-apply {
+        padding: 10px 20px;
+        background: #e94560;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-weight: 700;
+        font-size: 0.88rem;
+        cursor: pointer;
+        font-family: inherit;
+        transition: background 0.2s;
+    }
+    .btn-apply:hover { background: #c0392b; }
+    .btn-apply:disabled {
+        background: #ccc;
+        cursor: not-allowed;
+    }
+    .qa-feedback {
+        font-size: 0.8rem;
+        color: #27ae60;
+        font-weight: 600;
+        opacity: 0;
+        transition: opacity 0.3s;
+    }
+    .qa-feedback.show { opacity: 1; }
+
+    /* ============ TABLA DE HORARIOS ============ */
     .schedule-table {
         background: white;
         border-radius: 12px;
         overflow: hidden;
         box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+    .schedule-table.dimmed {
+        opacity: 0.45;
+        pointer-events: none;
+        transition: opacity 0.3s;
     }
     .day-row {
         display: grid;
@@ -111,7 +304,13 @@
         font-size: 0.9rem;
         align-self: center;
     }
+
+    /* ============ RESPONSIVE ============ */
     @media (max-width: 768px) {
+        .toggle-247-box { padding: 12px 14px; }
+        .toggle-247-label { font-size: 0.9rem; }
+        .qa-row { grid-template-columns: 1fr; gap: 4px; }
+        .qa-times input[type="time"] { flex: 1; width: auto; min-width: 90px; }
         .day-row {
             grid-template-columns: 1fr;
             gap: 8px;
@@ -135,16 +334,78 @@
 <div class="schedule-wrap">
     <h1>🕐 Horario de atención</h1>
 
-    <div class="info-box">
-        <strong>ℹ️ Cómo funciona:</strong> Configura tu horario semanal para retiro en tienda
-        y delivery. Los clientes solo podrán hacer pedidos dentro del horario configurado.
-        Si dejas un día sin horario, se considerará <strong>cerrado</strong>.
-    </div>
-
-    <form method="post">
+    <form method="post" id="schedule-form">
         {% csrf_token %}
 
-        <div class="schedule-table">
+        {# ============ TOGGLE 24/7 ============ #}
+        <div class="toggle-247-box {% if store.has_24_7_schedule %}active{% endif %}" id="toggle-247-box">
+            <label class="toggle-247-label" for="has_24_7_schedule">
+                <input type="checkbox"
+                       id="has_24_7_schedule"
+                       name="has_24_7_schedule"
+                       {% if store.has_24_7_schedule %}checked{% endif %}>
+                <span class="switch"></span>
+                <span>🕐 Atiendo 24/7 — Abierto todos los días, todas las horas</span>
+            </label>
+            <div class="toggle-247-info" id="toggle-247-info">
+                {% if store.has_24_7_schedule %}
+                    ✅ Los horarios individuales están desactivados
+                {% else %}
+                    Actívalo si abres siempre. Se ignora la tabla de abajo.
+                {% endif %}
+            </div>
+        </div>
+
+        {# ============ APLICAR RAPIDO (tipo alarma) ============ #}
+        <div class="quick-apply">
+            <h3>⚡ Aplicar horario rápido a varios días</h3>
+            <p class="hint">Elige un horario, marca los días y presiona Aplicar. Se rellenan los campos de abajo automáticamente.</p>
+
+            <div class="qa-row">
+                <label>🏪 Retiro</label>
+                <div class="qa-times">
+                    <input type="time" id="qa-pickup-open" value="08:00">
+                    <span class="dash">→</span>
+                    <input type="time" id="qa-pickup-close" value="20:00">
+                </div>
+            </div>
+
+            <div class="qa-row">
+                <label>🛵 Delivery</label>
+                <div class="qa-times">
+                    <input type="time" id="qa-delivery-open" value="08:00">
+                    <span class="dash">→</span>
+                    <input type="time" id="qa-delivery-close" value="20:00">
+                </div>
+            </div>
+
+            <div style="margin-top:12px;">
+                <label style="font-size:0.85rem; font-weight:600; color:#34495e;">📅 Días a aplicar:</label>
+                <div class="qa-days" id="qa-days">
+                    <div class="qa-day" data-day="0">Lun</div>
+                    <div class="qa-day" data-day="1">Mar</div>
+                    <div class="qa-day" data-day="2">Mié</div>
+                    <div class="qa-day" data-day="3">Jue</div>
+                    <div class="qa-day" data-day="4">Vie</div>
+                    <div class="qa-day" data-day="5">Sáb</div>
+                    <div class="qa-day" data-day="6">Dom</div>
+                </div>
+                <div class="qa-shortcuts">
+                    <button type="button" class="qa-shortcut" data-preset="weekdays">Lun–Vie</button>
+                    <button type="button" class="qa-shortcut" data-preset="weekend">Sáb + Dom</button>
+                    <button type="button" class="qa-shortcut" data-preset="all">Todos</button>
+                    <button type="button" class="qa-shortcut" data-preset="none">Ninguno</button>
+                </div>
+            </div>
+
+            <div class="qa-actions">
+                <button type="button" class="btn-apply" id="btn-apply">✨ Aplicar a días seleccionados</button>
+                <span class="qa-feedback" id="qa-feedback">✅ Aplicado</span>
+            </div>
+        </div>
+
+        {# ============ TABLA DE HORARIOS POR DÍA ============ #}
+        <div class="schedule-table {% if store.has_24_7_schedule %}dimmed{% endif %}" id="schedule-table">
             <div class="day-row header">
                 <div>Día</div>
                 <div>🏪 Retiro en tienda</div>
@@ -161,7 +422,7 @@
                         <div class="time-inputs">
                             <input type="time"
                                    name="day_{{ sched.day_of_week }}_pickup_open"
-                                   value="{% if sched.pickup_open %}{{ sched.pickup_open|time:'H:i' }}{% endif %}">
+                                   value="{% if sched.pickup_open %}{{ sched.pickup_open|time:'H:i'}}{% endif %}">
                             <span class="dash">→</span>
                             <input type="time"
                                    name="day_{{ sched.day_of_week }}_pickup_close"
@@ -205,10 +466,114 @@
 </div>
 
 <script>
+    /* ============================================================
+       TOGGLE 24/7 - cambia el estilo visual y atenua la tabla
+       ============================================================ */
+    (function () {
+        var toggle = document.getElementById('has_24_7_schedule');
+        var box = document.getElementById('toggle-247-box');
+        var info = document.getElementById('toggle-247-info');
+        var table = document.getElementById('schedule-table');
+        if (!toggle) return;
+
+        toggle.addEventListener('change', function () {
+            if (toggle.checked) {
+                box.classList.add('active');
+                table.classList.add('dimmed');
+                info.textContent = '✅ Los horarios individuales están desactivados';
+            } else {
+                box.classList.remove('active');
+                table.classList.remove('dimmed');
+                info.textContent = 'Actívalo si abres siempre. Se ignora la tabla de abajo.';
+            }
+        });
+    })();
+
+    /* ============================================================
+       CERRAR DIA (individual)
+       ============================================================ */
     function toggleDay(dayNum) {
         var row = document.getElementById('row-' + dayNum);
         var isClosed = document.getElementById('closed_' + dayNum).checked;
         row.classList.toggle('closed', isClosed);
     }
+
+    /* ============================================================
+       APLICAR RAPIDO (tipo alarma)
+       ============================================================ */
+    (function () {
+        var days = document.querySelectorAll('.qa-day');
+        var btnApply = document.getElementById('btn-apply');
+        var feedback = document.getElementById('qa-feedback');
+
+        // Toggle de dias
+        days.forEach(function (d) {
+            d.addEventListener('click', function () {
+                d.classList.toggle('active');
+            });
+        });
+
+        // Atajos
+        document.querySelectorAll('.qa-shortcut').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                var preset = btn.dataset.preset;
+                days.forEach(function (d) {
+                    var day = parseInt(d.dataset.day);
+                    var on = false;
+                    if (preset === 'weekdays') on = day >= 0 && day <= 4;
+                    else if (preset === 'weekend') on = day >= 5;
+                    else if (preset === 'all') on = true;
+                    else if (preset === 'none') on = false;
+                    d.classList.toggle('active', on);
+                });
+            });
+        });
+
+        // Aplicar
+        btnApply.addEventListener('click', function () {
+            var selected = [];
+            days.forEach(function (d) {
+                if (d.classList.contains('active')) selected.push(parseInt(d.dataset.day));
+            });
+
+            if (selected.length === 0) {
+                feedback.textContent = '⚠️ Marca al menos un día';
+                feedback.style.color = '#e74c3c';
+                feedback.classList.add('show');
+                setTimeout(function () { feedback.classList.remove('show'); }, 2000);
+                return;
+            }
+
+            var pOpen = document.getElementById('qa-pickup-open').value;
+            var pClose = document.getElementById('qa-pickup-close').value;
+            var dOpen = document.getElementById('qa-delivery-open').value;
+            var dClose = document.getElementById('qa-delivery-close').value;
+
+            selected.forEach(function (day) {
+                var pO = document.querySelector('[name="day_' + day + '_pickup_open"]');
+                var pC = document.querySelector('[name="day_' + day + '_pickup_close"]');
+                var dO = document.querySelector('[name="day_' + day + '_delivery_open"]');
+                var dC = document.querySelector('[name="day_' + day + '_delivery_close"]');
+                var closedCb = document.getElementById('closed_' + day);
+
+                if (pO) pO.value = pOpen;
+                if (pC) pC.value = pClose;
+                if (dO) dO.value = dOpen;
+                if (dC) dC.value = dClose;
+
+                // Desmarcar "Cerrado" y actualizar estilo
+                if (closedCb && closedCb.checked) {
+                    closedCb.checked = false;
+                    toggleDay(day);
+                }
+            });
+
+            // Feedback visual
+            feedback.textContent = '✅ Aplicado a ' + selected.length + ' día(s)';
+            feedback.style.color = '#27ae60';
+            feedback.classList.add('show');
+            setTimeout(function () { feedback.classList.remove('show'); }, 2500);
+        });
+    })();
 </script>
 {% endblock %}

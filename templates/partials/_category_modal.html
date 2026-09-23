@@ -1,0 +1,63 @@
+{% load static %}
+{# ============================================================
+   PARCIAL: Modal de categorias reutilizable
+   Parametros (via {% include ... with ... %}):
+     - categories: queryset de Category
+     - select_name: nombre del select oculto (default: "category")
+     - value_field: "pk" o "slug" (default: "slug")
+     - current_value: valor actual (opcional, para preseleccionar)
+     - empty_label: texto de la opcion vacia (default: "Sin categoria")
+     - btn_default: texto por defecto del boton
+   ============================================================ #}
+
+<div class="filter category-filter-wrap">
+    <button type="button" class="category-open-btn" id="categoryOpenBtn">
+        <span id="categoryBtnLabel">{{ btn_default|default:"Categorías" }}</span>
+    </button>
+    <select name="{{ select_name|default:'category' }}" id="categoryFilter" class="hidden-category-select">
+        <option value="">{{ empty_label|default:"Sin categoría" }}</option>
+        {% for cat in categories %}
+            <option value="{% if value_field == 'pk' %}{{ cat.id }}{% else %}{{ cat.slug }}{% endif %}"
+                    data-id="{{ cat.id }}"
+                    data-slug="{{ cat.slug }}"
+                    {% if current_value == cat.slug or current_value|stringformat:"s" == cat.id|stringformat:"s" %}selected{% endif %}>
+                {{ cat.emoji }} {{ cat.name }}
+            </option>
+        {% endfor %}
+    </select>
+</div>
+
+<div class="cat-modal-overlay" id="catModalOverlay" aria-hidden="true">
+    <div class="cat-modal" role="dialog" aria-labelledby="catModalTitle">
+        <div class="cat-modal-header">
+            <h2 id="catModalTitle">📂 Categorías</h2>
+            <button type="button" class="cat-modal-close" id="catModalClose" aria-label="Cerrar">✕</button>
+        </div>
+        <div class="cat-modal-search">
+            <input type="text" id="catSearchInput" placeholder="Buscar categoría...">
+        </div>
+        <div class="cat-modal-body" id="catModalBody">
+            <div class="cat-card" data-slug="" data-name="todas">
+                <div class="cat-card-bg" style="background: linear-gradient(135deg, #e94560, #c0392b);">
+                    <span class="cat-card-emoji">🛍️</span>
+                </div>
+                <span class="cat-card-name">Todas</span>
+            </div>
+            {% for cat in categories %}
+                <div class="cat-card"
+                     data-slug="{{ cat.slug }}"
+                     data-id="{{ cat.id }}"
+                     data-name="{{ cat.name|lower }}">
+                    <div class="cat-card-bg"
+                         {% if cat.image %}style="background-image: url('{{ cat.image.url }}');"{% else %}style="background: {{ cat.color }};"{% endif %}>
+                        <span class="cat-card-emoji">{% if not cat.image %}{{ cat.emoji }}{% endif %}</span>
+                    </div>
+                    <span class="cat-card-name">{{ cat.name }}</span>
+                </div>
+            {% endfor %}
+        </div>
+        <div class="cat-modal-footer">
+            <button type="button" class="cat-clear-btn" id="catClearBtn">Limpiar categoría</button>
+        </div>
+    </div>
+</div>

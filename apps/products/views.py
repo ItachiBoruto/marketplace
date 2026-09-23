@@ -13,7 +13,7 @@ from apps.stores.models import Store
 # ===== PÁGINA PRINCIPAL (PROTEGIDA) =====
 def product_list(request):
     """Página principal: muestra todos los productos disponibles (solo para usuarios autenticados)."""
-    products = Product.objects.filter(is_available=True).select_related('store')
+    products = Product.objects.filter(is_available=True).select_related('store', 'category')
     
     # Búsqueda
     q = request.GET.get('q')
@@ -43,8 +43,10 @@ def product_list(request):
         products = products.order_by('name')
     
     stores = Store.objects.filter(is_active=True)
-    categories = Product.objects.filter(is_available=True).values_list('name', flat=True).distinct()
-    
+    # Categorias reales (modelo Category), no nombres de productos
+    from .models import Category
+    categories = Category.objects.filter(is_active=True).order_by('order', 'name')
+
     context = {
         'products': products,
         'stores': stores,
@@ -119,7 +121,7 @@ class ProductListAPI(APIView):
     throttle_classes = [CatalogAnonThrottle, CatalogUserThrottle]
 
     def get(self, request):
-        products = Product.objects.filter(is_available=True).select_related('store')
+        products = Product.objects.filter(is_available=True).select_related('store', 'category')
         
         search = request.GET.get('search', '')
         if search:
@@ -134,7 +136,7 @@ class ProductListAPI(APIView):
         
         category = request.GET.get('category', '')
         if category:
-            products = products.filter(name__icontains=category)
+            products = products.filter(category__slug=category)
         
         sort = request.GET.get('sort')
         if sort == 'price':

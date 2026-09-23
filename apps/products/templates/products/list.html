@@ -55,20 +55,15 @@
                             {% endfor %}
                         </select>
                     </div>
-                    <div class="filter">
-                        <select id="categoryFilter">
+                    <div class="filter category-filter-wrap">
+                        <button type="button" class="category-open-btn" id="categoryOpenBtn">
+                            <span id="categoryBtnLabel">Categorías</span>
+                        </button>
+                        <select id="categoryFilter" class="hidden-category-select">
                             <option value="">Todas las categorías</option>
-                            {% for category in categories %}
-                                <option value="{{ category }}">{{ category }}</option>
+                            {% for cat in categories %}
+                                <option value="{{ cat.slug }}">{{ cat.emoji }} {{ cat.name }}</option>
                             {% endfor %}
-                        </select>
-                    </div>
-                    <div class="filter">
-                        <select id="sortFilter">
-                            <option value="name">Orden alfabético</option>
-                            <option value="price">Menor precio</option>
-                            <option value="-price">Mayor precio</option>
-                            <option value="-created_at">Más recientes</option>
                         </select>
                     </div>
                 </div>
@@ -83,6 +78,39 @@
                 Cargando más productos...
             </div>
         </div>
+    
+        <!-- ============ MODAL DE CATEGORIAS ============ -->
+        <div class="cat-modal-overlay" id="catModalOverlay" aria-hidden="true">
+            <div class="cat-modal" role="dialog" aria-labelledby="catModalTitle">
+                <div class="cat-modal-header">
+                    <h2 id="catModalTitle">📂 Categorías</h2>
+                    <button type="button" class="cat-modal-close" id="catModalClose" aria-label="Cerrar">✕</button>
+                </div>
+                <div class="cat-modal-search">
+                    <input type="text" id="catSearchInput" placeholder="Buscar categoría...">
+                </div>
+                <div class="cat-modal-body" id="catModalBody">
+                    <div class="cat-card" data-slug="" data-name="todas" data-tooltip="Todas las categorias">
+                        <div class="cat-card-bg" style="background: linear-gradient(135deg, #e94560, #c0392b);">
+                            <span class="cat-card-emoji">🛍️</span>
+                        </div>
+                        <span class="cat-card-name">Todas</span>
+                    </div>
+                    {% for cat in categories %}
+                        <div class="cat-card" data-slug="{{ cat.slug }}" data-name="{{ cat.name|lower }}" data-tooltip="{{ cat.emoji }} {{ cat.name }}">
+                            <div class="cat-card-bg"
+                                 {% if cat.image %}style="background-image: url('{{ cat.image.url }}');"{% else %}style="background: {{ cat.color }};"{% endif %}>
+                                <span class="cat-card-emoji">{% if not cat.image %}{{ cat.emoji }}{% endif %}</span>
+                            </div>
+                            <span class="cat-card-name">{{ cat.name }}</span>
+                        </div>
+                    {% endfor %}
+                </div>
+                <div class="cat-modal-footer">
+                    <button type="button" class="cat-clear-btn" id="catClearBtn">Limpiar filtro</button>
+                </div>
+            </div>
+        </div>
     </main>
 
     <script>
@@ -93,7 +121,6 @@
         const searchBtn = document.getElementById('searchBtn');
         const storeFilter = document.getElementById('storeFilter');
         const categoryFilter = document.getElementById('categoryFilter');
-        const sortFilter = document.getElementById('sortFilter');
 
         // ===== TOGGLES MÓVIL =====
         const menuToggle = document.getElementById('menuToggle');
@@ -223,7 +250,7 @@
             currentSearch = searchInput.value.trim();
             currentStore = storeFilter.value;
             currentCategory = categoryFilter.value;
-            currentSort = sortFilter.value;
+            currentSort = 'name'; // Orden fijo: alfabetico
             loading.textContent = 'Cargando más productos...';
             loading.style.display = 'block';
             loadProducts(1, currentSearch, currentStore, currentCategory, currentSort);
@@ -233,9 +260,121 @@
         searchInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') performSearch(); });
         storeFilter.addEventListener('change', performSearch);
         categoryFilter.addEventListener('change', performSearch);
-        sortFilter.addEventListener('change', performSearch);
 
         loadProducts(1, '', '', '', 'name');
+
+        /* ============================================================
+           CAT-MODAL-JS - Modal de categorias
+           ============================================================ */
+        (function () {
+            var openBtn = document.getElementById('categoryOpenBtn');
+            var btnLabel = document.getElementById('categoryBtnLabel');
+            var overlay = document.getElementById('catModalOverlay');
+            var closeBtn = document.getElementById('catModalClose');
+            var clearBtn = document.getElementById('catClearBtn');
+            var searchInp = document.getElementById('catSearchInput');
+            var body = document.getElementById('catModalBody');
+            var sel = document.getElementById('categoryFilter');
+            if (!openBtn || !overlay || !sel) return;
+
+            function syncLabel() {
+                var val = sel.value;
+                if (!val) {
+                    btnLabel.textContent = 'Categorías';
+                    openBtn.classList.remove('has-filter');
+                    return;
+                }
+                var opt = sel.querySelector('option[value="' + val + '"]');
+                if (opt) {
+                    btnLabel.textContent = opt.textContent.trim();
+                    openBtn.classList.add('has-filter');
+                }
+            }
+
+            function markSelected(slug) {
+                document.querySelectorAll('.cat-card').forEach(function (c) {
+                    c.classList.toggle('selected', c.dataset.slug === slug);
+                });
+            }
+
+            function openModal() {
+                overlay.classList.add('open');
+                overlay.setAttribute('aria-hidden', 'false');
+                document.body.style.overflow = 'hidden';
+                markSelected(sel.value);
+                if (searchInp) {
+                    searchInp.value = '';
+                    document.querySelectorAll('.cat-card').forEach(function (c) {
+                        c.classList.remove('hidden');
+                    });
+                }
+                setTimeout(function () { if (searchInp) searchInp.focus(); }, 200);
+            }
+
+            function closeModal() {
+                overlay.classList.remove('open');
+                overlay.setAttribute('aria-hidden', 'true');
+                document.body.style.overflow = '';
+            }
+
+            function applyCategory(slug) {
+                sel.value = slug;
+                sel.dispatchEvent(new Event('change', { bubbles: true }));
+                syncLabel();
+                closeModal();
+            }
+
+            // Abrir
+            openBtn.addEventListener('click', function (e) {
+                e.preventDefault();
+                openModal();
+            });
+
+            // Cerrar: X, overlay, ESC
+            closeBtn.addEventListener('click', closeModal);
+            overlay.addEventListener('click', function (e) {
+                if (e.target === overlay) closeModal();
+            });
+            document.addEventListener('keydown', function (e) {
+                if (e.key === 'Escape' && overlay.classList.contains('open')) closeModal();
+            });
+
+            // Click en tarjeta
+            body.addEventListener('click', function (e) {
+                var card = e.target.closest('.cat-card');
+                if (!card) return;
+                applyCategory(card.dataset.slug);
+            });
+
+            // Limpiar filtro
+            clearBtn.addEventListener('click', function () {
+                applyCategory('');
+            });
+
+            // Busqueda dentro del modal
+            if (searchInp) {
+                searchInp.addEventListener('input', function () {
+                    var q = searchInp.value.trim().toLowerCase();
+                    var visible = 0;
+                    document.querySelectorAll('.cat-card').forEach(function (c) {
+                        var match = !q || (c.dataset.name || '').indexOf(q) !== -1;
+                        c.classList.toggle('hidden', !match);
+                        if (match) visible++;
+                    });
+                    var old = body.querySelector('.cat-no-results');
+                    if (old) old.remove();
+                    if (visible === 0) {
+                        var msg = document.createElement('div');
+                        msg.className = 'cat-no-results';
+                        msg.textContent = 'No se encontraron categorias';
+                        body.appendChild(msg);
+                    }
+                });
+            }
+
+            // Sincronizar el label al cargar (por si el select ya tiene valor)
+            syncLabel();
+        })();
     </script>
     <script src="{% static 'js/notifications.js' %}"></script>
     <script src="/static/js/email-verify-banner.js"></script>

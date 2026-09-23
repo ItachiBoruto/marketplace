@@ -1,13 +1,177 @@
 {% extends 'stores/dashboard/base.html' %}
+{% load static %}
 
 {% block title %}{% if form.instance.pk %}Editar{% else %}Crear{% endif %} producto{% endblock %}
 
 {% block content %}
-<h1>{% if form.instance.pk %}Editar{% else %}Crear{% endif %} producto</h1>
-<form method="post" enctype="multipart/form-data">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit" style="background: #3498db; color: white; border: none; padding: 10px 25px; border-radius: 25px;">Guardar</button>
-    <a href="{% url 'stores:product_list' store.id %}">Cancelar</a>
-</form>
+<style>
+    .pf-wrap { max-width: 780px; margin: 0 auto; }
+    .pf-wrap h1 { font-size: 1.3rem; color: #1a1a2e; margin: 0 0 20px; }
+    .pf-card {
+        background: white;
+        border-radius: 14px;
+        padding: 22px 24px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+    }
+    .pf-row { margin-bottom: 18px; }
+    .pf-row label {
+        display: block;
+        font-weight: 600;
+        font-size: 0.88rem;
+        color: #34495e;
+        margin-bottom: 6px;
+    }
+    .pf-row input[type="text"],
+    .pf-row input[type="number"],
+    .pf-row input[type="file"],
+    .pf-row textarea {
+        width: 100%;
+        padding: 10px 12px;
+        border: 1px solid #dfe3e8;
+        border-radius: 8px;
+        font-family: inherit;
+        font-size: 0.92rem;
+        box-sizing: border-box;
+        transition: border-color 0.2s;
+    }
+    .pf-row input:focus,
+    .pf-row textarea:focus {
+        outline: none;
+        border-color: #e94560;
+    }
+    .pf-row textarea { min-height: 70px; resize: vertical; }
+    .pf-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .pf-help { font-size: 0.78rem; color: #95a5a6; margin-top: 4px; }
+    .pf-actions {
+        display: flex;
+        gap: 12px;
+        margin-top: 24px;
+        align-items: center;
+    }
+    .pf-btn-save {
+        padding: 11px 28px;
+        background: #2ecc71;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-weight: 700;
+        font-size: 0.95rem;
+        cursor: pointer;
+        font-family: inherit;
+        transition: background 0.2s;
+    }
+    .pf-btn-save:hover { background: #27ae60; }
+    .pf-btn-cancel {
+        color: #7f8c8d;
+        text-decoration: none;
+        font-size: 0.9rem;
+    }
+    .pf-btn-cancel:hover { color: #1a1a2e; }
+
+    /* Boton del modal (reutiliza .category-open-btn pero adaptado al ancho) */
+    .pf-wrap .category-filter-wrap {
+        display: block;
+        width: 100%;
+    }
+    .pf-wrap .category-open-btn {
+        width: 100%;
+        justify-content: center;
+        padding: 11px 16px;
+        font-size: 0.95rem;
+        height: auto;
+    }
+    .pf-checkbox-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .pf-checkbox-row input[type="checkbox"] {
+        width: 18px; height: 18px;
+        accent-color: #e94560;
+        cursor: pointer;
+    }
+
+    @media (max-width: 600px) {
+        .pf-card { padding: 16px 14px; }
+        .pf-2col { grid-template-columns: 1fr; }
+    }
+</style>
+
+<div class="pf-wrap">
+    <h1>{% if form.instance.pk %}✏️ Editar producto{% else %}➕ Crear producto{% endif %}</h1>
+
+    <form method="post" enctype="multipart/form-data" class="pf-card" id="productForm">
+        {% csrf_token %}
+
+        {# ============ CATEGORÍA (con modal) ============ #}
+        <div class="pf-row">
+            <label>Categoría</label>
+            {% include 'partials/_category_modal.html' with categories=categories select_name='category' value_field='pk' current_value=form.category.value|default:'' empty_label='Sin categoría' btn_default='Seleccionar categoría' %}
+            <div class="pf-help">Elige la categoría a la que pertenece este producto.</div>
+        </div>
+
+        {# ============ NOMBRE ============ #}
+        <div class="pf-row">
+            <label for="{{ form.name.id_for_label }}">Nombre del producto *</label>
+            {{ form.name }}
+        </div>
+
+        {# ============ PRECIO + STOCK ============ #}
+        <div class="pf-row pf-2col">
+            <div>
+                <label for="{{ form.price.id_for_label }}">Precio ($) *</label>
+                {{ form.price }}
+            </div>
+            <div>
+                <label for="{{ form.stock.id_for_label }}">Stock disponible *</label>
+                {{ form.stock }}
+            </div>
+        </div>
+
+        {# ============ IMAGEN ============ #}
+        <div class="pf-row">
+            <label for="{{ form.image.id_for_label }}">Imagen</label>
+            {{ form.image }}
+            {% if form.instance.image %}
+                <div class="pf-help">Actual: <a href="{{ form.instance.image.url }}" target="_blank">ver imagen</a></div>
+            {% endif %}
+        </div>
+
+        {# ============ DESCRIPCIÓN ============ #}
+        <div class="pf-row">
+            <label for="{{ form.description.id_for_label }}">Descripción</label>
+            {{ form.description }}
+        </div>
+
+        {# ============ INFO ADICIONAL ============ #}
+        <div class="pf-row">
+            <label for="{{ form.additional_info.id_for_label }}">Información adicional</label>
+            {{ form.additional_info }}
+            <div class="pf-help">Ingredientes, medidas, materiales, etc.</div>
+        </div>
+
+        {# ============ KEYWORDS ============ #}
+        <div class="pf-row">
+            <label for="{{ form.keywords.id_for_label }}">Palabras clave</label>
+            {{ form.keywords }}
+            <div class="pf-help">Separadas por comas. Ayudan a que te encuentren en las búsquedas.</div>
+        </div>
+
+        {# ============ DISPONIBLE ============ #}
+        <div class="pf-row pf-checkbox-row">
+            {{ form.is_available }}
+            <label for="{{ form.is_available.id_for_label }}" style="margin: 0; font-weight: 500;">Producto disponible para la venta</label>
+        </div>
+
+        {# ============ ACCIONES ============ #}
+        <div class="pf-actions">
+            <button type="submit" class="pf-btn-save">
+                {% if form.instance.pk %}💾 Guardar cambios{% else %}✅ Crear producto{% endif %}
+            </button>
+            <a href="{% url 'stores:product_list' store.id %}" class="pf-btn-cancel">Cancelar</a>
+        </div>
+    </form>
+</div>
+
+<script src="{% static 'js/category-modal.js' %}"></script>
 {% endblock %}

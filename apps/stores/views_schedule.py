@@ -38,6 +38,12 @@ class ScheduleConfigView(RoleContextMixin, OwnerRequiredMixin, View):
         if not store:
             raise Http404()
 
+        # === Toggle 24/7 ===
+        has_24_7 = request.POST.get('has_24_7_schedule') == 'on'
+        if store.has_24_7_schedule != has_24_7:
+            store.has_24_7_schedule = has_24_7
+            store.save(update_fields=['has_24_7_schedule'])
+
         # Procesar los 7 dias
         errors = []
         for day_num, day_name in StoreSchedule.DAY_CHOICES:
