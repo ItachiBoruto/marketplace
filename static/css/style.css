@@ -2468,3 +2468,111 @@ header nav a:hover {
         font-size: 28px !important;
     }
 }
+
+/* ============================================================
+   TARJETA DE PRODUCTO v2 - Compacta (2025-09-23)
+   Sobrescribe los duplicados anteriores sin borrarlos.
+   ============================================================ */
+
+/* Imagen mas baja */
+.product-card .product-image {
+    height: 130px !important;
+}
+
+/* Info interna mas compacta */
+.product-card .product-info {
+    padding: 10px 12px 12px !important;
+    gap: 3px !important;
+}
+
+/* Nombre del producto - unificamos .product-name y .product-info h3 */
+.product-card .product-name,
+.product-card .product-info h3 {
+    font-size: 0.95rem !important;
+    font-weight: 600 !important;
+    line-height: 1.25 !important;
+    margin: 0 !important;
+    color: var(--text-dark) !important;
+    /* Truncar a 2 lineas maximo con ellipsis */
+    display: -webkit-box !important;
+    -webkit-line-clamp: 2 !important;
+    -webkit-box-orient: vertical !important;
+    overflow: hidden !important;
+    min-height: 2.4em !important; /* reserva 2 lineas siempre */
+}
+
+/* Nombre del comercio */
+.product-card .store-name {
+    font-size: 0.72rem !important;
+    margin: 0 !important;
+    color: var(--text-muted) !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+}
+
+/* Precio - arreglamos el mismatch .price vs .product-price */
+.product-card .price,
+.product-card .product-price {
+    font-size: 1.1rem !important;
+    font-weight: 700 !important;
+    color: var(--highlight-color) !important;
+    margin: 3px 0 !important;
+    line-height: 1.2 !important;
+}
+
+/* Contador de stock */
+.product-card .stock-counter {
+    font-size: 0.7rem !important;
+    margin: 0 !important;
+    line-height: 1.2 !important;
+}
+
+/* Badge AGOTADO / POCO STOCK - un poco mas chico */
+.product-card .stock-badge {
+    font-size: 0.65rem !important;
+    padding: 2px 8px !important;
+    top: 6px !important;
+    left: 6px !important;
+}
+
+/* ============================================================
+   GRID MAS DENSO
+   ============================================================ */
+.product-grid {
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)) !important;
+    gap: 14px !important;
+}
+
+/* ============================================================
+   MOBILE - mas compacto todavia
+   ============================================================ */
+@media (max-width: 640px) {
+    .product-card .product-image {
+        height: 110px !important;
+    }
+    .product-card .product-info {
+        padding: 8px 10px 10px !important;
+        gap: 2px !important;
+    }
+    .product-card .product-name,
+    .product-card .product-info h3 {
+        font-size: 0.85rem !important;
+        min-height: 2.2em !important;
+    }
+    .product-card .store-name {
+        font-size: 0.68rem !important;
+    }
+    .product-card .price,
+    .product-card .product-price {
+        font-size: 1rem !important;
+    }
+    .product-card .stock-counter {
+        font-size: 0.65rem !important;
+    }
+    .product-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 10px !important;
+        padding: 12px 0 !important;
+    }
+}
