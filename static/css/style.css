@@ -2450,3 +2450,21 @@ header nav a:hover {
         max-width: 120px;
     }
 }
+
+/* ============================================================
+   FIX MOBILE v2 - Flying box visible en pantallas pequenas
+   ============================================================ */
+.flying-box {
+    will-change: transform, opacity !important;
+    z-index: 99999 !important;
+    pointer-events: none !important;
+    -webkit-backface-visibility: hidden !important;
+    backface-visibility: hidden !important;
+}
+@media (max-width: 768px) {
+    .flying-box {
+        width: 44px !important;
+        height: 44px !important;
+        font-size: 28px !important;
+    }
+}

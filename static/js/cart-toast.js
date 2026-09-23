@@ -1,8 +1,13 @@
 ﻿/**
  * Cart toast + flying box + feedback visual al agregar productos.
+ * v2 - Optimizado para mobile (fallback a esquina sup. derecha)
  */
 (function () {
     'use strict';
+
+    var IS_MOBILE = window.matchMedia('(max-width: 768px)').matches;
+    var FLY_DURATION = IS_MOBILE ? 550 : 700; // ms
+    var DEBUG = false; // poner true para ver logs en consola
 
     function escapeHtml(str) {
         return String(str || '').replace(/[&<>"']/g, function (c) {
@@ -10,41 +15,86 @@
         });
     }
 
+    function isElementVisible(el) {
+        if (!el) return false;
+        var rect = el.getBoundingClientRect();
+        if (rect.width === 0 || rect.height === 0) return false;
+        var style = window.getComputedStyle(el);
+        if (style.display === 'none' || style.visibility === 'hidden') return false;
+        if (parseFloat(style.opacity) === 0) return false;
+        return true;
+    }
+
     function getCartElement() {
-        return document.querySelector('.header-cart-link') || document.querySelector('a[href="/cart/"]');
+        var selectors = [
+            '.header-cart-link',
+            '.cart-count-badge',
+            'a[href="/cart/"]',
+            'a[href$="/cart/"]',
+            'a[href*="/cart"]'
+        ];
+        for (var i = 0; i < selectors.length; i++) {
+            var nodes = document.querySelectorAll(selectors[i]);
+            for (var j = 0; j < nodes.length; j++) {
+                if (isElementVisible(nodes[j])) return nodes[j];
+            }
+        }
+        return null;
+    }
+
+    function getCartTarget() {
+        var el = getCartElement();
+        if (el) {
+            var r = el.getBoundingClientRect();
+            return { x: r.left + r.width / 2, y: r.top + r.height / 2, element: el, source: 'visible-cart' };
+        }
+        // Fallback: esquina superior derecha (donde suele estar el carrito en mobile)
+        return { x: window.innerWidth - 30, y: 30, element: null, source: 'fallback-corner' };
     }
 
     function flyBoxToCart(fromButton) {
-        var cartEl = getCartElement();
-        if (!cartEl || !fromButton) return;
-
+        if (!fromButton) return;
         var btnRect = fromButton.getBoundingClientRect();
-        var cartRect = cartEl.getBoundingClientRect();
+        if (btnRect.width === 0 || btnRect.height === 0) return;
+
+        var target = getCartTarget();
+        if (DEBUG) console.log('[cart-toast] target:', target.source, target);
+
+        var startX = btnRect.left + btnRect.width / 2;
+        var startY = btnRect.top + btnRect.height / 2;
+        var dx = target.x - startX;
+        var dy = target.y - startY;
 
         var box = document.createElement('div');
         box.className = 'flying-box';
-        box.innerHTML = '\ud83d\udce6';
-        box.style.left = (btnRect.left + btnRect.width / 2 - 20) + 'px';
-        box.style.top = (btnRect.top + btnRect.height / 2 - 20) + 'px';
+        box.textContent = '\ud83d\udce6';
+        box.style.left = (startX - 22) + 'px';
+        box.style.top = (startY - 22) + 'px';
         document.body.appendChild(box);
 
-        var dx = (cartRect.left + cartRect.width / 2) - (btnRect.left + btnRect.width / 2);
-        var dy = (cartRect.top + cartRect.height / 2) - (btnRect.top + btnRect.height / 2);
+        var sec = FLY_DURATION / 1000;
+        box.style.transition =
+            'transform ' + sec + 's cubic-bezier(0.45, 0.05, 0.55, 0.95), ' +
+            'opacity ' + sec + 's ease-in';
 
+        // Doble rAF: garantiza que el navegador registre el estado inicial
+        // antes de aplicar la transform (clave en mobile).
         requestAnimationFrame(function () {
-            box.classList.add('flying-box-animate');
-            box.style.transform = 'translate(' + dx + 'px, ' + dy + 'px) scale(0.4) rotate(360deg)';
-            box.style.opacity = '0.3';
+            requestAnimationFrame(function () {
+                box.style.transform = 'translate(' + dx + 'px, ' + dy + 'px) scale(0.3) rotate(360deg)';
+                box.style.opacity = '0.4';
+            });
         });
 
         setTimeout(function () {
             box.remove();
-            var cartElNow = getCartElement();
-            if (cartElNow) {
-                cartElNow.classList.add('cart-shake');
-                setTimeout(function () { cartElNow.classList.remove('cart-shake'); }, 700);
+            if (target.element) {
+                target.element.classList.add('cart-shake');
+                setTimeout(function () {
+                    if (target.element) target.element.classList.remove('cart-shake');
+                }, 700);
             }
-        }, 750);
+        }, FLY_DURATION + 60);
     }
 
     function showCartToast(productName, cartCount, isError) {
@@ -78,7 +128,7 @@
         }
 
         overlay.classList.add('show');
-        setTimeout(function() { overlay.classList.remove('show'); }, 2400);
+        setTimeout(function () { overlay.classList.remove('show'); }, 2400);
     }
 
     function updateBadge(count) {
@@ -136,16 +186,14 @@
                 btn.textContent = '\u2705 Agregado';
                 btn.classList.add('btn-added-success');
 
-                // Volamos la caja al carrito
                 flyBoxToCart(btn);
 
-                // Mostramos el overlay + actualizamos badge
                 setTimeout(function () {
                     showCartToast(data.product_name || productName, data.cart_count, false);
                     updateBadge(data.cart_count);
-                }, 700);
+                }, FLY_DURATION);
 
-                setTimeout(function() {
+                setTimeout(function () {
                     btn.classList.remove('btn-added-success');
                 }, 700);
             } else {
