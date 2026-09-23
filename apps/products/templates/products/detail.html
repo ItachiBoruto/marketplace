@@ -269,6 +269,96 @@
             display: block;
             margin-top: 2px;
         }
+    </style>    <!-- COMPACT DETAIL v3 -->
+    <style>
+        /* ============================================================
+           MOBILE: layout en 2 columnas (imagen al lado de la info)
+           Reduce ~50% del scroll vertical sin volver ilegible nada.
+           ============================================================ */
+        @media (max-width: 768px) {
+            .product-page-wrap {
+                padding: 6px 0 !important;
+            }
+
+            /* HERO: imagen 100px a la izquierda + info a la derecha */
+            .product-hero {
+                grid-template-columns: 100px 1fr !important;
+                padding: 10px !important;
+                gap: 10px !important;
+                align-items: start !important;
+            }
+            .product-hero-image {
+                max-width: 100px !important;
+                width: 100px !important;
+                margin: 0 !important;
+                aspect-ratio: 1 / 1 !important;
+            }
+
+            /* Info a la derecha, textos compactos */
+            .product-hero-info h1 {
+                font-size: 0.95rem !important;
+                margin: 0 0 2px !important;
+                line-height: 1.2 !important;
+            }
+            .product-hero-store {
+                font-size: 0.7rem !important;
+                margin: 0 0 4px !important;
+            }
+            .product-hero-price {
+                font-size: 1.15rem !important;
+                margin: 0 !important;
+                line-height: 1.15 !important;
+            }
+            .product-hero-price-bs {
+                font-size: 0.8rem !important;
+                margin: 0 !important;
+                line-height: 1.2 !important;
+            }
+            .rate-hint {
+                display: block !important;
+                font-size: 0.62rem !important;
+                margin-top: 1px !important;
+            }
+            .product-hero-stock {
+                font-size: 0.7rem !important;
+                margin: 4px 0 0 !important;
+            }
+
+            /* Descripcion y adicional: ancho completo debajo */
+            .product-hero-desc {
+                font-size: 0.78rem !important;
+                line-height: 1.35 !important;
+                margin: 6px 0 4px !important;
+                grid-column: 1 / -1 !important;
+            }
+            .product-hero-additional {
+                padding: 5px 8px !important;
+                margin: 4px 0 !important;
+                grid-column: 1 / -1 !important;
+            }
+            .product-hero-additional h4 { font-size: 0.72rem !important; margin-bottom: 2px !important; }
+            .product-hero-additional p { font-size: 0.74rem !important; }
+
+            /* Botones: mas bajos */
+            .product-hero-actions {
+                margin-top: 6px !important;
+                gap: 6px !important;
+                grid-column: 1 / -1 !important;
+            }
+            .product-hero-actions .btn-add-cart,
+            .product-hero-actions .btn-visit-store {
+                padding: 7px 10px !important;
+                font-size: 0.78rem !important;
+            }
+
+            /* Seccion de relacionados */
+            .related-section { margin-top: 14px !important; }
+            .related-section h2 {
+                font-size: 0.9rem !important;
+                margin-bottom: 6px !important;
+            }
+            .related-grid { gap: 8px !important; }
+        }
     </style>
 </head>
 <body>
