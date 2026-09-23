@@ -82,7 +82,7 @@
                 <a href="/">🏠 Inicio</a>
                 <a href="/stores/">📦 Comercios</a>
                 {% if user.is_authenticated %}
-                    <a href="{% url 'cart:view' %}">🛒 Carrito<span class="cart-count-badge" {% if not cart_count %}style="display:none;"{% endif %}>{{ cart_count|default:0 }}</span></a>
+                    <a href="{% url 'cart:view' %}" class="header-cart-link"><span class="cart-icon-text">🛒 Carrito</span><span class="cart-count-badge" {% if not cart_count %}style="display:none;"{% endif %}>{{ cart_count|default:0 }}</span></a>
                 {% endif %}
                 {% if user.is_authenticated and user.is_staff %}
                     <a href="/admin/">⚙️ Admin</a>
