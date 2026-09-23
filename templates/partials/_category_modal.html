@@ -1,14 +1,14 @@
 {% load static %}
-{# ============================================================
+{% comment %}
    PARCIAL: Modal de categorias reutilizable
-   Parametros (via {% include ... with ... %}):
+   Parametros (via include con with):
      - categories: queryset de Category
      - select_name: nombre del select oculto (default: "category")
      - value_field: "pk" o "slug" (default: "slug")
      - current_value: valor actual (opcional, para preseleccionar)
      - empty_label: texto de la opcion vacia (default: "Sin categoria")
      - btn_default: texto por defecto del boton
-   ============================================================ #}
+{% endcomment %}
 
 <div class="filter category-filter-wrap">
     <button type="button" class="category-open-btn" id="categoryOpenBtn">

@@ -106,7 +106,7 @@
         {# ============ CATEGORÍA (con modal) ============ #}
         <div class="pf-row">
             <label>Categoría</label>
-            {% include 'partials/_category_modal.html' with categories=categories select_name='category' value_field='pk' current_value=form.category.value|default:'' empty_label='Sin categoría' btn_default='Seleccionar categoría' %}
+            {% include 'partials/_category_modal.html' with categories=categories select_name='category' value_field='pk' current_value=form.category.value empty_label='Sin categoría' btn_default='Seleccionar categoría' %}
             <div class="pf-help">Elige la categoría a la que pertenece este producto.</div>
         </div>
 
