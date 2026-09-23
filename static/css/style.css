@@ -379,10 +379,7 @@ header nav a:hover {
     margin-bottom: 20px;
 }
 
-.profile-cover {
-    height: 80px;  /* Reducido de 100px a 80px para bajar el nombre */
-    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-}
+.profile-cover { display: none !important; }
 
 .profile-info {
     display: flex;
@@ -768,16 +765,8 @@ header nav a:hover {
     header nav a {
         font-size: 0.8rem;
     }
-    .profile-info {
-        flex-direction: column;
-        align-items: center;
-        text-align: center;
-        padding: 12px 12px;
-    }
-    .profile-avatar {
-        width: 70px;
-        height: 70px;
-    }
+    
+    
     .profile-details h1 {
         font-size: 1.3rem;
     }
@@ -3230,5 +3219,326 @@ header nav a:hover {
     }
     .filters-toggle {
         display: none !important;
+    }
+}
+
+/* ============================================================
+   STORE PASILLOS v1 - Boton "Visitar pasillo" en el comercio
+   ============================================================ */
+.store-pasillos-wrap {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+    margin: 12px 0 20px;
+}
+.store-pasillos-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    background: linear-gradient(135deg, #1a1a2e, #16213e);
+    color: white;
+    border: none;
+    border-radius: 50px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(26, 26, 46, 0.25);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+.store-pasillos-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(26, 26, 46, 0.4);
+}
+.store-pasillos-clear {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    background: #f0f2f5;
+    color: #7f8c8d;
+    border: none;
+    border-radius: 50px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+}
+.store-pasillos-clear:hover {
+    background: #e1e4e8;
+    color: #1a1a2e;
+}
+@media (max-width: 600px) {
+    .store-pasillos-wrap {
+        gap: 6px;
+    }
+    .store-pasillos-btn {
+        padding: 8px 16px;
+        font-size: 0.85rem;
+    }
+}
+
+/* ============================================================
+   PROFILE MOBILE LAYOUT FINAL
+   Avatar a la izquierda, datos a la derecha, sin cover.
+   ============================================================ */
+@media (max-width: 768px) {
+
+    /* Perfil: fila con avatar e info */
+    html body .profile-info,
+    .profile-info {
+        display: flex !important;
+        flex-direction: row !important;
+        align-items: flex-start !important;
+        justify-content: flex-start !important;
+        text-align: left !important;
+        gap: 12px !important;
+        padding: 14px 16px !important;
+        flex-wrap: nowrap !important;
+        position: relative !important;
+    }
+
+    /* Avatar a la izquierda, 80px, redondo */
+    html body .profile-avatar,
+    .profile-avatar {
+        width: 80px !important;
+        height: 80px !important;
+        flex-shrink: 0 !important;
+        margin: 0 !important;
+    }
+    .profile-avatar img {
+        width: 100% !important;
+        height: 100% !important;
+        object-fit: cover !important;
+        border-radius: 50% !important;
+    }
+    .profile-avatar .no-avatar {
+        font-size: 2rem !important;
+    }
+
+    /* Detalles a la derecha */
+    html body .profile-details,
+    .profile-details {
+        flex: 1 1 auto !important;
+        min-width: 0 !important;
+        text-align: left !important;
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 4px !important;
+    }
+
+    .profile-details h1 {
+        font-size: 1.1rem !important;
+        margin: 0 !important;
+        line-height: 1.2 !important;
+    }
+
+    .profile-details p {
+        font-size: 0.8rem !important;
+        line-height: 1.3 !important;
+        margin: 0 !important;
+        display: -webkit-box !important;
+        -webkit-line-clamp: 2 !important;
+        -webkit-box-orient: vertical !important;
+        overflow: hidden !important;
+    }
+
+    .profile-meta {
+        display: flex !important;
+        justify-content: flex-start !important;
+        flex-wrap: wrap !important;
+        gap: 6px !important;
+        margin: 0 !important;
+        font-size: 0.75rem !important;
+    }
+    .profile-meta span {
+        font-size: 0.75rem !important;
+    }
+
+    /* Badges de estado abajo, ancho completo */
+    .store-status-badges {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 6px !important;
+        margin-top: 10px !important;
+        width: 100% !important;
+    }
+    .store-status-badge {
+        padding: 7px 10px !important;
+        font-size: 0.72rem !important;
+        border-radius: 8px !important;
+        gap: 6px !important;
+    }
+    .store-status-badge .badge-title { font-size: 0.75rem !important; }
+    .store-status-badge .badge-sub { font-size: 0.68rem !important; margin-top: 1px !important; }
+    .store-status-badge .dot { width: 8px !important; height: 8px !important; }
+
+    /* Acciones */
+    .profile-actions {
+        display: flex !important;
+        gap: 8px !important;
+        margin-top: 10px !important;
+        flex-wrap: wrap !important;
+    }
+    .profile-actions .btn-back,
+    .profile-actions .btn-dashboard {
+        padding: 7px 14px !important;
+        font-size: 0.8rem !important;
+    }
+
+    /* Header del perfil: sin cover */
+    .profile-header {
+        margin-bottom: 12px !important;
+    }
+    .profile-cover {
+        display: none !important;
+        height: 0 !important;
+    }
+
+    /* Tabs */
+    .profile-nav {
+        padding: 0 8px !important;
+        gap: 4px !important;
+    }
+    .profile-nav a {
+        padding: 8px 10px !important;
+        font-size: 0.8rem !important;
+    }
+}
+
+/* ============================================================
+   PROFILE MOBILE FINAL v2
+   Fila 1: [Avatar] [Nombre + desc + delivery]
+   Fila 2: [Badge Retiro] [Badge Delivery]   <- lado a lado
+   Fila 3: [Volver] [Gestionar]              <- lado a lado
+   ============================================================ */
+@media (max-width: 768px) {
+
+    /* Contenedor principal: flex con wrap */
+    html body .profile-info,
+    .profile-info {
+        display: flex !important;
+        flex-direction: row !important;
+        flex-wrap: wrap !important;
+        align-items: flex-start !important;
+        justify-content: flex-start !important;
+        text-align: left !important;
+        gap: 12px !important;
+        padding: 14px 16px !important;
+    }
+
+    /* === FILA 1: Avatar + Info === */
+    html body .profile-avatar,
+    .profile-avatar {
+        width: 80px !important;
+        height: 80px !important;
+        flex: 0 0 80px !important;
+        margin: 0 !important;
+    }
+    .profile-avatar img {
+        width: 100% !important;
+        height: 100% !important;
+        object-fit: cover !important;
+        border-radius: 50% !important;
+    }
+    .profile-avatar .no-avatar { font-size: 2rem !important; }
+
+    html body .profile-details,
+    .profile-details {
+        flex: 1 1 0 !important;
+        min-width: 0 !important;
+        text-align: left !important;
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 4px !important;
+    }
+    .profile-details h1 {
+        font-size: 1.1rem !important;
+        margin: 0 !important;
+        line-height: 1.2 !important;
+    }
+    .profile-details p {
+        font-size: 0.8rem !important;
+        line-height: 1.3 !important;
+        margin: 0 !important;
+        display: -webkit-box !important;
+        -webkit-line-clamp: 2 !important;
+        -webkit-box-orient: vertical !important;
+        overflow: hidden !important;
+    }
+    .profile-meta {
+        display: flex !important;
+        justify-content: flex-start !important;
+        flex-wrap: wrap !important;
+        gap: 6px !important;
+        margin: 0 !important;
+        font-size: 0.75rem !important;
+    }
+    .profile-meta span { font-size: 0.75rem !important; }
+
+    /* === FILA 2: Badges en fila (uno al lado del otro) === */
+    html body .profile-info > .store-status-badges,
+    .profile-info .store-status-badges {
+        display: flex !important;
+        flex-direction: row !important;
+        flex-wrap: wrap !important;
+        gap: 8px !important;
+        margin-top: 4px !important;
+        flex: 1 1 100% !important;
+        width: 100% !important;
+        order: 10 !important;
+    }
+    .store-status-badge {
+        flex: 1 1 calc(50% - 4px) !important;
+        min-width: 140px !important;
+        padding: 8px 10px !important;
+        font-size: 0.72rem !important;
+        border-radius: 8px !important;
+        gap: 6px !important;
+        justify-content: flex-start !important;
+    }
+    .store-status-badge .badge-title { font-size: 0.75rem !important; }
+    .store-status-badge .badge-sub { font-size: 0.68rem !important; margin-top: 1px !important; }
+    .store-status-badge .dot { width: 8px !important; height: 8px !important; }
+
+    /* === FILA 3: Botones abajo ancho completo === */
+    html body .profile-actions,
+    .profile-actions {
+        display: flex !important;
+        flex-direction: row !important;
+        gap: 8px !important;
+        margin-top: 4px !important;
+        flex-wrap: wrap !important;
+        flex: 1 1 100% !important;
+        width: 100% !important;
+        order: 20 !important;
+    }
+    .profile-actions .btn-back,
+    .profile-actions .btn-dashboard {
+        flex: 1 1 0 !important;
+        padding: 9px 14px !important;
+        font-size: 0.82rem !important;
+        text-align: center !important;
+        justify-content: center !important;
+    }
+
+    /* Header del perfil: sin cover */
+    .profile-header { margin-bottom: 12px !important; }
+    .profile-cover {
+        display: none !important;
+        height: 0 !important;
+    }
+
+    /* Tabs */
+    .profile-nav {
+        padding: 0 8px !important;
+        gap: 4px !important;
+    }
+    .profile-nav a {
+        padding: 8px 10px !important;
+        font-size: 0.8rem !important;
     }
 }

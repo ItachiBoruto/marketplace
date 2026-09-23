@@ -20,11 +20,20 @@ def store_list(request):
 def store_detail(request, store_id):
     from .schedule_utils import get_store_status
 
+    from apps.products.models import Category
+
     store = get_object_or_404(Store, id=store_id, is_active=True)
     products = Product.objects.filter(
         store=store, is_available=True
-    ).select_related('store')
+    ).select_related('store', 'category')
     store_status = get_store_status(store)
+
+    # Categorias que TIENEN al menos un producto disponible en este comercio
+    store_categories = Category.objects.filter(
+        products__store=store,
+        products__is_available=True,
+        is_active=True
+    ).distinct().order_by('order', 'name')
 
     # Meta tags para compartir
     og_title = f"{store.name} - Mi Marketplace"
@@ -34,6 +43,7 @@ def store_detail(request, store_id):
     return render(request, 'stores/detail.html', {
         'store': store,
         'products': products,
+        'store_categories': store_categories,
         'store_status': store_status,
         'og_title': og_title,
         'og_description': og_description,

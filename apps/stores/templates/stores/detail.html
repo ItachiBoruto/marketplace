@@ -116,13 +116,12 @@
                     <div class="profile-details">
                         <h1>{{ store.name }}</h1>
                         <p>{{ store.description }}</p>
-                        <div class="profile-meta">
-                            <span>📦 {{ products|length }} productos</span>
-                            <span>📅 Desde {{ store.created_at|date:"M Y" }}</span>
-                            {% if store.offers_delivery %}
-                                <span>🛵 Delivery (${{ store.delivery_fee }})</span>
-                            {% endif %}
-                        </div>
+                        {% if store.offers_delivery %}
+                            <div class="profile-meta">
+                                <span class="meta-delivery">🛵 Delivery (${{ store.delivery_fee }})</span>
+                            </div>
+                        {% endif %}
+                    
 
                         {% if store_status.has_schedule %}
                             <div class="store-status-badges">
@@ -193,7 +192,7 @@
                                 {% endif %}
                             </div>
                         {% endif %}
-                    </div>
+                </div>
                     <div class="profile-actions">
                         <a href="/stores/" class="btn-back">← Volver</a>
 
@@ -220,15 +219,18 @@
             <div class="store-search-bar">
                 <input type="text" id="storeSearchInput" placeholder="Buscar en {{ store.name }}...">
                 <button id="storeSearchBtn">🔍</button>
-                <div class="store-sort">
-                    <select id="sortFilter">
-                        <option value="name">Orden alfabético</option>
-                        <option value="price">Menor precio</option>
-                        <option value="-price">Mayor precio</option>
-                        <option value="created_at">Más recientes</option>
-                    </select>
-                </div>
             </div>
+
+            {% if store_categories %}
+            <div class="store-pasillos-wrap">
+                <button type="button" class="store-pasillos-btn" id="storePasillosBtn">
+                    <span>🚪 Visitar pasillo...</span>
+                </button>
+                <button type="button" class="store-pasillos-clear" id="storePasillosClear" style="display: none;">
+                    ✕ Quitar filtro
+                </button>
+            </div>
+            {% endif %}
 
             <!-- Detalle del producto seleccionado (ARRIBA del grid) -->
             <div id="product-detail-container" style="display: none; margin-bottom: 24px;"></div>
@@ -256,6 +258,39 @@
 
             <div id="storeLoading" style="display: none; text-align: center; padding: 20px; color: #777;">
                 Cargando más productos...
+            </div>
+        </div>
+    
+        <!-- ============ MODAL DE PASILLOS ============ -->
+        <div class="cat-modal-overlay" id="storePasillosModal" aria-hidden="true">
+            <div class="cat-modal" role="dialog">
+                <div class="cat-modal-header">
+                    <h2>🚪 Pasillos de {{ store.name }}</h2>
+                    <button type="button" class="cat-modal-close" id="storePasillosClose" aria-label="Cerrar">✕</button>
+                </div>
+                <div class="cat-modal-search">
+                    <input type="text" id="storePasillosSearch" placeholder="Buscar pasillo...">
+                </div>
+                <div class="cat-modal-body" id="storePasillosBody">
+                    <div class="cat-card" data-slug="" data-name="todos">
+                        <div class="cat-card-bg" style="background: linear-gradient(135deg, #1a1a2e, #16213e);">
+                            <span class="cat-card-emoji">🛍️</span>
+                        </div>
+                        <span class="cat-card-name">Todos</span>
+                    </div>
+                    {% for cat in store_categories %}
+                        <div class="cat-card" data-slug="{{ cat.slug }}" data-name="{{ cat.name|lower }}">
+                            <div class="cat-card-bg"
+                                 {% if cat.image %}style="background-image: url('{{ cat.image.url }}');"{% else %}style="background: {{ cat.color }};"{% endif %}>
+                                <span class="cat-card-emoji">{% if not cat.image %}{{ cat.emoji }}{% endif %}</span>
+                            </div>
+                            <span class="cat-card-name">{{ cat.name }}</span>
+                        </div>
+                    {% endfor %}
+                </div>
+                <div class="cat-modal-footer">
+                    <button type="button" class="cat-clear-btn" id="storePasillosReset">Ver todos los productos</button>
+                </div>
             </div>
         </div>
     </main>

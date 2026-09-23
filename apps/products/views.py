@@ -162,7 +162,7 @@ class StoreProductListAPI(APIView):
         
         products = Product.objects.filter(
             store_id=store_id, is_available=True
-        ).select_related('store')
+        ).select_related('store', 'category')
         
         search = request.GET.get('search', '')
         if search:
@@ -170,6 +170,10 @@ class StoreProductListAPI(APIView):
                 Q(name__icontains=search) |
                 Q(keywords__icontains=search)
             )
+
+        category = request.GET.get('category', '')
+        if category:
+            products = products.filter(category__slug=category)
         
         sort = request.GET.get('sort', 'name')
         if sort == 'name':
