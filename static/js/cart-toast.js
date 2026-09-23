@@ -188,8 +188,8 @@
 
                 flyBoxToCart(btn);
 
+                // Actualizamos el badge apenas termina la animacion de la caja
                 setTimeout(function () {
-                    showCartToast(data.product_name || productName, data.cart_count, false);
                     updateBadge(data.cart_count);
                 }, FLY_DURATION);
 
