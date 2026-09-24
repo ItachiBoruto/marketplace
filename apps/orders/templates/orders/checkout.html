@@ -276,70 +276,11 @@
     {{ subtotal|stringformat:"f"|json_script:"data-subtotal" }}
     {{ total_delivery_fee|stringformat:"f"|json_script:"data-shipping" }}
     {{ bcv_rate|default_if_none:""|stringformat:"s"|json_script:"data-rate" }}
-    <script>
-        const SUBTOTAL_USD = parseFloat(JSON.parse(document.getElementById('data-subtotal').textContent)) || 0;
-        const SHIPPING_FEE = parseFloat(JSON.parse(document.getElementById('data-shipping').textContent)) || 0;
-        const BCV_RATE_RAW = JSON.parse(document.getElementById('data-rate').textContent);
-        const BCV_RATE = BCV_RATE_RAW ? parseFloat(BCV_RATE_RAW) : null;
-        const DELIVERY_AVAILABLE = {% if delivery_available %}true{% else %}false{% endif %};
+    {{ delivery_available|json_script:'data-delivery-available' }}
+    {{ bank_info|json_script:'data-bank-transfer' }}
+    {{ mobile_info|json_script:'data-bank-mobile' }}
 
-        function formatUsd(v) { return '$' + v.toFixed(2); }
-        function formatBs(v) { return 'Bs. ' + v.toLocaleString('es-VE', {minimumFractionDigits: 2, maximumFractionDigits: 2}); }
-
-        function updateTotals() {
-            const method = document.querySelector('input[name="shipping_method"]:checked')?.value || 'pickup';
-            const isDelivery = method === 'delivery' && DELIVERY_AVAILABLE;
-            const fee = isDelivery ? SHIPPING_FEE : 0;
-            const totalUsd = SUBTOTAL_USD + fee;
-
-            document.getElementById('shippingLine').style.display = isDelivery ? 'flex' : 'none';
-            document.getElementById('shippingFee').textContent = formatUsd(fee);
-            document.getElementById('totalUsd').textContent = formatUsd(totalUsd);
-
-            if (BCV_RATE) {
-                document.getElementById('totalBs').textContent = formatBs(totalUsd * BCV_RATE);
-            }
-
-            document.getElementById('deliveryAddressBlock').classList.toggle('show', isDelivery);
-        }
-
-        document.querySelectorAll('input[name="shipping_method"]').forEach(r => {
-            r.addEventListener('change', updateTotals);
-        });
-
-        updateTotals();
-
-        function copyToClipboard(text, btn) {
-            const done = () => {
-                if (btn) {
-                    const orig = btn.textContent;
-                    btn.textContent = '✅';
-                    setTimeout(() => { btn.textContent = orig; }, 1500);
-                }
-            };
-            if (navigator.clipboard && window.isSecureContext) {
-                navigator.clipboard.writeText(text).then(done).catch(() => { fallbackCopy(text); done(); });
-            } else { fallbackCopy(text); done(); }
-        }
-        function fallbackCopy(text) {
-            const ta = document.createElement('textarea');
-            ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
-            document.body.appendChild(ta); ta.select();
-            try { document.execCommand('copy'); } catch (e) {}
-            document.body.removeChild(ta);
-        }
-        function copyAllBankData() {
-            const data = [
-                'Banco: {{ bank_info.bank_name }}',
-                'Titular: {{ bank_info.account_holder }}',
-                'Cédula: {{ bank_info.document }}',
-                'Cuenta: {{ bank_info.account_number }}',
-                'Teléfono: {{ bank_info.phone }}'
-            ].join('\n');
-            copyToClipboard(data, null);
-            alert('Datos copiados');
-        }
-    </script>
+    <script src="{% static 'js/checkout.js' %}?v=1"></script>
     <script src="/static/js/email-verify-banner.js"></script>
 </body>
 </html>
