@@ -20,3 +20,8 @@ staticfiles/
 .python-version.bak
 
 datos_export.json
+*.bak
+*.bak-*
+*.bak2-*
+*.bak-move-*
+*.backup-*
