@@ -1,132 +1,103 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ product.name }} - Mi Marketplace</title>
-    {% include 'partials/_meta_tags.html' %}
-    {% load static %}
-    {% load exchange_filters %}
-    <link rel="stylesheet" href="{% static 'css/style.css' %}">
-    <link rel="stylesheet" href="{% static 'css/product_detail.css' %}?v=1">    <!-- COMPACT DETAIL v3 -->
-    
-</head>
-<body>
-    <header>
-        <div class="container">
-            <h1>🛒 Mi Marketplace</h1>
-            <nav>
-                <a href="/">🏠 Inicio</a>
-                <a href="/stores/">📦 Comercios</a>
-                <a href="{% url 'cart:view' %}" class="header-cart-link"><span class="cart-icon-text">🛒 Carrito</span><span class="cart-count-badge" {% if not cart_count %}style="display:none;"{% endif %}>{{ cart_count|default:0 }}</span></a>
-                {% if user.is_authenticated and user.is_staff %}
-                    <a href="/admin/">⚙️ Admin</a>
-                {% endif %}
-                {% if user.is_superuser %}
-                    <a href="{% url 'orders:superuser_orders' %}">📋 Panel</a>
-                {% endif %}
-                {% if user.is_authenticated %}
-                    <span style="color: rgba(255,255,255,0.7); margin: 0 10px;">👤 {{ user.username }}</span>
-                    <form action="{% url 'logout' %}" method="post" style="display: inline;">
-                        {% csrf_token %}
-                        <button type="submit" style="background: none; border: none; color: rgba(255,255,255,0.85); cursor: pointer; font-size: 0.95rem; padding: 0; margin: 0 10px;">🚪 Cerrar sesión</button>
-                    </form>
-                {% endif %}
-            </nav>
-        </div>
-    </header>
+{% extends "base.html" %}
+{% load static %}
+{% load exchange_filters %}
 
-    <main>
-        <div class="container">
-            <div class="product-page-wrap">
-                <div class="product-hero">
-                    <div class="product-hero-image">
-                        {% if product.image %}
-                            <img src="{{ product.image.url }}" alt="{{ product.name }}">
-                        {% else %}
-                            <div class="no-image-hero">📷</div>
-                        {% endif %}
-                    </div>
+{% block title %}{{ product.name }} - Mi Marketplace{% endblock %}
 
-                    <div class="product-hero-info">
-                        <h1>{{ product.name }}</h1>
-                        <p class="product-hero-store">
-                            🏪 Vendido por <a href="{% url 'stores:detail' product.store.id %}">{{ product.store.name }}</a>
-                        </p>
-                        <p class="product-hero-price">${{ product.price }}</p>
-                        {% if bcv_rate %}
-                        <p class="product-hero-price-bs">
-                            Bs. {{ product.price|to_bs:bcv_rate }}
-                            <span class="rate-hint">Tasa BCV: {{ bcv_rate|floatformat:2 }} Bs/USD</span>
-                        </p>
-                        {% endif %}{% if product.stock <= 0 %}
-                            <p class="product-hero-stock stock-out">📦 Sin stock</p>
-                        {% elif product.stock <= 5 %}
-                            <p class="product-hero-stock stock-low">📦 ¡Últimas {{ product.stock }} unidades!</p>
-                        {% else %}
-                            <p class="product-hero-stock">📦 Stock: {{ product.stock }}</p>
-                        {% endif %}
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/product_detail.css' %}?v=1">
+{% endblock %}
 
-                        {% if product.description %}
-                            <div class="product-hero-desc">{{ product.description|linebreaks }}</div>
-                        {% endif %}
-
-                        {% if product.additional_info %}
-                            <div class="product-hero-additional">
-                                <h4>Información adicional</h4>
-                                <p>{{ product.additional_info|linebreaksbr }}</p>
-                            </div>
-                        {% endif %}
-
-                        <div class="product-hero-actions">
-                            {% if product.stock > 0 %}
-                                <button type="button" class="btn-add-cart"
-                                        data-add-cart
-                                        data-product-id="{{ product.id }}"
-                                        data-product-name="{{ product.name }}">
-                                    🛒 Agregar al carrito
-                                </button>
-                            {% else %}
-                                <button type="button" class="btn-add-cart" disabled>
-                                    🚫 Sin stock
-                                </button>
-                            {% endif %}
-                            <a href="{% url 'stores:detail' product.store.id %}" class="btn-visit-store">
-                                🏪 Visitar comercio
-                            </a>
-                        </div>
-                    </div>
-                </div>
-
-                {% if related_products %}
-                    <section class="related-section">
-                        <h2>🔥 Productos similares</h2>
-                        <div class="related-grid">
-                            {% for rel in related_products %}
-                                <a href="{% url 'products:detail' rel.id %}" class="related-card">
-                                    <div class="related-card-image">
-                                        {% if rel.image %}
-                                            <img src="{{ rel.image.url }}" alt="{{ rel.name }}" loading="lazy">
-                                        {% else %}
-                                            <div class="related-no-image">📷</div>
-                                        {% endif %}
-                                    </div>
-                                    <div class="related-card-info">
-                                        <h4>{{ rel.name }}</h4>
-                                        <p class="price">${{ rel.price }}</p>
-                                        <p class="store-name">🏪 {{ rel.store.name }}</p>
-                                    </div>
-                                </a>
-                            {% endfor %}
-                        </div>
-                    </section>
+{% block content %}
+<div class="container">
+    <div class="product-page-wrap">
+        <div class="product-hero">
+            <div class="product-hero-image">
+                {% if product.image %}
+                    <img src="{{ product.image.url }}" alt="{{ product.name }}">
+                {% else %}
+                    <div class="no-image-hero">📷</div>
                 {% endif %}
             </div>
-        </div>
-    </main>
 
-    <script src="{% static 'js/cart-toast.js' %}"></script>
-    <script src="{% static 'js/notifications.js' %}"></script>
-    <script src="/static/js/email-verify-banner.js"></script>
-</body>
-</html>
+            <div class="product-hero-info">
+                <h1>{{ product.name }}</h1>
+                <p class="product-hero-store">
+                    🏪 Vendido por <a href="{% url 'stores:detail' product.store.id %}">{{ product.store.name }}</a>
+                </p>
+                <p class="product-hero-price">${{ product.price }}</p>
+                {% if bcv_rate %}
+                <p class="product-hero-price-bs">
+                    Bs. {{ product.price|to_bs:bcv_rate }}
+                    <span class="rate-hint">Tasa BCV: {{ bcv_rate|floatformat:2 }} Bs/USD</span>
+                </p>
+                {% endif %}
+                {% if product.stock <= 0 %}
+                    <p class="product-hero-stock stock-out">📦 Sin stock</p>
+                {% elif product.stock <= 5 %}
+                    <p class="product-hero-stock stock-low">📦 ¡Últimas {{ product.stock }} unidades!</p>
+                {% else %}
+                    <p class="product-hero-stock">📦 Stock: {{ product.stock }}</p>
+                {% endif %}
+
+                {% if product.description %}
+                    <div class="product-hero-desc">{{ product.description|linebreaks }}</div>
+                {% endif %}
+
+                {% if product.additional_info %}
+                    <div class="product-hero-additional">
+                        <h4>Información adicional</h4>
+                        <p>{{ product.additional_info|linebreaksbr }}</p>
+                    </div>
+                {% endif %}
+
+                <div class="product-hero-actions">
+                    {% if product.stock > 0 %}
+                        <button type="button" class="btn-add-cart"
+                                data-add-cart
+                                data-product-id="{{ product.id }}"
+                                data-product-name="{{ product.name }}">
+                            🛒 Agregar al carrito
+                        </button>
+                    {% else %}
+                        <button type="button" class="btn-add-cart" disabled>
+                            🚫 Sin stock
+                        </button>
+                    {% endif %}
+                    <a href="{% url 'stores:detail' product.store.id %}" class="btn-visit-store">
+                        🏪 Visitar comercio
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        {% if related_products %}
+            <section class="related-section">
+                <h2>🔥 Productos similares</h2>
+                <div class="related-grid">
+                    {% for rel in related_products %}
+                        <a href="{% url 'products:detail' rel.id %}" class="related-card">
+                            <div class="related-card-image">
+                                {% if rel.image %}
+                                    <img src="{{ rel.image.url }}" alt="{{ rel.name }}" loading="lazy">
+                                {% else %}
+                                    <div class="related-no-image">📷</div>
+                                {% endif %}
+                            </div>
+                            <div class="related-card-info">
+                                <h4>{{ rel.name }}</h4>
+                                <p class="price">${{ rel.price }}</p>
+                                <p class="store-name">🏪 {{ rel.store.name }}</p>
+                            </div>
+                        </a>
+                    {% endfor %}
+                </div>
+            </section>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/cart-toast.js' %}"></script>
+{% endblock %}

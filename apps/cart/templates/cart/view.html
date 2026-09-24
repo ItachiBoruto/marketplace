@@ -7,10 +7,6 @@
 <link rel="stylesheet" href="{% static 'css/cart.css' %}?v=1">
 {% endblock %}
 
-{% block nav_extra %}
-<a href="{% url 'cart:view' %}" class="header-cart-link"><span class="cart-icon-text">🛒 Carrito</span><span class="cart-count-badge" {% if not cart_count %}style="display:none;"{% endif %}>{{ cart_count|default:0 }}</span></a>
-{% endblock %}
-
 {% block content %}
 <div class="cart-page">
     <h1>🛒 Mi Carrito</h1>

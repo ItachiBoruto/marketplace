@@ -33,21 +33,42 @@
         // No inyectar si ya existe
         if (document.getElementById('notifBell')) return;
 
-        // Preferir header-top (arriba a la derecha, junto al logo)
-        // Fallback: nav
-        var target = header.querySelector('.header-top')
-                  || header.querySelector('nav')
-                  || header;
-
         var bell = buildBell();
 
-        // Si hay boton toggle (movil), insertar antes
-        // Si no, agregar al final (queda a la derecha del area)
-        var toggle = target.querySelector('.header-menu-toggle');
-        if (toggle && target.classList.contains('header-top')) {
-            target.insertBefore(bell, toggle);
+        // ============================================================
+        // ESTRATEGIA DE INSERCION (en orden de prioridad):
+        // 1. .header-quick-actions: junto al carrito y hamburguesa
+        // 2. .header-top: antes del boton hamburguesa
+        // 3. nav: al final
+        // 4. header: al final (fallback)
+        // ============================================================
+        var quickActions = header.querySelector('.header-quick-actions');
+
+        if (quickActions) {
+            // Insertar despues del carrito (si existe), antes del toggle
+            var cartLink = quickActions.querySelector('.header-cart-link');
+            var toggleBtn = quickActions.querySelector('.header-menu-toggle');
+
+            if (toggleBtn) {
+                // Antes del boton hamburguesa
+                quickActions.insertBefore(bell, toggleBtn);
+            } else if (cartLink) {
+                // Despues del carrito
+                cartLink.insertAdjacentElement('afterend', bell);
+            } else {
+                quickActions.appendChild(bell);
+            }
         } else {
-            target.appendChild(bell);
+            var target = header.querySelector('.header-top')
+                      || header.querySelector('nav')
+                      || header;
+
+            var toggle = target.querySelector('.header-menu-toggle');
+            if (toggle && target.classList.contains('header-top')) {
+                target.insertBefore(bell, toggle);
+            } else {
+                target.appendChild(bell);
+            }
         }
 
         // Eventos

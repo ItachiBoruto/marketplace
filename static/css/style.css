@@ -3628,3 +3628,76 @@ header .container.header-container {
         display: none !important;
     }
 }
+
+/* ============================================================
+   HEADER QUICK ACTIONS - Carrito arriba a la derecha
+   ============================================================ */
+.header-quick-actions {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    margin-left: auto !important;
+}
+
+.header-quick-actions .header-cart-link {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 4px !important;
+    background: linear-gradient(135deg, #e94560, #c0392b) !important;
+    color: white !important;
+    padding: 6px 12px !important;
+    border-radius: 50px !important;
+    text-decoration: none !important;
+    font-weight: 700 !important;
+    font-size: 0.85rem !important;
+    box-shadow: 0 3px 10px rgba(233, 69, 96, 0.3) !important;
+    transition: transform 0.2s, box-shadow 0.2s !important;
+    white-space: nowrap !important;
+}
+.header-quick-actions .header-cart-link:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 6px 16px rgba(233, 69, 96, 0.45) !important;
+    color: white !important;
+}
+.header-quick-actions .header-cart-link .cart-icon-text {
+    font-size: 0.95rem !important;
+}
+.header-quick-actions .header-cart-link .cart-count-badge {
+    background: white !important;
+    color: #c0392b !important;
+    border-radius: 50px !important;
+    padding: 1px 7px !important;
+    font-size: 0.68rem !important;
+    font-weight: 800 !important;
+    min-width: 18px !important;
+    text-align: center !important;
+    transition: transform 0.3s !important;
+}
+.header-quick-actions .header-cart-link .cart-count-badge.bump {
+    animation: cartBadgeBump 0.5s ease !important;
+}
+
+/* Ocultar el carrito duplicado dentro del nav */
+.header-nav .header-cart-link {
+    display: none !important;
+}
+
+/* Mobile: carrito mas chico */
+@media (max-width: 768px) {
+    .header-quick-actions {
+        gap: 6px !important;
+    }
+    .header-quick-actions .header-cart-link {
+        padding: 5px 10px !important;
+        font-size: 0.78rem !important;
+        gap: 3px !important;
+    }
+    .header-quick-actions .header-cart-link .cart-icon-text {
+        font-size: 0.88rem !important;
+    }
+    .header-quick-actions .header-cart-link .cart-count-badge {
+        font-size: 0.62rem !important;
+        min-width: 16px !important;
+        padding: 1px 6px !important;
+    }
+}
