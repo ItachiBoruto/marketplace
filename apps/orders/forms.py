@@ -12,11 +12,13 @@ class PaymentForm(forms.ModelForm):
         model = Order
         fields = (
             'shipping_method', 'delivery_address',
+            'payment_method',
             'payment_bank', 'payment_reference', 'payment_date',
             'payment_proof', 'notes',
         )
         widgets = {
             'shipping_method': forms.RadioSelect(attrs={'class': 'shipping-radio'}),
+            'payment_method': forms.RadioSelect(attrs={'class': 'payment-radio'}),
             'delivery_address': forms.Textarea(attrs={
                 'class': 'form-control',
                 'rows': 2,
@@ -46,6 +48,7 @@ class PaymentForm(forms.ModelForm):
         }
         labels = {
             'shipping_method': '¿Cómo quieres recibir tu pedido?',
+            'payment_method': '¿Cómo quieres pagar?',
             'delivery_address': 'Dirección de entrega',
             'payment_bank': 'Banco emisor',
             'payment_reference': 'Número de referencia',
@@ -57,6 +60,8 @@ class PaymentForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         self.delivery_available = kwargs.pop('delivery_available', False)
         self.pickup_available = kwargs.pop('pickup_available', True)
+        self.accepts_transfer = kwargs.pop('accepts_transfer', True)
+        self.accepts_mobile = kwargs.pop('accepts_mobile', False)
         super().__init__(*args, **kwargs)
 
         # Construir dinamicamente las opciones disponibles
@@ -75,6 +80,22 @@ class PaymentForm(forms.ModelForm):
         # Seleccionar el primer metodo disponible por defecto
         self.fields['shipping_method'].initial = choices[0][0]
 
+        # ===== Choices de metodo de PAGO =====
+        payment_choices = []
+        if self.accepts_transfer:
+            payment_choices.append(('transfer', 'Transferencia bancaria'))
+        if self.accepts_mobile:
+            payment_choices.append(('mobile', 'Pago movil'))
+
+        # Si el comercio no acepta ninguno -> no permitir envio
+        if not payment_choices:
+            raise forms.ValidationError(
+                'El comercio no tiene metodos de pago configurados. Contacta al vendedor.'
+            )
+
+        self.fields['payment_method'].choices = payment_choices
+        self.fields['payment_method'].initial = payment_choices[0][0]
+
         # Ocultar el campo de direccion si no hay delivery
         if not self.delivery_available:
             self.fields['delivery_address'].widget = forms.HiddenInput()
@@ -87,7 +108,9 @@ class PaymentForm(forms.ModelForm):
 
     def clean_payment_proof(self):
         img = self.cleaned_data.get('payment_proof')
-        if img and hasattr(img, 'size'):
+        # Solo validar si es un archivo NUEVO subido ahora
+        from django.core.files.uploadedfile import UploadedFile
+        if img and isinstance(img, UploadedFile) and img.size > 0:
             validate_image(img)
         return img
 
@@ -120,6 +143,21 @@ class PaymentForm(forms.ModelForm):
         else:
             raise forms.ValidationError(
                 '❌ Método de entrega no válido.'
+            )
+
+        # ===== Validar el metodo de PAGO =====
+        payment = cleaned.get('payment_method')
+        if payment == 'transfer' and not self.accepts_transfer:
+            raise forms.ValidationError(
+                '❌ Este comercio no acepta transferencia bancaria.'
+            )
+        if payment == 'mobile' and not self.accepts_mobile:
+            raise forms.ValidationError(
+                '❌ Este comercio no acepta pago móvil.'
+            )
+        if not payment:
+            raise forms.ValidationError(
+                '❌ Debes elegir un método de pago.'
             )
 
         return cleaned

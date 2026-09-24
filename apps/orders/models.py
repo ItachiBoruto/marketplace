@@ -52,6 +52,17 @@ class Order(models.Model):
     )
 
     # Datos del pago (los llena el usuario)
+    PAYMENT_METHOD_CHOICES = [
+        ('transfer', 'Transferencia bancaria'),
+        ('mobile', 'Pago movil'),
+    ]
+    payment_method = models.CharField(
+        max_length=20,
+        choices=PAYMENT_METHOD_CHOICES,
+        blank=True,
+        default='',
+        verbose_name='Metodo de pago'
+    )
     payment_bank = models.CharField(max_length=100, blank=True, verbose_name='Banco emisor')
     payment_reference = models.CharField(max_length=50, blank=True, verbose_name='Referencia')
     payment_proof = models.ImageField(

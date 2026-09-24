@@ -114,6 +114,8 @@ def checkout(request):
             request.POST, request.FILES,
             delivery_available=delivery_available,
             pickup_available=pickup_available,
+            accepts_transfer=store.accepts_transfer,
+            accepts_mobile=store.accepts_mobile_payment,
         )
         if form.is_valid():
             method = form.cleaned_data['shipping_method']
@@ -143,6 +145,7 @@ def checkout(request):
                 'shipping_method': method,
                 'delivery_address': form.cleaned_data.get('delivery_address', ''),
                 'shipping_fee': shipping_fee,
+                'payment_method': form.cleaned_data.get('payment_method', ''),
                 'payment_bank': form.cleaned_data['payment_bank'],
                 'payment_reference': form.cleaned_data['payment_reference'],
                 'payment_date': form.cleaned_data['payment_date'],
@@ -171,7 +174,26 @@ def checkout(request):
         form = PaymentForm(
             delivery_available=delivery_available,
             pickup_available=pickup_available,
+            accepts_transfer=store.accepts_transfer,
+            accepts_mobile=store.accepts_mobile_payment,
         )
+
+    # ===== Datos de pago del comercio =====
+    # Si el comercio tiene datos configurados, se usan.
+    # Si no, se cae al fallback de settings (compatibilidad con comercios viejos).
+    store_bank_info = {
+        'bank_name': store.bank_name or settings.BANK_INFO.get('bank_name', ''),
+        'account_number': store.account_number or settings.BANK_INFO.get('account_number', ''),
+        'account_holder': store.account_holder or settings.BANK_INFO.get('account_holder', ''),
+        'document': store.document or settings.BANK_INFO.get('document', ''),
+        'phone': store.payment_phone or settings.BANK_INFO.get('phone', ''),
+    }
+
+    store_mobile_info = {
+        'bank_name': store.mobile_payment_bank or '',
+        'phone': store.payment_phone or '',
+        'document': store.document or '',
+    }
 
     return render(request, 'orders/checkout.html', {
         'cart': cart,
@@ -179,7 +201,10 @@ def checkout(request):
         'form': form,
         'store': store,
         'subtotal': subtotal,
-        'bank_info': settings.BANK_INFO,
+        'bank_info': store_bank_info,
+        'mobile_info': store_mobile_info,
+        'accepts_transfer': store.accepts_transfer,
+        'accepts_mobile': store.accepts_mobile_payment,
         'delivery_available': delivery_available,
         'pickup_available': pickup_available,
         'total_delivery_fee': total_delivery_fee,

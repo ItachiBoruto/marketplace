@@ -9,7 +9,10 @@ class StoreProfileForm(forms.ModelForm):
     """
     Formulario para editar el perfil del comercio.
     Los datos bancarios criticos NO se editan aqui (requieren aprobacion del superuser).
-    Solo se pueden editar los datos no criticos: payment_email y payment_notes.
+    Solo se pueden editar:
+    - Datos generales del comercio
+    - Metodos de pago aceptados (toggles)
+    - Delivery
     """
 
     class Meta:
@@ -17,8 +20,8 @@ class StoreProfileForm(forms.ModelForm):
         fields = [
             "name", "logo", "description", "is_active",
             "legal_name", "rif", "address", "phone", "email",
+            "accepts_transfer", "accepts_mobile_payment",
             "offers_delivery", "delivery_fee",
-            "payment_email", "payment_notes",
         ]
         widgets = {
             "name": forms.TextInput(attrs={"class": "form-control"}),
@@ -29,10 +32,10 @@ class StoreProfileForm(forms.ModelForm):
             "address": forms.TextInput(attrs={"class": "form-control"}),
             "phone": forms.TextInput(attrs={"class": "form-control"}),
             "email": forms.EmailInput(attrs={"class": "form-control"}),
+            "accepts_transfer": forms.CheckboxInput(attrs={"class": "form-check-input"}),
+            "accepts_mobile_payment": forms.CheckboxInput(attrs={"class": "form-check-input"}),
             "offers_delivery": forms.CheckboxInput(attrs={"class": "form-check-input"}),
             "delivery_fee": forms.NumberInput(attrs={"class": "form-control", "step": "0.01", "min": "0"}),
-            "payment_email": forms.EmailInput(attrs={"class": "form-control"}),
-            "payment_notes": forms.Textarea(attrs={"rows": 2, "class": "form-control"}),
         }
         labels = {
             "name": "Nombre comercial",
@@ -44,15 +47,17 @@ class StoreProfileForm(forms.ModelForm):
             "address": "Dirección",
             "phone": "Teléfono (opcional)",
             "email": "Correo electrónico (opcional)",
+            "accepts_transfer": "Acepto transferencia bancaria",
+            "accepts_mobile_payment": "Acepto pago móvil",
             "offers_delivery": "Ofrecer delivery a domicilio",
             "delivery_fee": "Tarifa de delivery (USD)",
-            "payment_email": "Email para notificaciones de pago",
-            "payment_notes": "Notas adicionales de pago",
         }
 
     def clean_logo(self):
         img = self.cleaned_data.get('logo')
-        if img and hasattr(img, 'size'):
+        # Solo validar si es un archivo NUEVO subido ahora.
+        from django.core.files.uploadedfile import UploadedFile
+        if img and isinstance(img, UploadedFile) and img.size > 0:
             validate_image(img)
         return img
 

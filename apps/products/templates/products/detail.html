@@ -64,15 +64,14 @@
         .product-hero-price {
             font-size: 1.8rem;
             font-weight: 700;
-            color: var(--highlight-color);
+            color: #27ae60;
             margin: 0 0 6px;
         }
         .product-hero-stock {
             font-size: 0.9rem;
             color: var(--text-muted);
             margin: 0 0 14px;
-        }
-        .product-hero-stock.stock-out {
+        }.product-hero-stock.stock-out {
             color: #e74c3c;
             font-weight: 600;
         }
@@ -409,9 +408,7 @@
                             Bs. {{ product.price|to_bs:bcv_rate }}
                             <span class="rate-hint">Tasa BCV: {{ bcv_rate|floatformat:2 }} Bs/USD</span>
                         </p>
-                        {% endif %}
-
-                        {% if product.stock <= 0 %}
+                        {% endif %}{% if product.stock <= 0 %}
                             <p class="product-hero-stock stock-out">📦 Sin stock</p>
                         {% elif product.stock <= 5 %}
                             <p class="product-hero-stock stock-low">📦 ¡Últimas {{ product.stock }} unidades!</p>

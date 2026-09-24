@@ -32,6 +32,18 @@ class Store(models.Model):
                   "(ignora los horarios por día)."
     )
 
+    # ===== Metodos de pago aceptados =====
+    accepts_transfer = models.BooleanField(
+        default=True,
+        verbose_name="¿Acepta transferencia bancaria?",
+        help_text="El cliente paga por transferencia a la cuenta del comercio."
+    )
+    accepts_mobile_payment = models.BooleanField(
+        default=False,
+        verbose_name="¿Acepta pago movil?",
+        help_text="El cliente paga con pago movil al telefono del comercio."
+    )
+
     # ===== Datos bancarios (para pagos directos al comercio) =====
     bank_name = models.CharField(
         max_length=100, blank=True,
@@ -51,6 +63,11 @@ class Store(models.Model):
         max_length=20, blank=True,
         verbose_name="Cédula o RIF",
         help_text="Ej: V-12345678 o J-12345678-9"
+    )
+    mobile_payment_bank = models.CharField(
+        max_length=100, blank=True,
+        verbose_name="Banco receptor de pago movil",
+        help_text="Banco donde recibes el pago movil (puede ser distinto al de transferencia)"
     )
     payment_phone = models.CharField(
         max_length=20, blank=True,
@@ -134,6 +151,7 @@ class StorePaymentChangeRequest(models.Model):
     new_account_number = models.CharField(max_length=40, blank=True, verbose_name='Cuenta (nueva)')
     new_account_holder = models.CharField(max_length=150, blank=True, verbose_name='Titular (nuevo)')
     new_document = models.CharField(max_length=20, blank=True, verbose_name='Cédula/RIF (nuevo)')
+    new_mobile_payment_bank = models.CharField(max_length=100, blank=True, verbose_name='Banco pago movil (nuevo)')
     new_payment_phone = models.CharField(max_length=20, blank=True, verbose_name='Teléfono (nuevo)')
 
     # Snapshot del estado actual (para comparar)
@@ -141,6 +159,7 @@ class StorePaymentChangeRequest(models.Model):
     old_account_number = models.CharField(max_length=40, blank=True)
     old_account_holder = models.CharField(max_length=150, blank=True)
     old_document = models.CharField(max_length=20, blank=True)
+    old_mobile_payment_bank = models.CharField(max_length=100, blank=True)
     old_payment_phone = models.CharField(max_length=20, blank=True)
 
     reason = models.TextField(blank=True, verbose_name='Motivo del cambio')

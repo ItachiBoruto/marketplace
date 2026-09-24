@@ -272,6 +272,95 @@
             .shipping-options { grid-template-columns: 1fr; }
         }
     </style>
+    <style>
+        /* ============ METODOS DE PAGO - BOTONES Y PANELES ============ */
+        .payment-methods-wrap {
+            margin-bottom: 14px;
+        }
+        .payment-methods-wrap h3 {
+            font-size: 1rem;
+            color: #1a1a2e;
+            margin: 0 0 10px;
+            font-weight: 700;
+        }
+        .payment-methods-row {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .pm-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 2px;
+            flex: 1 1 0;
+            min-width: 90px;
+            padding: 10px 8px;
+            background: white;
+            border: 2px solid #dfe3e8;
+            border-radius: 10px;
+            cursor: pointer;
+            font-family: inherit;
+            transition: border-color 0.2s, background 0.2s, transform 0.15s;
+        }
+        .pm-btn:hover {
+            border-color: #e94560;
+            transform: translateY(-1px);
+        }
+        .pm-btn.selected {
+            border-color: #e94560;
+            background: #fff5f7;
+            box-shadow: 0 2px 8px rgba(233, 69, 96, 0.15);
+        }
+        .pm-btn .pm-icon {
+            font-size: 1.4rem;
+            line-height: 1;
+        }
+        .pm-btn .pm-label {
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: #2c3e50;
+            text-align: center;
+            line-height: 1.1;
+        }
+        .pm-btn.selected .pm-label {
+            color: #c0392b;
+        }
+        .pm-panel {
+            display: none;
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 14px;
+            margin-bottom: 14px;
+            border: 1px solid #e9ecef;
+        }
+        .pm-panel.show {
+            display: block;
+            animation: pmFadeIn 0.25s ease;
+        }
+        @keyframes pmFadeIn {
+            from { opacity: 0; transform: translateY(-4px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .pm-panel h3 {
+            font-size: 0.92rem;
+            color: #1a1a2e;
+            margin: 0 0 10px;
+            font-weight: 700;
+        }
+
+        /* Mobile: los botones mas compactos */
+        @media (max-width: 500px) {
+            .pm-btn {
+                padding: 8px 6px;
+                min-width: 70px;
+            }
+            .pm-btn .pm-icon { font-size: 1.2rem; }
+            .pm-btn .pm-label { font-size: 0.72rem; }
+            .pm-panel { padding: 10px; }
+        }
+    </style>
 </head>
 <body>
     <header>
@@ -426,7 +515,29 @@
                     <div class="checkout-card">
                         <h2>💳 Registrar tu pago</h2>
 
-                        <div class="bank-info">
+                        <!-- ============ SELECTOR DE METODO DE PAGO ============ -->
+                        <div class="payment-methods-wrap">
+                            <h3>💳 ¿Cómo quieres pagar?</h3>
+
+                            <div class="payment-methods-row">
+                                {% if accepts_transfer %}
+                                <button type="button" class="pm-btn selected" data-method="transfer" id="pmBtnTransfer">
+                                    <span class="pm-icon">🏦</span>
+                                    <span class="pm-label">Transferencia</span>
+                                </button>
+                                {% endif %}
+                                {% if accepts_mobile %}
+                                <button type="button" class="pm-btn{% if not accepts_transfer %} selected{% endif %}" data-method="mobile" id="pmBtnMobile">
+                                    <span class="pm-icon">📱</span>
+                                    <span class="pm-label">Pago móvil</span>
+                                </button>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        {# ============ PANEL: TRANSFERENCIA ============ #}
+                        {% if accepts_transfer %}
+                        <div class="pm-panel" id="pmPanelTransfer" data-method="transfer">
                             <h3>Datos para la transferencia</h3>
                             <div class="bank-row-copy">
                                 <div class="bank-row"><strong>Banco:</strong><span>{{ bank_info.bank_name }}</span></div>
@@ -446,22 +557,46 @@
                                 <div class="bank-row"><strong>Cuenta:</strong><span>{{ bank_info.account_number }}</span></div>
                                 <button type="button" class="btn-copy" onclick="copyToClipboard('{{ bank_info.account_number }}', this)">📋</button>
                             </div>
-                            {% if bank_info.phone %}
-                            <div class="bank-row-copy">
-                                <div class="bank-row"><strong>Teléfono:</strong><span>{{ bank_info.phone }}</span></div>
-                                <button type="button" class="btn-copy" onclick="copyToClipboard('{{ bank_info.phone }}', this)">📋</button>
-                            </div>
-                            {% endif %}
 
                             <div class="qr-section">
                                 <img src="{% url 'orders:payment_qr' %}" alt="QR" class="qr-image">
                                 <p class="qr-hint">Escanea para copiar los datos</p>
                             </div>
 
-                            <button type="button" class="btn-copy-all" onclick="copyAllBankData()">
+                            <button type="button" class="btn-copy-all" onclick="copyAllTransferData()">
                                 📋 Copiar todos los datos
                             </button>
                         </div>
+                        {% endif %}
+
+                        {# ============ PANEL: PAGO MOVIL ============ #}
+                        {% if accepts_mobile %}
+                        <div class="pm-panel{% if not accepts_transfer %} show{% endif %}" id="pmPanelMobile" data-method="mobile">
+                            <h3>Datos para el pago móvil</h3>
+                            <div class="bank-row-copy">
+                                <div class="bank-row"><strong>Banco receptor:</strong><span>{{ mobile_info.bank_name }}</span></div>
+                                <button type="button" class="btn-copy" onclick="copyToClipboard('{{ mobile_info.bank_name }}', this)">📋</button>
+                            </div>
+                            <div class="bank-row-copy">
+                                <div class="bank-row"><strong>Teléfono:</strong><span>{{ mobile_info.phone }}</span></div>
+                                <button type="button" class="btn-copy" onclick="copyToClipboard('{{ mobile_info.phone }}', this)">📋</button>
+                            </div>
+                            {% if mobile_info.document %}
+                            <div class="bank-row-copy">
+                                <div class="bank-row"><strong>Cédula / RIF:</strong><span>{{ mobile_info.document }}</span></div>
+                                <button type="button" class="btn-copy" onclick="copyToClipboard('{{ mobile_info.document }}', this)">📋</button>
+                            </div>
+                            {% endif %}
+
+                            <button type="button" class="btn-copy-all" onclick="copyAllMobileData()">
+                                📋 Copiar todos los datos
+                            </button>
+                        </div>
+                        {% endif %}
+
+                        {# Campo oculto con el metodo elegido #}
+                        <input type="hidden" name="payment_method" id="paymentMethodInput" value="{% if accepts_transfer %}transfer{% elif accepts_mobile %}mobile{% endif %}">
+
 
                         <h3>💳 Datos del pago</h3>
 

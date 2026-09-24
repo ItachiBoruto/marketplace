@@ -76,8 +76,9 @@ def view_cart(request):
     """Carrito segmentado por comercio."""
     cart = get_or_create_cart(request)
 
-    # Agrupar items por comercio
-    items = cart.items.select_related('product', 'product__store').all()
+    # Agrupar items por comercio. Orden descendente por id:
+    # los items agregados mas recientemente aparecen primero.
+    items = cart.items.select_related('product', 'product__store').order_by('-id')
 
     groups_dict = {}
     for item in items:
@@ -89,6 +90,8 @@ def view_cart(request):
                 'subtotal': 0,
                 'delivery_fee': store.delivery_fee if store.offers_delivery else 0,
                 'offers_delivery': store.offers_delivery,
+                # id del item mas reciente que se agrego en este grupo
+                'first_item_id': item.id,
             }
         groups_dict[store.id]['items'].append(item)
         groups_dict[store.id]['subtotal'] += item.get_total()
@@ -100,8 +103,10 @@ def view_cart(request):
         g['total'] = g['subtotal'] + (g['delivery_fee'] if g['has_delivery'] else 0)
         groups.append(g)
 
-    # Ordenar por nombre del comercio
-    groups.sort(key=lambda x: x['store'].name.lower())
+    # Ordenar grupos por orden de llegada (el primer item que se agrego
+    # de cada comercio define el orden)
+    # Orden descendente: el comercio con el item mas reciente va primero
+    groups.sort(key=lambda x: x['first_item_id'], reverse=True)
 
     grand_total = sum(g['total'] for g in groups)
     grand_total_no_delivery = sum(g['subtotal'] for g in groups)
