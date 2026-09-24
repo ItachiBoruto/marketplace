@@ -258,7 +258,7 @@ header nav a:hover {
 .price {
     font-size: 1.1rem;
     font-weight: 700;
-    color: var(--highlight-color);
+    color: #27ae60;
     margin: 2px 0;
 }
 
@@ -676,7 +676,7 @@ header nav a:hover {
 
 .product-price {
     font-size: 1.6rem;
-    color: var(--highlight-color);
+    color: #27ae60;
     font-weight: 700;
     margin: 4px 0;
 }
@@ -950,7 +950,7 @@ header nav a:hover {
 .price {
     font-size: 0.95rem;
     font-weight: 700;
-    color: var(--highlight-color);
+    color: #27ae60;
     margin: 2px 0;
 }
 
@@ -2482,7 +2482,7 @@ header nav a:hover {
 .product-card .product-price {
     font-size: 1.1rem !important;
     font-weight: 700 !important;
-    color: var(--highlight-color) !important;
+    color: #27ae60 !important;
     margin: 3px 0 !important;
     line-height: 1.2 !important;
 }
