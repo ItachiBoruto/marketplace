@@ -1,0 +1,78 @@
+{% load static %}<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Mi Marketplace{% endblock %}</title>
+    {% include 'partials/_meta_tags.html' %}
+    <link rel="stylesheet" href="{% static 'css/style.css' %}?v=10">
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+    <header>
+        <div class="container header-container">
+            <div class="header-top">
+                <h1 class="header-logo">{% block logo_text %}🛒 Mi Marketplace{% endblock %}</h1>
+                <button class="header-menu-toggle" id="menuToggle" aria-label="Menu">☰</button>
+            </div>
+
+            <nav class="header-nav" id="headerNav">
+                <a href="/">🏠 Inicio</a>
+                <a href="/stores/">📦 Comercios</a>
+                {% if user.is_authenticated and user.is_staff %}
+                    <a href="/admin/">⚙️ Admin</a>
+                {% endif %}
+                {% if user.is_superuser %}
+                    <a href="{% url 'orders:superuser_orders' %}">📋 Panel</a>
+                {% endif %}
+                {% block nav_extra %}{% endblock %}
+                {% if user.is_authenticated %}
+                    <span class="header-user">👤 {{ user.username }}</span>
+                    <form action="{% url 'logout' %}" method="post" class="logout-form">
+                        {% csrf_token %}
+                        <button type="submit" class="logout-btn">🚪 Cerrar sesion</button>
+                    </form>
+                {% else %}
+                    <a href="{% url 'login' %}">🔑 Ingresar</a>
+                    <a href="{% url 'accounts:register' %}">📝 Registrarse</a>
+                {% endif %}
+            </nav>
+
+            {% block header_actions %}{% endblock %}
+        </div>
+    </header>
+
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    {% block footer %}
+    <footer style="background: #1a1a2e; color: rgba(255,255,255,0.7); padding: 30px 20px; text-align: center; margin-top: 40px; font-size: 0.85rem;">
+        <div style="max-width: 1200px; margin: 0 auto;">
+            <p style="margin: 0 0 12px;">
+                <a href="/legal/privacidad/" style="color: rgba(255,255,255,0.85); text-decoration: none; margin: 0 12px;">Politica de Privacidad</a>
+                <a href="/legal/terminos/" style="color: rgba(255,255,255,0.85); text-decoration: none; margin: 0 12px;">Terminos y Condiciones</a>
+                <a href="/legal/cookies/" style="color: rgba(255,255,255,0.85); text-decoration: none; margin: 0 12px;">Cookies</a>
+            </p>
+            <p style="margin: 0; font-size: 0.78rem;">© 2026 Mi Marketplace. Todos los derechos reservados.</p>
+        </div>
+    </footer>
+    {% endblock %}
+
+    <script>
+    (function() {
+        var btn = document.getElementById('menuToggle');
+        var nav = document.getElementById('headerNav');
+        if (btn && nav) {
+            btn.addEventListener('click', function () {
+                nav.classList.toggle('open');
+                btn.textContent = nav.classList.contains('open') ? '✕' : '☰';
+            });
+        }
+    })();
+    </script>
+    <script src="{% static 'js/notifications.js' %}"></script>
+    <script src="/static/js/email-verify-banner.js"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>
