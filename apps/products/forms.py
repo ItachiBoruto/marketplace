@@ -1,4 +1,5 @@
 from django import forms
+from django.core.files.uploadedfile import UploadedFile
 
 from apps.utils.validators import validate_image
 
@@ -44,7 +45,10 @@ class ProductForm(forms.ModelForm):
 
     def clean_image(self):
         img = self.cleaned_data.get('image')
-        # Si es un archivo nuevo (no un string del storage)
-        if img and hasattr(img, 'size'):
-            validate_image(img)
+        # Solo validar si es un archivo NUEVO subido ahora.
+        # Los archivos existentes (de Cloudinary u otro storage)
+        # no son UploadedFile y no tienen extension en el name.
+        if img and isinstance(img, UploadedFile):
+            if img.size > 0:
+                validate_image(img)
         return img
