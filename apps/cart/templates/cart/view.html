@@ -1,163 +1,120 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mi Carrito</title>
-    {% load static %}
-    <link rel="stylesheet" href="{% static 'css/style.css' %}?v=9">
-    <link rel="stylesheet" href="{% static 'css/cart.css' %}?v=1">
-</head>
-<body>
-    <header>
-        <div class="container header-container">
-            <div class="header-top">
-                <h1 class="header-logo">🛒 Mi Marketplace</h1>
-                <button class="header-menu-toggle" id="menuToggle" aria-label="Menú">☰</button>
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Mi Carrito - Mi Marketplace{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/cart.css' %}?v=1">
+{% endblock %}
+
+{% block nav_extra %}
+<a href="{% url 'cart:view' %}" class="header-cart-link"><span class="cart-icon-text">🛒 Carrito</span><span class="cart-count-badge" {% if not cart_count %}style="display:none;"{% endif %}>{{ cart_count|default:0 }}</span></a>
+{% endblock %}
+
+{% block content %}
+<div class="cart-page">
+    <h1>🛒 Mi Carrito</h1>
+
+    {% if messages %}
+        <ul class="messages">
+            {% for message in messages %}
+                <li class="{{ message.tags }}">{{ message }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+    {% if groups %}
+        <!-- Resumen general -->
+        <div class="grand-summary">
+            <h3>Resumen</h3>
+            <div class="grand-row">
+                <span>Total de {{ groups|length }} comercio{{ groups|length|pluralize:"s" }}</span>
+                <span>${{ grand_total_no_delivery|floatformat:2 }}</span>
             </div>
-
-            <nav class="header-nav" id="headerNav">
-                <a href="/">🏠 Inicio</a>
-                <a href="/stores/">📦 Comercios</a>
-                {% if user.is_authenticated and user.is_staff %}
-                    <a href="/admin/">⚙️ Admin</a>
+            <div class="grand-note">
+                📌 Cada comercio se paga por separado. Haz clic en "Pagar este carrito" en cada bloque.
+                {% if groups|length > 1 %}
+                    Esto asegura que cada vendedor reciba su dinero directamente.
                 {% endif %}
-                {% if user.is_superuser %}
-                    <a href="{% url 'orders:superuser_orders' %}">📋 Panel</a>
-                {% endif %}
-                {% if user.is_authenticated %}
-                    <span class="header-user">👤 {{ user.username }}</span>
-                    <form action="{% url 'logout' %}" method="post" class="logout-form">
-                        {% csrf_token %}
-                        <button type="submit" class="logout-btn">🚪 Cerrar sesión</button>
-                    </form>
-                {% else %}
-                    <a href="{% url 'login' %}">🔑 Ingresar</a>
-                    <a href="{% url 'accounts:register' %}">📝 Registrarse</a>
-                {% endif %}
-            </nav>
+            </div>
         </div>
-    </header>
 
-    <main>
-        <div class="cart-page">
-            <h1>🛒 Mi Carrito</h1>
-
-            {% if messages %}
-                <ul class="messages">
-                    {% for message in messages %}
-                        <li class="{{ message.tags }}">{{ message }}</li>
-                    {% endfor %}
-                </ul>
-            {% endif %}
-
-            {% if groups %}
-                <!-- Resumen general -->
-                <div class="grand-summary">
-                    <h3>Resumen</h3>
-                    <div class="grand-row">
-                        <span>Total de {{ groups|length }} comercio{{ groups|length|pluralize:"s" }}</span>
-                        <span>${{ grand_total_no_delivery|floatformat:2 }}</span>
+        <!-- Grupos por comercio -->
+        {% for group in groups %}
+            <div class="store-group">
+                <div class="store-group-header">
+                    <div class="store-group-title">
+                        <span class="store-icon">🏪</span>
+                        <span>{{ group.store.name }}</span>
                     </div>
-                    <div class="grand-note">
-                        📌 Cada comercio se paga por separado. Haz clic en "Pagar este carrito" en cada bloque.
-                        {% if groups|length > 1 %}
-                            Esto asegura que cada vendedor reciba su dinero directamente.
-                        {% endif %}
-                    </div>
+                    <a href="{% url 'stores:detail' group.store.id %}" class="store-group-link">Ver comercio →</a>
                 </div>
 
-                <!-- Grupos por comercio -->
-                {% for group in groups %}
-                    <div class="store-group">
-                        <div class="store-group-header">
-                            <div class="store-group-title">
-                                <span class="store-icon">🏪</span>
-                                <span>{{ group.store.name }}</span>
-                            </div>
-                            <a href="{% url 'stores:detail' group.store.id %}" class="store-group-link">Ver comercio →</a>
-                        </div>
-
-                        {% for item in group.items %}
-                            <div class="cart-item">
-                                <div class="cart-item-img">
-                                    {% if item.product.image %}
-                                        <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}">
-                                    {% else %}
-                                        <div class="no-img">📷</div>
-                                    {% endif %}
-                                </div>
-                                <div class="cart-item-info">
-                                    <h4>{{ item.product.name }}</h4>
-                                    <span class="unit-price">${{ item.price|floatformat:2 }} c/u</span>
-                                </div>
-                                <div class="cart-item-actions">
-                                    <form action="{% url 'cart:update' item.id %}" method="post" class="qty-form">
-                                        {% csrf_token %}
-                                        <input type="number" name="quantity" value="{{ item.quantity }}" min="0" onchange="this.form.submit()">
-                                    </form>
-                                    <span class="cart-item-subtotal">${{ item.get_total|floatformat:2 }}</span>
-                                    <form action="{% url 'cart:remove' item.id %}" method="post" style="display:inline;">
-                                        {% csrf_token %}
-                                        <button type="submit" class="btn-remove">🗑️</button>
-                                    </form>
-                                </div>
-                            </div>
-                        {% endfor %}
-
-                        <div class="store-group-totals">
-                            <div class="total-line">
-                                <span>Subtotal</span>
-                                <span>${{ group.subtotal|floatformat:2 }}</span>
-                            </div>
-                            {% if group.has_delivery %}
-                                <div class="total-line delivery">
-                                    <span>🚚 Envío</span>
-                                    <span>${{ group.delivery_fee|floatformat:2 }}</span>
-                                </div>
-                                <div class="delivery-note">
-                                    Al pagar en este comercio puedes elegir entre retiro en tienda o delivery.
-                                </div>
+                {% for item in group.items %}
+                    <div class="cart-item">
+                        <div class="cart-item-img">
+                            {% if item.product.image %}
+                                <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}">
+                            {% else %}
+                                <div class="no-img">📷</div>
                             {% endif %}
-                            <div class="total-line grand">
-                                <span>Total</span>
-                                <span>${{ group.total|floatformat:2 }}</span>
-                            </div>
-
-                            <div class="group-actions">
-                                <a href="{% url 'orders:checkout' %}?store={{ group.store.id }}" class="btn-pay-store">
-                                    💳 Pagar este carrito
-                                </a>
-                            </div>
+                        </div>
+                        <div class="cart-item-info">
+                            <h4>{{ item.product.name }}</h4>
+                            <span class="unit-price">${{ item.price|floatformat:2 }} c/u</span>
+                        </div>
+                        <div class="cart-item-actions">
+                            <form action="{% url 'cart:update' item.id %}" method="post" class="qty-form">
+                                {% csrf_token %}
+                                <input type="number" name="quantity" value="{{ item.quantity }}" min="0" onchange="this.form.submit()">
+                            </form>
+                            <span class="cart-item-subtotal">${{ item.get_total|floatformat:2 }}</span>
+                            <form action="{% url 'cart:remove' item.id %}" method="post" style="display:inline;">
+                                {% csrf_token %}
+                                <button type="submit" class="btn-remove">🗑️</button>
+                            </form>
                         </div>
                     </div>
                 {% endfor %}
 
-                <div style="text-align: center; margin-top: 24px;">
-                    <a href="/" class="btn-back-home">← Seguir comprando</a>
+                <div class="store-group-totals">
+                    <div class="total-line">
+                        <span>Subtotal</span>
+                        <span>${{ group.subtotal|floatformat:2 }}</span>
+                    </div>
+                    {% if group.has_delivery %}
+                        <div class="total-line delivery">
+                            <span>🚚 Envío</span>
+                            <span>${{ group.delivery_fee|floatformat:2 }}</span>
+                        </div>
+                        <div class="delivery-note">
+                            Al pagar en este comercio puedes elegir entre retiro en tienda o delivery.
+                        </div>
+                    {% endif %}
+                    <div class="total-line grand">
+                        <span>Total</span>
+                        <span>${{ group.total|floatformat:2 }}</span>
+                    </div>
+                    <div class="group-actions">
+                        <a href="{% url 'orders:checkout' %}?store={{ group.store.id }}" class="btn-pay-store">
+                            💳 Pagar este carrito
+                        </a>
+                    </div>
                 </div>
+            </div>
+        {% endfor %}
 
-            {% else %}
-                <div class="empty-cart">
-                    <div class="icon">🛒</div>
-                    <h3>Tu carrito está vacío</h3>
-                    <p>¡Explora nuestros productos y agrega lo que te guste!</p>
-                    <a href="/" class="btn-primary">Ver productos</a>
-                </div>
-            {% endif %}
+        <div style="text-align: center; margin-top: 24px;">
+            <a href="/" class="btn-back-home">← Seguir comprando</a>
         </div>
-    </main>
-    <script>
-        (function () {
-            var btn = document.getElementById('menuToggle');
-            var nav = document.getElementById('headerNav');
-            if (btn && nav) {
-                btn.addEventListener('click', function () {
-                    nav.classList.toggle('open');
-                    btn.textContent = nav.classList.contains('open') ? '✕' : '☰';
-                });
-            }
-        })();
-    </script>
-</body>
-</html>
+
+    {% else %}
+        <div class="empty-cart">
+            <div class="icon">🛒</div>
+            <h3>Tu carrito está vacío</h3>
+            <p>¡Explora nuestros productos y agrega lo que te guste!</p>
+            <a href="/" class="btn-primary">Ver productos</a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
