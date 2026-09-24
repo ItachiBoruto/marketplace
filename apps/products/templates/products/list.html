@@ -1,131 +1,87 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mi Marketplace</title>
-    {% include 'partials/_meta_tags.html' %}
-    {% load static %}
-    <link rel="stylesheet" href="{% static 'css/style.css' %}">
-</head>
-<body>
-    <header>
-        <div class="container header-container">
-            <div class="header-top">
-                <h1 class="header-logo">🛒 Mi Marketplace</h1>
-                <button class="header-menu-toggle" id="menuToggle" aria-label="Menú">☰</button>
-            </div>
+{% extends "base.html" %}
+{% load static %}
 
-            <nav class="header-nav" id="headerNav">
-                <a href="/">🏠 Inicio</a>
-                <a href="/stores/">📦 Comercios</a>
-                {% if user.is_authenticated and user.is_staff %}
-                    <a href="/admin/">⚙️ Admin</a>
-                {% endif %}
-                {% if user.is_superuser %}
-                    <a href="{% url 'orders:superuser_orders' %}">📋 Panel</a>
-                {% endif %}
-                {% if user.is_authenticated %}
-                    <a href="{% url 'cart:view' %}" class="header-cart-link"><span class="cart-icon-text">🛒 Carrito</span><span class="cart-count-badge" {% if not cart_count %}style="display:none;"{% endif %}>{{ cart_count|default:0 }}</span></a>
-                    <span class="header-user">👤 {{ user.username }}</span>
-                    <form action="{% url 'logout' %}" method="post" class="logout-form">
-                        {% csrf_token %}
-                        <button type="submit" class="logout-btn">🚪 Cerrar sesión</button>
-                    </form>
-                {% else %}
-                    <a href="{% url 'login' %}">🔑 Ingresar</a>
-                    <a href="{% url 'accounts:register' %}">📝 Registrarse</a>
-                {% endif %}
-            </nav>
+{% block title %}Mi Marketplace{% endblock %}
 
-            <div class="header-actions-row">
-                <div class="search-bar">
-                    <input type="text" id="searchInput" placeholder="Buscar productos...">
-                    <button id="searchBtn" aria-label="Buscar">🔍</button>
+{% block nav_extra %}
+<a href="{% url 'cart:view' %}" class="header-cart-link"><span class="cart-icon-text">🛒 Carrito</span><span class="cart-count-badge" {% if not cart_count %}style="display:none;"{% endif %}>{{ cart_count|default:0 }}</span></a>
+{% endblock %}
+
+{% block header_actions %}
+<div class="header-actions-row">
+    <div class="search-bar">
+        <input type="text" id="searchInput" placeholder="Buscar productos...">
+        <button id="searchBtn" aria-label="Buscar">🔍</button>
+    </div>
+
+    <button class="filters-toggle" id="filtersToggle" aria-label="Filtros">🔽 Filtros</button>
+
+    <div class="header-filters" id="headerFilters">
+        <div class="filter">
+            <select id="storeFilter">
+                <option value="">Todos los comercios</option>
+                {% for store in stores %}
+                    <option value="{{ store.id }}">{{ store.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="filter category-filter-wrap">
+            <button type="button" class="category-open-btn" id="categoryOpenBtn">
+                <span id="categoryBtnLabel">Categorías</span>
+            </button>
+            <select id="categoryFilter" class="hidden-category-select">
+                <option value="">Todas las categorías</option>
+                {% for cat in categories %}
+                    <option value="{{ cat.slug }}">{{ cat.emoji }} {{ cat.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div id="productGrid" class="product-grid"></div>
+    <div id="loading" style="display: none; text-align: center; padding: 20px;">
+        Cargando más productos...
+    </div>
+</div>
+
+<!-- ============ MODAL DE CATEGORIAS ============ -->
+<div class="cat-modal-overlay" id="catModalOverlay" aria-hidden="true">
+    <div class="cat-modal" role="dialog" aria-labelledby="catModalTitle">
+        <div class="cat-modal-header">
+            <h2 id="catModalTitle">📂 Categorías</h2>
+            <button type="button" class="cat-modal-close" id="catModalClose" aria-label="Cerrar">✕</button>
+        </div>
+        <div class="cat-modal-search">
+            <input type="text" id="catSearchInput" placeholder="Buscar categoría...">
+        </div>
+        <div class="cat-modal-body" id="catModalBody">
+            <div class="cat-card" data-slug="" data-name="todas" data-tooltip="Todas las categorias">
+                <div class="cat-card-bg" style="background: linear-gradient(135deg, #e94560, #c0392b);">
+                    <span class="cat-card-emoji">🛍️</span>
                 </div>
-
-                <button class="filters-toggle" id="filtersToggle" aria-label="Filtros">🔽 Filtros</button>
-
-                <div class="header-filters" id="headerFilters">
-                    <div class="filter">
-                        <select id="storeFilter">
-                            <option value="">Todos los comercios</option>
-                            {% for store in stores %}
-                                <option value="{{ store.id }}">{{ store.name }}</option>
-                            {% endfor %}
-                        </select>
+                <span class="cat-card-name">Todas</span>
+            </div>
+            {% for cat in categories %}
+                <div class="cat-card" data-slug="{{ cat.slug }}" data-name="{{ cat.name|lower }}" data-tooltip="{{ cat.emoji }} {{ cat.name }}">
+                    <div class="cat-card-bg"
+                         {% if cat.image %}style="background-image: url('{{ cat.image.url }}');"{% else %}style="background: {{ cat.color }};"{% endif %}>
+                        <span class="cat-card-emoji">{% if not cat.image %}{{ cat.emoji }}{% endif %}</span>
                     </div>
-                    <div class="filter category-filter-wrap">
-                        <button type="button" class="category-open-btn" id="categoryOpenBtn">
-                            <span id="categoryBtnLabel">Categorías</span>
-                        </button>
-                        <select id="categoryFilter" class="hidden-category-select">
-                            <option value="">Todas las categorías</option>
-                            {% for cat in categories %}
-                                <option value="{{ cat.slug }}">{{ cat.emoji }} {{ cat.name }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
+                    <span class="cat-card-name">{{ cat.name }}</span>
                 </div>
-            </div>
+            {% endfor %}
         </div>
-    </header>
+        <div class="cat-modal-footer">
+            <button type="button" class="cat-clear-btn" id="catClearBtn">Limpiar filtro</button>
+        </div>
+    </div>
+</div>
+{% endblock %}
 
-    <main>
-        <div class="container">
-            <div id="productGrid" class="product-grid"></div>
-            <div id="loading" style="display: none; text-align: center; padding: 20px;">
-                Cargando más productos...
-            </div>
-        </div>
-    
-        <!-- ============ MODAL DE CATEGORIAS ============ -->
-        <div class="cat-modal-overlay" id="catModalOverlay" aria-hidden="true">
-            <div class="cat-modal" role="dialog" aria-labelledby="catModalTitle">
-                <div class="cat-modal-header">
-                    <h2 id="catModalTitle">📂 Categorías</h2>
-                    <button type="button" class="cat-modal-close" id="catModalClose" aria-label="Cerrar">✕</button>
-                </div>
-                <div class="cat-modal-search">
-                    <input type="text" id="catSearchInput" placeholder="Buscar categoría...">
-                </div>
-                <div class="cat-modal-body" id="catModalBody">
-                    <div class="cat-card" data-slug="" data-name="todas" data-tooltip="Todas las categorias">
-                        <div class="cat-card-bg" style="background: linear-gradient(135deg, #e94560, #c0392b);">
-                            <span class="cat-card-emoji">🛍️</span>
-                        </div>
-                        <span class="cat-card-name">Todas</span>
-                    </div>
-                    {% for cat in categories %}
-                        <div class="cat-card" data-slug="{{ cat.slug }}" data-name="{{ cat.name|lower }}" data-tooltip="{{ cat.emoji }} {{ cat.name }}">
-                            <div class="cat-card-bg"
-                                 {% if cat.image %}style="background-image: url('{{ cat.image.url }}');"{% else %}style="background: {{ cat.color }};"{% endif %}>
-                                <span class="cat-card-emoji">{% if not cat.image %}{{ cat.emoji }}{% endif %}</span>
-                            </div>
-                            <span class="cat-card-name">{{ cat.name }}</span>
-                        </div>
-                    {% endfor %}
-                </div>
-                <div class="cat-modal-footer">
-                    <button type="button" class="cat-clear-btn" id="catClearBtn">Limpiar filtro</button>
-                </div>
-            </div>
-        </div>
-    </main>
-
-    <script src="{% static 'js/product_list.js' %}?v=1"></script>
-    <script src="{% static 'js/notifications.js' %}"></script>
-    <script src="/static/js/email-verify-banner.js"></script>
-
-    <footer style="background: #1a1a2e; color: rgba(255,255,255,0.7); padding: 30px 20px; text-align: center; margin-top: 40px; font-size: 0.85rem;">
-        <div style="max-width: 1200px; margin: 0 auto;">
-            <p style="margin: 0 0 12px;">
-                <a href="/legal/privacidad/" style="color: rgba(255,255,255,0.85); text-decoration: none; margin: 0 12px;">Política de Privacidad</a>
-                <a href="/legal/terminos/" style="color: rgba(255,255,255,0.85); text-decoration: none; margin: 0 12px;">Términos y Condiciones</a>
-                <a href="/legal/cookies/" style="color: rgba(255,255,255,0.85); text-decoration: none; margin: 0 12px;">Cookies</a>
-            </p>
-            <p style="margin: 0; font-size: 0.78rem;">© 2026 Mi Marketplace. Todos los derechos reservados.</p>
-        </div>
-    </footer>
-</body>
-</html>
+{% block extra_js %}
+<script src="{% static 'js/product_list.js' %}?v=1"></script>
+{% endblock %}

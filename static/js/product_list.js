@@ -20,18 +20,9 @@
         const storeFilter = document.getElementById('storeFilter');
         const categoryFilter = document.getElementById('categoryFilter');
 
-        // ===== TOGGLES MÓVIL =====
-        const menuToggle = document.getElementById('menuToggle');
-        const headerNav = document.getElementById('headerNav');
+        // ===== TOGGLE DE FILTROS (el menu lo maneja base.html) =====
         const filtersToggle = document.getElementById('filtersToggle');
         const headerFilters = document.getElementById('headerFilters');
-
-        if (menuToggle) {
-            menuToggle.addEventListener('click', () => {
-                headerNav.classList.toggle('open');
-                menuToggle.textContent = headerNav.classList.contains('open') ? '✕' : '☰';
-            });
-        }
 
         if (filtersToggle) {
             filtersToggle.addEventListener('click', () => {
