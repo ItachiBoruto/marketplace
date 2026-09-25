@@ -21,6 +21,38 @@
     --border-radius-sm: 8px;
     --transition-speed: 0.3s;
     --font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, Oxygen, Ubuntu, sans-serif;
+
+    /* Texto */
+    --text-medium: #555555;
+    --text-lighter: #95a5a6;
+
+    /* Acentos oscuros (hover, texto sobre fondo claro) */
+    --highlight-dark: #c0392b;
+    --success-dark: #27ae60;
+    --warning-dark: #b9770e;
+    --info-color: #3498db;
+
+    /* Estados (fondos) */
+    --success-bg: #d5f4e6;
+    --warning-bg: #fff3cd;
+    --danger-bg: #fdedec;
+
+    /* Estados (textos) */
+    --success-text: #0f5132;
+    --warning-text: #856404;
+
+    /* Bordes */
+    --border-light: #e9ecef;
+    --border-medium: #dddddd;
+    --border-dark: #e1e4e8;
+    --border-subtle: #dfe3e8;
+    --border-soft: #f5f5f5;
+
+    /* Fondos */
+    --bg-gray: #f8f9fa;
+    --bg-gray-light: #f5f7fa;
+    --bg-subtle: #f0f0f0;
+    --bg-off-white: #fafbfc;
 }
 
 /* ============================
@@ -136,7 +168,7 @@ header nav a:hover {
 }
 
 .search-bar button:hover {
-    background: #c0392b;
+    background: var(--highlight-dark);
 }
 
 .filter {
@@ -194,7 +226,7 @@ header nav a:hover {
 .product-image {
     height: 160px;
     overflow: hidden;
-    background: #f5f7fa;
+    background: var(--bg-gray-light);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -216,7 +248,7 @@ header nav a:hover {
 .no-image {
     color: var(--text-muted);
     font-size: 0.9rem;
-    background: #e9ecef;
+    background: var(--border-light);
     width: 100%;
     height: 100%;
     display: flex;
@@ -258,7 +290,7 @@ header nav a:hover {
 .price {
     font-size: 1.1rem;
     font-weight: 700;
-    color: #27ae60;
+    color: var(--success-dark);
     margin: 2px 0;
 }
 
@@ -269,12 +301,12 @@ header nav a:hover {
     display: inline-block;
     align-self: flex-start;
     background: #eafaf1;
-    color: #27ae60;
+    color: var(--success-dark);
 }
 
 .stock.out-of-stock {
-    background: #fdedec;
-    color: #e74c3c;
+    background: var(--danger-bg);
+    color: var(--danger-color);
 }
 
 /* ============================
@@ -326,13 +358,13 @@ header nav a:hover {
     height: 60px;
     border-radius: 50%;
     overflow: hidden;
-    background: #f5f7fa;
+    background: var(--bg-gray-light);
     display: flex;
     align-items: center;
     justify-content: center;
     margin-bottom: 10px;
     flex-shrink: 0;
-    border: 3px solid #e9ecef;
+    border: 3px solid var(--border-light);
 }
 
 .store-logo img {
@@ -397,7 +429,7 @@ header nav a:hover {
     border-radius: 50%;
     overflow: hidden;
     border: 4px solid var(--bg-white);
-    background: #f5f7fa;
+    background: var(--bg-gray-light);
     flex-shrink: 0;
     display: flex;
     align-items: center;
@@ -459,7 +491,7 @@ header nav a:hover {
 }
 
 .profile-actions .btn-dashboard:hover {
-    background: #c0392b;
+    background: var(--highlight-dark);
 }
 
 .profile-actions .btn-back {
@@ -479,7 +511,7 @@ header nav a:hover {
 .profile-nav {
     display: flex;
     gap: 0;
-    border-top: 1px solid #e9ecef;
+    border-top: 1px solid var(--border-light);
     padding: 0 20px;
 }
 
@@ -516,7 +548,7 @@ header nav a:hover {
 .store-search-bar input {
     flex: 1;
     padding: 8px 16px;
-    border: 2px solid #ddd;
+    border: 2px solid var(--border-medium);
     border-radius: 30px;
     font-size: 0.9rem;
     min-width: 180px;
@@ -540,12 +572,12 @@ header nav a:hover {
 }
 
 .store-search-bar button:hover {
-    background: #c0392b;
+    background: var(--highlight-dark);
 }
 
 .store-search-bar .store-sort select {
     padding: 8px 14px;
-    border: 2px solid #ddd;
+    border: 2px solid var(--border-medium);
     border-radius: 30px;
     font-size: 0.9rem;
     background: white;
@@ -584,7 +616,7 @@ header nav a:hover {
     max-height: 120px;
     width: 100%;
     overflow: hidden;
-    background: #f5f7fa;
+    background: var(--bg-gray-light);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -647,7 +679,7 @@ header nav a:hover {
     height: 200px;
     border-radius: var(--border-radius);
     overflow: hidden;
-    background: #f5f7fa;
+    background: var(--bg-gray-light);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -676,7 +708,7 @@ header nav a:hover {
 
 .product-price {
     font-size: 1.6rem;
-    color: #27ae60;
+    color: var(--success-dark);
     font-weight: 700;
     margin: 4px 0;
 }
@@ -694,7 +726,7 @@ header nav a:hover {
 }
 
 .product-additional {
-    background: #f8f9fa;
+    background: var(--bg-gray);
     padding: 12px 16px;
     border-radius: var(--border-radius-sm);
     margin: 12px 0;
@@ -723,7 +755,7 @@ header nav a:hover {
 }
 
 .btn-add-cart:hover {
-    background: #c0392b;
+    background: var(--highlight-dark);
 }
 
 /* ============================
@@ -904,7 +936,7 @@ header nav a:hover {
     width: 100%;
     aspect-ratio: 1 / 1;
     overflow: hidden;
-    background: #f5f7fa;
+    background: var(--bg-gray-light);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -950,7 +982,7 @@ header nav a:hover {
 .price {
     font-size: 0.95rem;
     font-weight: 700;
-    color: #27ae60;
+    color: var(--success-dark);
     margin: 2px 0;
 }
 
@@ -1159,27 +1191,27 @@ header nav a:hover {
 }
 
 .message.error {
-    background: #fdedec;
-    color: #c0392b;
-    border-left: 4px solid #e74c3c;
+    background: var(--danger-bg);
+    color: var(--highlight-dark);
+    border-left: 4px solid var(--danger-color);
 }
 
 .message.warning {
     background: #fef5e7;
-    color: #b9770e;
-    border-left: 4px solid #f39c12;
+    color: var(--warning-dark);
+    border-left: 4px solid var(--warning-color);
 }
 
 .message.success {
     background: #eafaf1;
     color: #229954;
-    border-left: 4px solid #2ecc71;
+    border-left: 4px solid var(--success-color);
 }
 
 .message.info {
     background: #eaf2f8;
     color: #21618c;
-    border-left: 4px solid #3498db;
+    border-left: 4px solid var(--info-color);
 }
 
 /* ============================================================
@@ -1252,7 +1284,7 @@ header nav a:hover {
 }
 
 .btn-login:hover {
-    background: #c0392b;
+    background: var(--highlight-dark);
 }
 
 .register-link {
@@ -1308,38 +1340,38 @@ header nav a:hover {
 }
 
 .badge-out {
-    background: #e74c3c;
+    background: var(--danger-color);
     color: white;
 }
 
 .badge-low {
-    background: #f39c12;
+    background: var(--warning-color);
     color: white;
     text-transform: none;
     font-size: 0.72rem;
 }
 
 .stock-counter.stock-zero {
-    color: #e74c3c;
+    color: var(--danger-color);
     font-weight: 600;
 }
 .stock-counter.stock-zero span {
-    background: #fdedec;
-    color: #c0392b;
+    background: var(--danger-bg);
+    color: var(--highlight-dark);
 }
 
 .stock-counter.stock-low {
-    color: #b9770e;
+    color: var(--warning-dark);
     font-weight: 600;
 }
 .stock-counter.stock-low span {
     background: #fef5e7;
-    color: #b9770e;
+    color: var(--warning-dark);
 }
 
 .variant-stock-warn {
     font-size: 0.72rem;
-    color: #e74c3c;
+    color: var(--danger-color);
     font-weight: 600;
     margin: 2px 0 0;
 }
@@ -1357,7 +1389,7 @@ header nav a:hover {
 /* Badge del carrito en el header */
 .cart-count-badge {
     display: inline-block;
-    background: #e94560;
+    background: var(--highlight-color);
     color: white;
     border-radius: 10px;
     padding: 1px 7px;
@@ -1412,7 +1444,7 @@ header nav a:hover {
     position: absolute;
     top: 0;
     right: 0;
-    background: #e94560;
+    background: var(--highlight-color);
     color: white;
     border-radius: 10px;
     padding: 1px 6px;
@@ -1443,26 +1475,26 @@ header nav a:hover {
     box-shadow: 0 8px 32px rgba(0,0,0,0.18);
     z-index: 9999;
     overflow: hidden;
-    color: #2c3e50;
+    color: var(--text-dark);
 }
 .notif-dropdown.show { display: block; }
 
 .notif-dropdown-header {
     padding: 12px 16px;
-    border-bottom: 1px solid #f0f0f0;
+    border-bottom: 1px solid var(--bg-subtle);
     display: flex;
     justify-content: space-between;
     align-items: center;
     gap: 10px;
 }
 .notif-dropdown-header strong {
-    color: #1a1a2e;
+    color: var(--primary-color);
     font-size: 0.95rem;
 }
 .notif-mark-all {
     background: none;
     border: none;
-    color: #3498db;
+    color: var(--info-color);
     cursor: pointer;
     font-size: 0.75rem;
     font-weight: 600;
@@ -1482,41 +1514,41 @@ header nav a:hover {
     padding: 11px 16px;
     border: none;
     background: white;
-    border-bottom: 1px solid #f5f5f5;
+    border-bottom: 1px solid var(--border-soft);
     cursor: pointer;
     font-family: inherit;
     transition: background 0.2s;
 }
-.notif-item:hover { background: #f8f9fa; }
+.notif-item:hover { background: var(--bg-gray); }
 .notif-item.unread {
     background: #eaf2f8;
-    border-left: 3px solid #3498db;
+    border-left: 3px solid var(--info-color);
 }
 .notif-item-title {
     font-weight: 600;
-    color: #2c3e50;
+    color: var(--text-dark);
     font-size: 0.87rem;
     margin-bottom: 2px;
 }
 .notif-item-msg {
-    color: #7f8c8d;
+    color: var(--text-muted);
     font-size: 0.78rem;
     margin-bottom: 3px;
     line-height: 1.3;
 }
 .notif-item-time {
-    color: #95a5a6;
+    color: var(--text-lighter);
     font-size: 0.7rem;
 }
 
 .notif-dropdown-footer {
     padding: 10px 16px;
     text-align: center;
-    border-top: 1px solid #f0f0f0;
-    background: #fafbfc;
+    border-top: 1px solid var(--bg-subtle);
+    background: var(--bg-off-white);
 }
 .notif-dropdown-footer a {
-    color: #3498db;
+    color: var(--info-color);
     text-decoration: none;
     font-size: 0.82rem;
     font-weight: 600;
@@ -1526,7 +1558,7 @@ header nav a:hover {
 .notif-empty {
     text-align: center;
     padding: 30px 20px;
-    color: #95a5a6;
+    color: var(--text-lighter);
     font-size: 0.85rem;
 }
 .notif-empty .icon {
@@ -1539,7 +1571,7 @@ header nav a:hover {
 .notif-loading {
     padding: 24px;
     text-align: center;
-    color: #95a5a6;
+    color: var(--text-lighter);
     font-size: 0.85rem;
 }
 
@@ -1854,10 +1886,10 @@ header nav a:hover {
     font-size: 0.88rem;
     font-family: inherit;
     background: transparent;
-    color: #2c3e50;
+    color: var(--text-dark);
 }
 .header-actions-row .search-bar input::placeholder {
-    color: #95a5a6;
+    color: var(--text-lighter);
 }
 .header-actions-row .search-bar button {
     background: var(--highlight-color);
@@ -1873,7 +1905,7 @@ header nav a:hover {
     transition: background 0.2s;
 }
 .header-actions-row .search-bar button:hover {
-    background: #c0392b;
+    background: var(--highlight-dark);
 }
 
 /* Filtros: mismo tamaño que el buscador */
@@ -1894,7 +1926,7 @@ header nav a:hover {
     font-size: 0.88rem;
     font-family: inherit;
     background: white;
-    color: #2c3e50;
+    color: var(--text-dark);
     cursor: pointer;
     box-shadow: 0 2px 8px rgba(0,0,0,0.08);
     min-width: 140px;
@@ -2034,8 +2066,8 @@ header nav a:hover {
    BANNER VERIFICAR EMAIL
    ============================================================ */
 .verify-email-banner {
-    background: linear-gradient(90deg, #fff3cd, #ffe8a1);
-    color: #856404;
+    background: linear-gradient(90deg, var(--warning-bg), #ffe8a1);
+    color: var(--warning-text);
     padding: 10px 20px;
     display: flex;
     align-items: center;
@@ -2056,7 +2088,7 @@ header nav a:hover {
     margin: 0;
 }
 .verify-email-banner .ve-btn {
-    background: #856404;
+    background: var(--warning-text);
     color: white;
     border: none;
     padding: 5px 14px;
@@ -2073,7 +2105,7 @@ header nav a:hover {
 .verify-email-banner .ve-close {
     background: none;
     border: none;
-    color: #856404;
+    color: var(--warning-text);
     cursor: pointer;
     font-size: 1rem;
     padding: 0 4px;
@@ -2140,7 +2172,7 @@ header nav a:hover {
 /* Animacion del boton agregar al carrito */
 .btn-add-cart.btn-added-success {
     animation: btnAddSuccess 0.6s ease !important;
-    background: #2ecc71 !important;
+    background: var(--success-color) !important;
     transform: scale(1.05);
 }
 @keyframes btnAddSuccess {
@@ -2156,7 +2188,7 @@ header nav a:hover {
     top: 90px;
     left: 50%;
     transform: translateX(-50%) translateY(-120%);
-    background: linear-gradient(135deg, #2ecc71, #27ae60);
+    background: linear-gradient(135deg, var(--success-color), var(--success-dark));
     color: white;
     padding: 16px 28px;
     border-radius: 16px;
@@ -2235,7 +2267,7 @@ header nav a:hover {
     display: inline-flex !important;
     align-items: center !important;
     gap: 6px !important;
-    background: linear-gradient(135deg, #e94560, #c0392b) !important;
+    background: linear-gradient(135deg, var(--highlight-color), var(--highlight-dark)) !important;
     color: white !important;
     padding: 8px 16px !important;
     border-radius: 50px !important;
@@ -2257,7 +2289,7 @@ header nav a:hover {
 }
 .header-cart-link .cart-count-badge {
     background: white !important;
-    color: #c0392b !important;
+    color: var(--highlight-dark) !important;
     border-radius: 50px !important;
     padding: 2px 9px !important;
     font-size: 0.75rem !important;
@@ -2289,7 +2321,7 @@ header nav a:hover {
 /* Animacion del boton agregar al carrito */
 .btn-add-cart.btn-added-success {
     animation: btnAddSuccess 0.6s ease !important;
-    background: #2ecc71 !important;
+    background: var(--success-color) !important;
 }
 @keyframes btnAddSuccess {
     0%   { transform: scale(1); }
@@ -2304,7 +2336,7 @@ header nav a:hover {
     top: 90px;
     left: 50%;
     transform: translateX(-50%) translateY(-20px);
-    background: linear-gradient(135deg, #2ecc71, #27ae60);
+    background: linear-gradient(135deg, var(--success-color), var(--success-dark));
     color: white;
     padding: 10px 16px;
     border-radius: 12px;
@@ -2482,7 +2514,7 @@ header nav a:hover {
 .product-card .product-price {
     font-size: 1.1rem !important;
     font-weight: 700 !important;
-    color: #27ae60 !important;
+    color: var(--success-dark) !important;
     margin: 3px 0 !important;
     line-height: 1.2 !important;
 }
@@ -2555,7 +2587,7 @@ header nav a:hover {
 .category-open-btn {
     height: 40px;
     padding: 0 18px;
-    background: linear-gradient(135deg, #e94560, #c0392b);
+    background: linear-gradient(135deg, var(--highlight-color), var(--highlight-dark));
     color: white;
     border: none;
     border-radius: 50px;
@@ -2575,7 +2607,7 @@ header nav a:hover {
     box-shadow: 0 4px 12px rgba(233, 69, 96, 0.45);
 }
 .category-open-btn.has-filter {
-    background: linear-gradient(135deg, #27ae60, #16a085);
+    background: linear-gradient(135deg, var(--success-dark), #16a085);
     box-shadow: 0 2px 8px rgba(46, 204, 113, 0.3);
 }
 .hidden-category-select {
@@ -2628,14 +2660,14 @@ header nav a:hover {
 .cat-modal-header h2 {
     margin: 0;
     font-size: 1.15rem;
-    color: #1a1a2e;
+    color: var(--primary-color);
     font-weight: 700;
 }
 .cat-modal-close {
     background: none;
     border: none;
     font-size: 1.3rem;
-    color: #7f8c8d;
+    color: var(--text-muted);
     cursor: pointer;
     padding: 4px 10px;
     border-radius: 8px;
@@ -2644,18 +2676,18 @@ header nav a:hover {
     transition: background 0.15s, color 0.15s;
 }
 .cat-modal-close:hover {
-    background: #f0f2f5;
-    color: #1a1a2e;
+    background: var(--bg-light);
+    color: var(--primary-color);
 }
 .cat-modal-search {
     padding: 12px 24px;
-    border-bottom: 1px solid #f5f5f5;
+    border-bottom: 1px solid var(--border-soft);
     flex-shrink: 0;
 }
 .cat-modal-search input {
     width: 100%;
     padding: 10px 16px;
-    border: 1px solid #e1e4e8;
+    border: 1px solid var(--border-dark);
     border-radius: 50px;
     font-size: 0.9rem;
     font-family: inherit;
@@ -2664,7 +2696,7 @@ header nav a:hover {
     box-sizing: border-box;
 }
 .cat-modal-search input:focus {
-    border-color: #e94560;
+    border-color: var(--highlight-color);
 }
 .cat-modal-body {
     padding: 20px 24px;
@@ -2691,7 +2723,7 @@ header nav a:hover {
     box-shadow: 0 8px 20px rgba(0,0,0,0.15);
 }
 .cat-card.selected {
-    border-color: #e94560;
+    border-color: var(--highlight-color);
     box-shadow: 0 4px 16px rgba(233, 69, 96, 0.4);
 }
 .cat-card.hidden {
@@ -2725,7 +2757,7 @@ header nav a:hover {
     font-size: 0.78rem;
     font-weight: 700;
     text-align: center;
-    color: #1a1a2e;
+    color: var(--primary-color);
     line-height: 1.2;
     background: white;
     min-height: 40px;
@@ -2735,13 +2767,13 @@ header nav a:hover {
 }
 .cat-modal-footer {
     padding: 14px 24px;
-    border-top: 1px solid #f5f5f5;
+    border-top: 1px solid var(--border-soft);
     text-align: center;
     flex-shrink: 0;
 }
 .cat-clear-btn {
-    background: #f0f2f5;
-    color: #7f8c8d;
+    background: var(--bg-light);
+    color: var(--text-muted);
     border: none;
     padding: 8px 20px;
     border-radius: 50px;
@@ -2752,14 +2784,14 @@ header nav a:hover {
     transition: background 0.15s, color 0.15s;
 }
 .cat-clear-btn:hover {
-    background: #e1e4e8;
-    color: #1a1a2e;
+    background: var(--border-dark);
+    color: var(--primary-color);
 }
 .cat-no-results {
     grid-column: 1 / -1;
     text-align: center;
     padding: 30px;
-    color: #95a5a6;
+    color: var(--text-lighter);
     font-size: 0.9rem;
 }
 
@@ -2872,7 +2904,7 @@ header nav a:hover {
     align-items: center !important;
     justify-content: center !important;
     font-weight: 700 !important;
-    color: #1a1a2e !important;
+    color: var(--primary-color) !important;
     text-align: center !important;
     line-height: 1.2 !important;
     background: white !important;
@@ -2962,7 +2994,7 @@ header nav a:hover {
     align-items: center;
     gap: 8px;
     padding: 10px 20px;
-    background: linear-gradient(135deg, #1a1a2e, #16213e);
+    background: linear-gradient(135deg, var(--primary-color), #16213e);
     color: white;
     border: none;
     border-radius: 50px;
@@ -2982,8 +3014,8 @@ header nav a:hover {
     align-items: center;
     gap: 6px;
     padding: 8px 14px;
-    background: #f0f2f5;
-    color: #7f8c8d;
+    background: var(--bg-light);
+    color: var(--text-muted);
     border: none;
     border-radius: 50px;
     font-size: 0.82rem;
@@ -2993,8 +3025,8 @@ header nav a:hover {
     transition: background 0.2s, color 0.2s;
 }
 .store-pasillos-clear:hover {
-    background: #e1e4e8;
-    color: #1a1a2e;
+    background: var(--border-dark);
+    color: var(--primary-color);
 }
 @media (max-width: 600px) {
     .store-pasillos-wrap {
@@ -3334,7 +3366,7 @@ header .container.header-container {
 }
 .header-nav a:hover {
     color: white !important;
-    border-bottom-color: #e94560 !important;
+    border-bottom-color: var(--highlight-color) !important;
 }
 .header-nav .header-user {
     color: rgba(255,255,255,0.7) !important;
@@ -3355,7 +3387,7 @@ header .container.header-container {
     padding: 0 !important;
 }
 .header-nav .logout-btn:hover {
-    color: #e94560 !important;
+    color: var(--highlight-color) !important;
 }
 
 /* ============ FILA DE ACCIONES (buscador + filtros + carrito) ============ */
@@ -3392,14 +3424,14 @@ header .container.header-container {
     font-size: 0.85rem !important;
     font-family: inherit !important;
     background: transparent !important;
-    color: #2c3e50 !important;
+    color: var(--text-dark) !important;
     min-width: 0 !important;
 }
 .header-actions-row .search-bar input::placeholder {
-    color: #95a5a6 !important;
+    color: var(--text-lighter) !important;
 }
 .header-actions-row .search-bar button {
-    background: #e94560 !important;
+    background: var(--highlight-color) !important;
     color: white !important;
     border: none !important;
     padding: 0 14px !important;
@@ -3442,7 +3474,7 @@ header .container.header-container {
     font-size: 0.82rem !important;
     font-family: inherit !important;
     background: white !important;
-    color: #2c3e50 !important;
+    color: var(--text-dark) !important;
     cursor: pointer !important;
     box-shadow: 0 2px 8px rgba(0,0,0,0.08) !important;
     min-width: 130px !important;
@@ -3453,7 +3485,7 @@ header .container.header-container {
 /* Boton de filtros (solo mobile) */
 .header-actions-row .filters-toggle {
     display: none;
-    background: #e94560 !important;
+    background: var(--highlight-color) !important;
     color: white !important;
     border: none !important;
     border-radius: 50px !important;
@@ -3478,7 +3510,7 @@ header .container.header-container {
     gap: 6px !important;
     height: 38px !important;
     padding: 0 16px !important;
-    background: linear-gradient(135deg, #e94560, #c0392b) !important;
+    background: linear-gradient(135deg, var(--highlight-color), var(--highlight-dark)) !important;
     color: white !important;
     border: none !important;
     border-radius: 50px !important;
@@ -3495,7 +3527,7 @@ header .container.header-container {
     box-shadow: 0 4px 12px rgba(233, 69, 96, 0.45) !important;
 }
 .category-open-btn.has-filter {
-    background: linear-gradient(135deg, #27ae60, #16a085) !important;
+    background: linear-gradient(135deg, var(--success-dark), #16a085) !important;
     box-shadow: 0 2px 8px rgba(46, 204, 113, 0.3) !important;
 }
 .hidden-category-select {
@@ -3507,7 +3539,7 @@ header .container.header-container {
     display: inline-flex !important;
     align-items: center !important;
     gap: 5px !important;
-    background: linear-gradient(135deg, #e94560, #c0392b) !important;
+    background: linear-gradient(135deg, var(--highlight-color), var(--highlight-dark)) !important;
     color: white !important;
     padding: 6px 14px !important;
     border-radius: 50px !important;
@@ -3528,7 +3560,7 @@ header .container.header-container {
 .header-cart-link .cart-icon-text { font-size: 0.9rem !important; }
 .header-cart-link .cart-count-badge {
     background: white !important;
-    color: #c0392b !important;
+    color: var(--highlight-dark) !important;
     border-radius: 50px !important;
     padding: 1px 8px !important;
     font-size: 0.7rem !important;
@@ -3643,7 +3675,7 @@ header .container.header-container {
     display: inline-flex !important;
     align-items: center !important;
     gap: 4px !important;
-    background: linear-gradient(135deg, #e94560, #c0392b) !important;
+    background: linear-gradient(135deg, var(--highlight-color), var(--highlight-dark)) !important;
     color: white !important;
     padding: 6px 12px !important;
     border-radius: 50px !important;
@@ -3664,7 +3696,7 @@ header .container.header-container {
 }
 .header-quick-actions .header-cart-link .cart-count-badge {
     background: white !important;
-    color: #c0392b !important;
+    color: var(--highlight-dark) !important;
     border-radius: 50px !important;
     padding: 1px 7px !important;
     font-size: 0.68rem !important;
@@ -3706,7 +3738,7 @@ header .container.header-container {
    SKELETON LOADERS - Placeholders mientras cargan productos
    ============================================================ */
 .skeleton {
-    background: linear-gradient(90deg, #f0f0f0 25%, #e4e4e4 50%, #f0f0f0 75%);
+    background: linear-gradient(90deg, var(--bg-subtle) 25%, #e4e4e4 50%, var(--bg-subtle) 75%);
     background-size: 200% 100%;
     animation: skeleton-loading 1.4s ease-in-out infinite;
     border-radius: 6px;
