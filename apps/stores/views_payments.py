@@ -61,6 +61,8 @@ def request_payment_change(request, store_id):
             req.old_account_number = store.account_number or ''
             req.old_account_holder = store.account_holder or ''
             req.old_document = store.document or ''
+            req.old_mobile_payment_bank = store.mobile_payment_bank or ''
+            req.old_mobile_document = store.mobile_document or ''
             req.old_payment_phone = store.payment_phone or ''
 
             req.save()
@@ -86,6 +88,8 @@ def request_payment_change(request, store_id):
             'new_account_number': store.account_number or '',
             'new_account_holder': store.account_holder or '',
             'new_document': store.document or '',
+            'new_mobile_payment_bank': store.mobile_payment_bank or '',
+            'new_mobile_document': store.mobile_document or '',
             'new_payment_phone': store.payment_phone or '',
         })
 
@@ -155,9 +159,12 @@ def approve_payment_request(request, request_id):
     store.account_number = req.new_account_number or ''
     store.account_holder = req.new_account_holder or ''
     store.document = req.new_document or ''
+    store.mobile_payment_bank = req.new_mobile_payment_bank or ''
+    store.mobile_document = req.new_mobile_document or ''
     store.payment_phone = req.new_payment_phone or ''
     store.save(update_fields=[
-        'bank_name', 'account_number', 'account_holder', 'document', 'payment_phone'
+        'bank_name', 'account_number', 'account_holder', 'document',
+        'mobile_payment_bank', 'mobile_document', 'payment_phone'
     ])
 
     # Marcar la solicitud como aprobada

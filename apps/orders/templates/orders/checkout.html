@@ -165,17 +165,16 @@
 
                     <!-- ============ COLUMNA DERECHA: DATOS BANCARIOS + PAGO ============ -->
                     <div class="checkout-card">
-                        <h2>💳 Registrar tu pago</h2>
+                        <h2>💳 ¿Cómo quieres pagar?</h2>
 
-                        <!-- ============ SELECTOR DE METODO DE PAGO ============ -->
-                        <div class="payment-methods-wrap">
-                            <h3>💳 ¿Cómo quieres pagar?</h3>
+                        <div class="pm-layout">
 
-                            <div class="payment-methods-row">
+                            <!-- ============ COLUMNA IZQUIERDA: BOTONES ============ -->
+                            <div class="pm-buttons-col">
                                 {% if accepts_transfer %}
                                 <button type="button" class="pm-btn selected" data-method="transfer" id="pmBtnTransfer">
                                     <span class="pm-icon">🏦</span>
-                                    <span class="pm-label">Transferencia</span>
+                                    <span class="pm-label">Transfer.</span>
                                 </button>
                                 {% endif %}
                                 {% if accepts_mobile %}
@@ -185,75 +184,75 @@
                                 </button>
                                 {% endif %}
                             </div>
+
+                            <!-- ============ COLUMNA DERECHA: PANELES ============ -->
+                            <div class="pm-panels-col">
+
+                                {# PANEL: TRANSFERENCIA #}
+                                {% if accepts_transfer %}
+                                <div class="pm-panel" id="pmPanelTransfer" data-method="transfer">
+                                    <div class="bank-row-copy">
+                                        <div class="bank-row"><strong>Banco:</strong><span>{{ bank_info.bank_name }}</span></div>
+                                        <button type="button" class="btn-copy" onclick="copyToClipboard('{{ bank_info.bank_name }}', this)">📋</button>
+                                    </div>
+                                    <div class="bank-row-copy">
+                                        <div class="bank-row"><strong>Titular:</strong><span>{{ bank_info.account_holder }}</span></div>
+                                        <button type="button" class="btn-copy" onclick="copyToClipboard('{{ bank_info.account_holder }}', this)">📋</button>
+                                    </div>
+                                    {% if bank_info.document %}
+                                    <div class="bank-row-copy">
+                                        <div class="bank-row"><strong>Cédula/RIF:</strong><span>{{ bank_info.document }}</span></div>
+                                        <button type="button" class="btn-copy" onclick="copyToClipboard('{{ bank_info.document }}', this)">📋</button>
+                                    </div>
+                                    {% endif %}
+                                    <div class="bank-row-copy">
+                                        <div class="bank-row"><strong>Cuenta:</strong><span>{{ bank_info.account_number }}</span></div>
+                                        <button type="button" class="btn-copy" onclick="copyToClipboard('{{ bank_info.account_number }}', this)">📋</button>
+                                    </div>
+
+                                    <div class="qr-section">
+                                        <img src="{% url 'orders:payment_qr' %}" alt="QR" class="qr-image">
+                                    </div>
+
+                                    <button type="button" class="btn-copy-all" onclick="copyAllTransferData()">
+                                        📋 Copiar todos
+                                    </button>
+                                </div>
+                                {% endif %}
+
+                                {# PANEL: PAGO MOVIL #}
+                                {% if accepts_mobile %}
+                                <div class="pm-panel{% if not accepts_transfer %} show{% endif %}" id="pmPanelMobile" data-method="mobile">
+                                    <div class="bank-row-copy">
+                                        <div class="bank-row"><strong>Banco:</strong><span>{{ mobile_info.bank_name }}</span></div>
+                                        <button type="button" class="btn-copy" onclick="copyToClipboard('{{ mobile_info.bank_name }}', this)">📋</button>
+                                    </div>
+                                    <div class="bank-row-copy">
+                                        <div class="bank-row"><strong>Teléfono:</strong><span>{{ mobile_info.phone }}</span></div>
+                                        <button type="button" class="btn-copy" onclick="copyToClipboard('{{ mobile_info.phone }}', this)">📋</button>
+                                    </div>
+                                    {% if mobile_info.document %}
+                                    <div class="bank-row-copy">
+                                        <div class="bank-row"><strong>Cédula/RIF:</strong><span>{{ mobile_info.document }}</span></div>
+                                        <button type="button" class="btn-copy" onclick="copyToClipboard('{{ mobile_info.document }}', this)">📋</button>
+                                    </div>
+                                    {% endif %}
+
+                                    <button type="button" class="btn-copy-all" onclick="copyAllMobileData()">
+                                        📋 Copiar todos
+                                    </button>
+                                </div>
+                                {% endif %}
+
+                            </div>
                         </div>
-
-                        {# ============ PANEL: TRANSFERENCIA ============ #}
-                        {% if accepts_transfer %}
-                        <div class="pm-panel" id="pmPanelTransfer" data-method="transfer">
-                            <h3>Datos para la transferencia</h3>
-                            <div class="bank-row-copy">
-                                <div class="bank-row"><strong>Banco:</strong><span>{{ bank_info.bank_name }}</span></div>
-                                <button type="button" class="btn-copy" onclick="copyToClipboard('{{ bank_info.bank_name }}', this)">📋</button>
-                            </div>
-                            <div class="bank-row-copy">
-                                <div class="bank-row"><strong>Titular:</strong><span>{{ bank_info.account_holder }}</span></div>
-                                <button type="button" class="btn-copy" onclick="copyToClipboard('{{ bank_info.account_holder }}', this)">📋</button>
-                            </div>
-                            {% if bank_info.document %}
-                            <div class="bank-row-copy">
-                                <div class="bank-row"><strong>Cédula / RIF:</strong><span>{{ bank_info.document }}</span></div>
-                                <button type="button" class="btn-copy" onclick="copyToClipboard('{{ bank_info.document }}', this)">📋</button>
-                            </div>
-                            {% endif %}
-                            <div class="bank-row-copy">
-                                <div class="bank-row"><strong>Cuenta:</strong><span>{{ bank_info.account_number }}</span></div>
-                                <button type="button" class="btn-copy" onclick="copyToClipboard('{{ bank_info.account_number }}', this)">📋</button>
-                            </div>
-
-                            <div class="qr-section">
-                                <img src="{% url 'orders:payment_qr' %}" alt="QR" class="qr-image">
-                                <p class="qr-hint">Escanea para copiar los datos</p>
-                            </div>
-
-                            <button type="button" class="btn-copy-all" onclick="copyAllTransferData()">
-                                📋 Copiar todos los datos
-                            </button>
-                        </div>
-                        {% endif %}
-
-                        {# ============ PANEL: PAGO MOVIL ============ #}
-                        {% if accepts_mobile %}
-                        <div class="pm-panel{% if not accepts_transfer %} show{% endif %}" id="pmPanelMobile" data-method="mobile">
-                            <h3>Datos para el pago móvil</h3>
-                            <div class="bank-row-copy">
-                                <div class="bank-row"><strong>Banco receptor:</strong><span>{{ mobile_info.bank_name }}</span></div>
-                                <button type="button" class="btn-copy" onclick="copyToClipboard('{{ mobile_info.bank_name }}', this)">📋</button>
-                            </div>
-                            <div class="bank-row-copy">
-                                <div class="bank-row"><strong>Teléfono:</strong><span>{{ mobile_info.phone }}</span></div>
-                                <button type="button" class="btn-copy" onclick="copyToClipboard('{{ mobile_info.phone }}', this)">📋</button>
-                            </div>
-                            {% if mobile_info.document %}
-                            <div class="bank-row-copy">
-                                <div class="bank-row"><strong>Cédula / RIF:</strong><span>{{ mobile_info.document }}</span></div>
-                                <button type="button" class="btn-copy" onclick="copyToClipboard('{{ mobile_info.document }}', this)">📋</button>
-                            </div>
-                            {% endif %}
-
-                            <button type="button" class="btn-copy-all" onclick="copyAllMobileData()">
-                                📋 Copiar todos los datos
-                            </button>
-                        </div>
-                        {% endif %}
 
                         {# Campo oculto con el metodo elegido #}
                         <input type="hidden" name="payment_method" id="paymentMethodInput" value="{% if accepts_transfer %}transfer{% elif accepts_mobile %}mobile{% endif %}">
 
 
-                        <h3>💳 Datos del pago</h3>
-
                         {% for field in form %}
-                            {% if field.name != 'shipping_method' and field.name != 'delivery_address' %}
+                            {% if field.name != 'shipping_method' and field.name != 'delivery_address' and field.name != 'payment_method' %}
                                 <div class="form-row">
                                     <label for="{{ field.id_for_label }}">{{ field.label }}</label>
                                     {{ field }}

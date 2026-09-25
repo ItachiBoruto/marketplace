@@ -192,7 +192,7 @@ def checkout(request):
     store_mobile_info = {
         'bank_name': store.mobile_payment_bank or '',
         'phone': store.payment_phone or '',
-        'document': store.document or '',
+        'document': store.mobile_document or store.document or '',
     }
 
     return render(request, 'orders/checkout.html', {

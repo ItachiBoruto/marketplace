@@ -69,6 +69,11 @@ class Store(models.Model):
         verbose_name="Banco receptor de pago movil",
         help_text="Banco donde recibes el pago movil (puede ser distinto al de transferencia)"
     )
+    mobile_document = models.CharField(
+        max_length=20, blank=True,
+        verbose_name="Cedula/RIF para pago movil",
+        help_text="Cedula o RIF del titular de pago movil (puede ser distinto al de transferencia)"
+    )
     payment_phone = models.CharField(
         max_length=20, blank=True,
         verbose_name="Teléfono para pago móvil",
@@ -152,6 +157,7 @@ class StorePaymentChangeRequest(models.Model):
     new_account_holder = models.CharField(max_length=150, blank=True, verbose_name='Titular (nuevo)')
     new_document = models.CharField(max_length=20, blank=True, verbose_name='Cédula/RIF (nuevo)')
     new_mobile_payment_bank = models.CharField(max_length=100, blank=True, verbose_name='Banco pago movil (nuevo)')
+    new_mobile_document = models.CharField(max_length=20, blank=True, verbose_name='Cedula/RIF pagomovil (nuevo)')
     new_payment_phone = models.CharField(max_length=20, blank=True, verbose_name='Teléfono (nuevo)')
 
     # Snapshot del estado actual (para comparar)
@@ -160,6 +166,7 @@ class StorePaymentChangeRequest(models.Model):
     old_account_holder = models.CharField(max_length=150, blank=True)
     old_document = models.CharField(max_length=20, blank=True)
     old_mobile_payment_bank = models.CharField(max_length=100, blank=True)
+    old_mobile_document = models.CharField(max_length=20, blank=True)
     old_payment_phone = models.CharField(max_length=20, blank=True)
 
     reason = models.TextField(blank=True, verbose_name='Motivo del cambio')
@@ -197,6 +204,8 @@ class StorePaymentChangeRequest(models.Model):
             self.new_account_number != self.old_account_number,
             self.new_account_holder != self.old_account_holder,
             self.new_document != self.old_document,
+            self.new_mobile_payment_bank != self.old_mobile_payment_bank,
+            self.new_mobile_document != self.old_mobile_document,
             self.new_payment_phone != self.old_payment_phone,
         ])
 

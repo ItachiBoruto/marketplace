@@ -82,7 +82,9 @@ class PaymentChangeRequestForm(forms.ModelForm):
         model = StorePaymentChangeRequest
         fields = [
             "new_bank_name", "new_account_number", "new_account_holder",
-            "new_document", "new_payment_phone", "reason",
+            "new_document",
+            "new_mobile_payment_bank", "new_mobile_document", "new_payment_phone",
+            "reason",
         ]
         widgets = {
             "new_bank_name": forms.TextInput(attrs={
@@ -105,9 +107,17 @@ class PaymentChangeRequestForm(forms.ModelForm):
                 "placeholder": "V-12345678 o J-12345678-9",
                 "required": True,
             }),
+            "new_mobile_payment_bank": forms.TextInput(attrs={
+                "class": "form-control",
+                "placeholder": "Ej: Banesco o Venezuela 0102",
+            }),
+            "new_mobile_document": forms.TextInput(attrs={
+                "class": "form-control",
+                "placeholder": "V-12345678 o J-12345678-9",
+            }),
             "new_payment_phone": forms.TextInput(attrs={
                 "class": "form-control",
-                "placeholder": "0414-1234567 (opcional)",
+                "placeholder": "0414-1234567",
             }),
             "reason": forms.Textarea(attrs={
                 "class": "form-control",
@@ -120,8 +130,10 @@ class PaymentChangeRequestForm(forms.ModelForm):
             "new_bank_name": "Banco",
             "new_account_number": "Número de cuenta",
             "new_account_holder": "Titular de la cuenta",
-            "new_document": "Cédula o RIF",
-            "new_payment_phone": "Teléfono para pago móvil (opcional)",
+            "new_document": "Cédula/RIF",
+            "new_mobile_payment_bank": "Banco receptor",
+            "new_mobile_document": "Cédula/RIF",
+            "new_payment_phone": "Teléfono",
             "reason": "Motivo del cambio",
         }
 
@@ -131,13 +143,37 @@ class PaymentChangeRequestForm(forms.ModelForm):
         # Verificar que al menos un campo cambió
         change_fields = [
             'new_bank_name', 'new_account_number', 'new_account_holder',
-            'new_document', 'new_payment_phone',
+            'new_document', 'new_mobile_payment_bank', 'new_mobile_document', 'new_payment_phone',
         ]
         has_any = any(cleaned.get(f) for f in change_fields)
 
         if not has_any:
             raise forms.ValidationError(
                 'Debes indicar al menos un cambio en los datos bancarios.'
+            )
+
+        # ============================================================
+        # Validacion EN GRUPO de los datos de pago movil:
+        # o se completan los 3, o no se completa ninguno.
+        # ============================================================
+        pm_bank = (cleaned.get('new_mobile_payment_bank') or '').strip()
+        pm_doc = (cleaned.get('new_mobile_document') or '').strip()
+        pm_phone = (cleaned.get('new_payment_phone') or '').strip()
+
+        pm_campos = [pm_bank, pm_doc, pm_phone]
+        pm_llenos = sum(1 for c in pm_campos if c)
+
+        if 0 < pm_llenos < 3:
+            # Alguno lleno pero no todos
+            if not pm_bank:
+                self.add_error('new_mobile_payment_bank', 'Requerido si actualizas pago movil.')
+            if not pm_doc:
+                self.add_error('new_mobile_document', 'Requerido si actualizas pago movil.')
+            if not pm_phone:
+                self.add_error('new_payment_phone', 'Requerido si actualizas pago movil.')
+            raise forms.ValidationError(
+                'Debes completar los 3 campos de pago movil (Banco, Cedula/RIF y Telefono) '
+                'o dejar los 3 vacios.'
             )
 
         return cleaned

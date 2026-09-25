@@ -128,11 +128,7 @@
                 </div>
             {% endif %}
 
-                        <h4 style="margin: 0 0 10px; color: #2c3e50; font-size: 0.95rem; border-bottom: 1px solid #eee; padding-bottom: 8px;">
-                🏦 Datos para transferencia
-            </h4>
-
-<div class="field">
+            <div class="field">
                 <label for="{{ form.new_bank_name.id_for_label }}">{{ form.new_bank_name.label }}</label>
                 {{ form.new_bank_name }}
                 {% if store.bank_name %}

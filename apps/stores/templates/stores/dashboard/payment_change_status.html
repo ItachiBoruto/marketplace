@@ -210,6 +210,21 @@
                                 <td class="new">{{ pending.new_document }}</td>
                             </tr>
                         {% endif %}
+                        {% if pending.new_mobile_payment_bank != pending.old_mobile_payment_bank %}
+                            <tr>
+                                <td><strong>Banco pago móvil</strong></td>
+                                <td class="old">{{ pending.old_mobile_payment_bank|default:"—" }}</td>
+                                <td class="new">{{ pending.new_mobile_payment_bank }}</td>
+                            </tr>
+                        {% endif %}
+                        {% if pending.new_mobile_document != pending.old_mobile_document %}
+                            <tr>
+                                <td><strong>Cédula/RIF pago móvil</strong></td>
+                                <td class="old">{{ pending.old_mobile_document|default:"—" }}</td>
+                                <td class="new">{{ pending.new_mobile_document }}</td>
+                            </tr>
+                        {% endif %}
+                        
                         {% if pending.new_payment_phone != pending.old_payment_phone %}
                             <tr>
                                 <td><strong>Teléfono</strong></td>
@@ -288,7 +303,22 @@
                                     <td class="new">{{ req.new_document }}</td>
                                 </tr>
                             {% endif %}
-                            {% if req.new_payment_phone != req.old_payment_phone %}
+                            {% if req.new_mobile_payment_bank != req.old_mobile_payment_bank %}
+                            <tr>
+                                <td><strong>Banco pago móvil</strong></td>
+                                <td class="old">{{ req.old_mobile_payment_bank|default:"—" }}</td>
+                                <td class="new">{{ req.new_mobile_payment_bank }}</td>
+                            </tr>
+                        {% endif %}
+                        {% if req.new_mobile_document != req.old_mobile_document %}
+                            <tr>
+                                <td><strong>Cédula/RIF pago móvil</strong></td>
+                                <td class="old">{{ req.old_mobile_document|default:"—" }}</td>
+                                <td class="new">{{ req.new_mobile_document }}</td>
+                            </tr>
+                        {% endif %}
+                        
+                        {% if req.new_payment_phone != req.old_payment_phone %}
                                 <tr>
                                     <td><strong>Teléfono</strong></td>
                                     <td class="old">{{ req.old_payment_phone|default:"—" }}</td>

@@ -1277,3 +1277,191 @@
                 font-size: 0.82rem !important;
             }
         }
+
+/* ============================================================
+   PM-LAYOUT 2 COLUMNAS - Botones izq + Panel der
+   ============================================================ */
+.pm-layout {
+    display: grid !important;
+    grid-template-columns: auto 1fr !important;
+    gap: 8px !important;
+    margin-bottom: 10px !important;
+    align-items: start !important;
+}
+
+.pm-buttons-col {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 6px !important;
+    width: 90px !important;
+    flex-shrink: 0 !important;
+}
+
+.pm-buttons-col .pm-btn {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 2px !important;
+    padding: 8px 4px !important;
+    background: white !important;
+    border: 2px solid #dfe3e8 !important;
+    border-radius: 10px !important;
+    cursor: pointer !important;
+    font-family: inherit !important;
+    transition: border-color 0.2s, background 0.2s !important;
+    width: 100% !important;
+    min-width: 0 !important;
+}
+
+.pm-buttons-col .pm-btn:hover {
+    border-color: #e94560 !important;
+}
+
+.pm-buttons-col .pm-btn.selected {
+    border-color: #e94560 !important;
+    background: #fff5f7 !important;
+    box-shadow: 0 2px 8px rgba(233, 69, 96, 0.15) !important;
+}
+
+.pm-buttons-col .pm-btn .pm-icon {
+    font-size: 1.2rem !important;
+    line-height: 1 !important;
+}
+
+.pm-buttons-col .pm-btn .pm-label {
+    font-size: 0.68rem !important;
+    font-weight: 600 !important;
+    color: #2c3e50 !important;
+    text-align: center !important;
+    line-height: 1.1 !important;
+}
+
+.pm-buttons-col .pm-btn.selected .pm-label {
+    color: #c0392b !important;
+}
+
+.pm-panels-col {
+    min-width: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 6px !important;
+}
+
+.pm-panels-col .pm-panel {
+    display: none !important;
+    background: #f8f9fa !important;
+    border-radius: 10px !important;
+    padding: 8px 10px !important;
+    border: 1px solid #e9ecef !important;
+}
+
+.pm-panels-col .pm-panel.show {
+    display: block !important;
+}
+
+.pm-panels-col .pm-panel h3 {
+    display: none !important;
+}
+
+/* El QR mas chico dentro del panel */
+.pm-panels-col .qr-section {
+    text-align: center !important;
+    margin: 6px 0 4px !important;
+}
+
+.pm-panels-col .qr-image {
+    max-width: 110px !important;
+    padding: 3px !important;
+}
+
+.pm-panels-col .qr-hint {
+    display: none !important;
+}
+
+/* Filas de datos bancarios mas compactas */
+.pm-panels-col .bank-row-copy {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 4px !important;
+    border-bottom: 1px solid #e9ecef !important;
+    padding: 3px 0 !important;
+}
+
+.pm-panels-col .bank-row-copy .bank-row {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 0 !important;
+    font-size: 0.72rem !important;
+    flex: 1 !important;
+    min-width: 0 !important;
+}
+
+.pm-panels-col .bank-row-copy .bank-row strong {
+    font-size: 0.66rem !important;
+    color: #7f8c8d !important;
+    font-weight: 500 !important;
+}
+
+.pm-panels-col .bank-row-copy .bank-row span {
+    font-size: 0.74rem !important;
+    color: #2c3e50 !important;
+    font-weight: 600 !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+}
+
+.pm-panels-col .bank-row-copy .btn-copy {
+    padding: 2px 4px !important;
+    font-size: 0.62rem !important;
+    background: #f0f2f5 !important;
+    color: #555 !important;
+    border: none !important;
+    border-radius: 4px !important;
+    cursor: pointer !important;
+    flex-shrink: 0 !important;
+}
+
+.pm-panels-col .btn-copy-all {
+    margin-top: 6px !important;
+    padding: 5px 8px !important;
+    font-size: 0.7rem !important;
+    width: 100% !important;
+    background: #3498db !important;
+    color: white !important;
+    border: none !important;
+    border-radius: 6px !important;
+    cursor: pointer !important;
+    font-weight: 600 !important;
+}
+
+/* Mobile: ajustes */
+@media (max-width: 480px) {
+    .pm-layout {
+        gap: 6px !important;
+    }
+    .pm-buttons-col {
+        width: 78px !important;
+        gap: 5px !important;
+    }
+    .pm-buttons-col .pm-btn {
+        padding: 6px 3px !important;
+    }
+    .pm-buttons-col .pm-btn .pm-icon {
+        font-size: 1.05rem !important;
+    }
+    .pm-buttons-col .pm-btn .pm-label {
+        font-size: 0.62rem !important;
+    }
+    .pm-panels-col .bank-row-copy .bank-row strong {
+        font-size: 0.6rem !important;
+    }
+    .pm-panels-col .bank-row-copy .bank-row span {
+        font-size: 0.68rem !important;
+    }
+    .pm-panels-col .qr-image {
+        max-width: 90px !important;
+    }
+}
