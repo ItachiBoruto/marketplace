@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.contrib import admin, messages
 
 from apps.notifications.models import notify
@@ -84,7 +85,7 @@ class OrderAdmin(admin.ModelAdmin):
         count = 0
         for order in queryset:
             if order.reservation_expires_at and not order.stock_released:
-                order.reservation_expires_at = timezone.now() + timedelta(minutes=30)
+                order.reservation_expires_at = timezone.now() + timedelta(minutes=settings.ORDER_RESERVATION_MINUTES)
                 order.save(update_fields=['reservation_expires_at'])
                 count += 1
         self.message_user(request, f'{count} reserva(s) extendida(s) +30 min.', messages.SUCCESS)

@@ -268,7 +268,10 @@ BANK_INFO = {
 # ============================================================
 # ===== RESERVA DE STOCK EN PEDIDOS =====
 # ============================================================
-ORDER_RESERVATION_MINUTES = int(os.environ.get('ORDER_RESERVATION_MINUTES', 30))
+# Tiempo que la reserva de stock se mantiene antes de expirar.
+# El cliente ya pago cuando crea el pedido, asi que este TTL es solo
+# un backstop por si el comercio nunca revisa. 4320 minutos = 3 dias.
+ORDER_RESERVATION_MINUTES = int(os.environ.get('ORDER_RESERVATION_MINUTES', 4320))
 
 # Token para el endpoint cron de expiración de reservas
 CRON_SECRET_TOKEN = os.environ.get('CRON_SECRET_TOKEN', '')
