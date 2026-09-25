@@ -48,7 +48,12 @@ class MovementListView(RoleContextMixin, OwnerRequiredMixin, ListView):
 
     def get_queryset(self):
         store = self.get_store()
-        return StockMovement.objects.filter(store=store).order_by("-created_at")
+        return (
+            StockMovement.objects
+            .filter(store=store)
+            .select_related("product", "product__category")
+            .order_by("-created_at")
+        )
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

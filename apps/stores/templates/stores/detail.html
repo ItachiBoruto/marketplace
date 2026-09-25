@@ -1,239 +1,203 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ store.name }} - Mi Marketplace</title>
-    {% include 'partials/_meta_tags.html' %}
-    {% load static %}
-    <link rel="stylesheet" href="{% static 'css/style.css' %}?v=8">
+{% extends "base.html" %}
+{% load static %}
 
-    <link rel="stylesheet" href="{% static 'css/store_profile.css' %}?v=1">
-</head>
-<body>
-    <header>
-        <div class="container">
-            <h1>🛒 Mi Marketplace</h1>
-            <nav>
-                <a href="/">🏠 Inicio</a>
-                <a href="/stores/">📦 Comercios</a>
-                {% if user.is_authenticated %}
-                    <a href="{% url 'cart:view' %}" class="header-cart-link"><span class="cart-icon-text">🛒 Carrito</span><span class="cart-count-badge" {% if not cart_count %}style="display:none;"{% endif %}>{{ cart_count|default:0 }}</span></a>
-                {% endif %}
-                {% if user.is_authenticated and user.is_staff %}
-                    <a href="/admin/">⚙️ Admin</a>
-                {% endif %}
-                {% if user.is_superuser %}
-                    <a href="{% url 'orders:superuser_orders' %}">📋 Panel</a>
-                {% endif %}
-                {% if user.is_authenticated %}
-                    <span style="color: rgba(255,255,255,0.7); margin: 0 10px;">👤 {{ user.username}}</span>
-                    <form action="{% url 'logout' %}" method="post" style="display: inline;">
-                        {% csrf_token %}
-                        <button type="submit" style="background: none; border: none; color: rgba(255,255,255,0.85); cursor: pointer; font-size: 0.95rem; padding: 0; margin: 0 10px;">🚪 Cerrar sesión</button>
-                    </form>
-                {% endif %}
-            </nav>
-        </div>
-    </header>
+{% block title %}{{ store.name }} - Mi Marketplace{% endblock %}
 
-    <main>
-        <div class="container" data-store-id="{{ store.id }}">
-            <div class="profile-header">
-                <div class="profile-cover"></div>
-                <div class="profile-info">
-                    <div class="profile-avatar">
-                        {% if store.logo %}
-                            <img src="{{ store.logo.url }}" alt="{{ store.name }}">
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/store_profile.css' %}?v=1">
+{% endblock %}
+
+{% block content %}
+<div class="container" data-store-id="{{ store.id }}">
+    <div class="profile-header">
+        <div class="profile-cover"></div>
+        <div class="profile-info">
+            <div class="profile-avatar">
+                {% if store.logo %}
+                    <img src="{{ store.logo.url }}" alt="{{ store.name }}">
+                {% else %}
+                    <div class="no-avatar">🏪</div>
+                {% endif %}
+            </div>
+            <div class="profile-details">
+                <h1>{{ store.name }}</h1>
+                <p>{{ store.description }}</p>
+                {% if store.offers_delivery %}
+                    <div class="profile-meta">
+                        <span class="meta-delivery">🛵 Delivery (${{ store.delivery_fee }})</span>
+                    </div>
+                {% endif %}
+
+                {% if store_status.has_schedule %}
+                    <div class="store-status-badges">
+                        {% if store_status.pickup.is_open %}
+                            <span class="store-status-badge open">
+                                <span class="dot"></span>
+                                <span>
+                                    <span class="badge-title">🏪 Retiro en tienda</span>
+                                    <span class="badge-sub">Disponible ahora</span>
+                                </span>
+                            </span>
+                        {% elif store_status.pickup.today_open and store_status.pickup.today_close %}
+                            <span class="store-status-badge scheduled">
+                                <span class="dot"></span>
+                                <span>
+                                    <span class="badge-title">Retiro en tienda</span>
+                                    <span class="badge-sub">Disponible de {{ store_status.pickup.today_open|time:'H:i' }} a {{ store_status.pickup.today_close|time:'H:i' }}</span>
+                                </span>
+                            </span>
                         {% else %}
-                            <div class="no-avatar">🏪</div>
+                            <span class="store-status-badge closed">
+                                <span class="dot"></span>
+                                <span>
+                                    <span class="badge-title">Retiro en tienda</span>
+                                    <span class="badge-sub">
+                                        Cerrado hoy
+                                        {% if store_status.pickup.next_open %}
+                                            - Abre {{ store_status.pickup.next_open}}
+                                        {% endif %}
+                                    </span>
+                                </span>
+                            </span>
                         {% endif %}
-                    </div>
-                    <div class="profile-details">
-                        <h1>{{ store.name }}</h1>
-                        <p>{{ store.description }}</p>
+
                         {% if store.offers_delivery %}
-                            <div class="profile-meta">
-                                <span class="meta-delivery">🛵 Delivery (${{ store.delivery_fee }})</span>
-                            </div>
-                        {% endif %}
-                    
-
-                        {% if store_status.has_schedule %}
-                            <div class="store-status-badges">
-                                <!-- RETIRO EN TIENDA -->
-                                {% if store_status.pickup.is_open %}
-                                    <span class="store-status-badge open">
-                                        <span class="dot"></span>
-                                        <span>
-                                            <span class="badge-title">🏪 Retiro en tienda</span>
-                                            <span class="badge-sub">Disponible ahora</span>
-                                        </span>
+                            {% if store_status.delivery.is_open %}
+                                <span class="store-status-badge open">
+                                    <span class="dot"></span>
+                                    <span>
+                                        <span class="badge-title">🛵 Delivery</span>
+                                        <span class="badge-sub">Disponible ahora</span>
                                     </span>
-                                {% elif store_status.pickup.today_open and store_status.pickup.today_close %}
-                                    <span class="store-status-badge scheduled">
-                                        <span class="dot"></span>
-                                        <span>
-                                            <span class="badge-title">🏪 Retiro en tienda</span>
-                                            <span class="badge-sub">Disponible de {{ store_status.pickup.today_open|time:'H:i' }} a {{ store_status.pickup.today_close|time:'H:i' }}</span>
-                                        </span>
+                                </span>
+                            {% elif store_status.delivery.today_open and store_status.delivery.today_close %}
+                                <span class="store-status-badge scheduled">
+                                    <span class="dot"></span>
+                                    <span>
+                                        <span class="badge-title">Delivery</span>
+                                        <span class="badge-sub">Disponible de {{ store_status.delivery.today_open|time:'H:i' }} a {{ store_status.delivery.today_close|time:'H:i' }}</span>
                                     </span>
-                                {% else %}
-                                    <span class="store-status-badge closed">
-                                        <span class="dot"></span>
-                                        <span>
-                                            <span class="badge-title">🏪 Retiro en tienda</span>
-                                            <span class="badge-sub">
-                                                Cerrado hoy
-                                                {% if store_status.pickup.next_open %}
-                                                    · Abre {{ store_status.pickup.next_open }}
-                                                {% endif %}
-                                            </span>
-                                        </span>
-                                    </span>
-                                {% endif %}
-
-                                <!-- DELIVERY -->
-                                {% if store.offers_delivery %}
-                                    {% if store_status.delivery.is_open %}
-                                        <span class="store-status-badge open">
-                                            <span class="dot"></span>
-                                            <span>
-                                                <span class="badge-title">🛵 Delivery</span>
-                                                <span class="badge-sub">Disponible ahora</span>
-                                            </span>
-                                        </span>
-                                    {% elif store_status.delivery.today_open and store_status.delivery.today_close %}
-                                        <span class="store-status-badge scheduled">
-                                            <span class="dot"></span>
-                                            <span>
-                                                <span class="badge-title">🛵 Delivery</span>
-                                                <span class="badge-sub">Disponible de {{ store_status.delivery.today_open|time:'H:i' }} a {{ store_status.delivery.today_close|time:'H:i' }}</span>
-                                            </span>
-                                        </span>
-                                    {% else %}
-                                        <span class="store-status-badge closed">
-                                            <span class="dot"></span>
-                                            <span>
-                                                <span class="badge-title">🛵 Delivery</span>
-                                                <span class="badge-sub">
-                                                    Cerrado hoy
-                                                    {% if store_status.delivery.next_open %}
-                                                        · Abre {{ store_status.delivery.next_open }}
-                                                    {% endif %}
-                                                </span>
-                                            </span>
-                                        </span>
-                                    {% endif %}
-                                {% endif %}
-                            </div>
-                        {% endif %}
-                </div>
-                    <div class="profile-actions">
-                        <a href="/stores/" class="btn-back">← Volver</a>
-
-                        {% if user.is_authenticated %}
-                            {% if user.is_superuser %}
-                                <a href="{% url 'stores:dashboard' store.id %}" class="btn-dashboard">⚙️ Gestionar</a>
+                                </span>
                             {% else %}
-                                {% for perm in user.store_permissions.all %}
-                                    {% if perm.store == store and perm.is_active %}
-                                        <a href="{% url 'stores:dashboard' store.id %}" class="btn-dashboard">⚙️ Gestionar</a>
-                                    {% endif %}
-                                {% endfor %}
+                                <span class="store-status-badge closed">
+                                    <span class="dot"></span>
+                                    <span>
+                                        <span class="badge-title">Delivery</span>
+                                        <span class="badge-sub">
+                                            Cerrado hoy
+                                            {% if store_status.delivery.next_open %}
+                                                - Abre {{ store_status.delivery.next_open }}
+                                            {% endif %}
+                                        </span>
+                                    </span>
+                                </span>
                             {% endif %}
                         {% endif %}
                     </div>
-                </div>
-                <div class="profile-nav">
-                    <a href="#" class="active" data-tab="products">Productos</a>
-                    <a href="#" data-tab="about">Acerca de</a>
-                    <a href="#" data-tab="reviews">Opiniones</a>
-                </div>
+                {% endif %}
             </div>
+            <div class="profile-actions">
+                <a href="/stores/" class="btn-back">← Volver</a>
 
-            <div class="store-search-bar">
-                <input type="text" id="storeSearchInput" placeholder="Buscar en {{ store.name }}...">
-                <button id="storeSearchBtn">🔍</button>
-            </div>
-
-            {% if store_categories %}
-            <div class="store-pasillos-wrap">
-                <button type="button" class="store-pasillos-btn" id="storePasillosBtn">
-                    <span>🚪 Visitar pasillo...</span>
-                </button>
-                <button type="button" class="store-pasillos-clear" id="storePasillosClear" style="display: none;">
-                    ✕ Quitar filtro
-                </button>
-            </div>
-            {% endif %}
-
-            <!-- Detalle del producto seleccionado (ARRIBA del grid) -->
-            <div id="product-detail-container" style="display: none; margin-bottom: 24px;"></div>
-
-            <div id="storeProductGrid" class="variant-grid">
-                {% for product in products %}
-                    <div class="variant-card" data-product-id="{{ product.id }}">
-                        <div class="variant-image">
-                            {% if product.image %}
-                                <img src="{{ product.image.url }}" alt="{{ product.name }}">
-                            {% else %}
-                                <div class="no-image">Sin imagen</div>
+                {% if user.is_authenticated %}
+                    {% if user.is_superuser %}
+                        <a href="{% url 'stores:dashboard' store.id %}" class="btn-dashboard">⚙️ Gestionar</a>
+                    {% else %}
+                        {% for perm in user.store_permissions.all %}
+                            {% if perm.store == store and perm.is_active %}
+                                <a href="{% url 'stores:dashboard' store.id %}" class="btn-dashboard">Gestionar</a>
                             {% endif %}
-                        </div>
-                        <div class="variant-info">
-                            <h4>{{ product.name }}</h4>
-                            <p class="price">${{ product.price }}</p>
-                            <p class="stock">Stock: {{ product.stock }}</p>
-                        </div>
-                    </div>
-                {% empty %}
-                    <p>No hay productos disponibles en este comercio.</p>
-                {% endfor %}
-            </div>
-
-            <div id="storeLoading" style="display: none; text-align: center; padding: 20px; color: #777;">
-                Cargando más productos...
+                        {% endfor %}
+                    {% endif %}
+                {% endif %}
             </div>
         </div>
-    
-        <!-- ============ MODAL DE PASILLOS ============ -->
-        <div class="cat-modal-overlay" id="storePasillosModal" aria-hidden="true">
-            <div class="cat-modal" role="dialog">
-                <div class="cat-modal-header">
-                    <h2>🚪 Pasillos de {{ store.name }}</h2>
-                    <button type="button" class="cat-modal-close" id="storePasillosClose" aria-label="Cerrar">✕</button>
+        <div class="profile-nav">
+            <a href="#" class="active" data-tab="products">Productos</a>
+            <a href="#" data-tab="about">Acerca de</a>
+            <a href="#" data-tab="reviews">Opiniones</a>
+        </div>
+    </div>
+
+    <div class="store-search-bar">
+        <input type="text" id="storeSearchInput" placeholder="Buscar en {{ store.name }}...">
+        <button id="storeSearchBtn" aria-label="Buscar">🔍</button>
+    </div>
+
+    {% if store_categories %}
+    <div class="store-pasillos-wrap">
+        <button type="button" class="store-pasillos-btn" id="storePasillosBtn">
+            <span>🚪 Visitar pasillo...</span>
+        </button>
+        <button type="button" class="store-pasillos-clear" id="storePasillosClear" style="display: none;">
+            ✕ Quitar filtro
+        </button>
+    </div>
+    {% endif %}
+
+    <div id="product-detail-container" style="display: none; margin-bottom: 24px;"></div>
+
+    <div id="storeProductGrid" class="variant-grid">
+        {% for product in products %}
+            <div class="variant-card" data-product-id="{{ product.id }}">
+                <div class="variant-image">
+                    {% if product.image %}
+                        <img src="{{ product.image.url }}" alt="{{ product.name }}">
+                    {% else %}
+                        <div class="no-image">Sin imagen</div>
+                    {% endif %}
                 </div>
-                <div class="cat-modal-search">
-                    <input type="text" id="storePasillosSearch" placeholder="Buscar pasillo...">
-                </div>
-                <div class="cat-modal-body" id="storePasillosBody">
-                    <div class="cat-card" data-slug="" data-name="todos">
-                        <div class="cat-card-bg" style="background: linear-gradient(135deg, #1a1a2e, #16213e);">
-                            <span class="cat-card-emoji">🛍️</span>
-                        </div>
-                        <span class="cat-card-name">Todos</span>
-                    </div>
-                    {% for cat in store_categories %}
-                        <div class="cat-card" data-slug="{{ cat.slug }}" data-name="{{ cat.name|lower }}">
-                            <div class="cat-card-bg"
-                                 {% if cat.image %}style="background-image: url('{{ cat.image.url }}');"{% else %}style="background: {{ cat.color }};"{% endif %}>
-                                <span class="cat-card-emoji">{% if not cat.image %}{{ cat.emoji }}{% endif %}</span>
-                            </div>
-                            <span class="cat-card-name">{{ cat.name }}</span>
-                        </div>
-                    {% endfor %}
-                </div>
-                <div class="cat-modal-footer">
-                    <button type="button" class="cat-clear-btn" id="storePasillosReset">Ver todos los productos</button>
+                <div class="variant-info">
+                    <h4>{{ product.name }}</h4>
+                    <p class="price">${{ product.price }}</p>
+                    <p class="stock">Stock: {{ product.stock }}</p>
                 </div>
             </div>
-        </div>
-    </main>
+        {% empty %}
+            <p>No hay productos disponibles en este comercio.</p>
+        {% endfor %}
+    </div>
 
-    <script src="{% static 'js/store_detail.js' %}?v=6"></script>
-    <script src="{% static 'js/cart-toast.js' %}?v=2"></script>
-    <script src="{% static 'js/notifications.js' %}"></script>
-    <script src="/static/js/email-verify-banner.js"></script>
-</body>
-</html>
+    <div id="storeLoading" style="display: none; text-align: center; padding: 20px; color: #777;">
+        📦 Cargando mas productos...
+    </div>
+</div>
+
+<!-- Modal de pasillos -->
+<div class="cat-modal-overlay" id="storePasillosModal" aria-hidden="true">
+    <div class="cat-modal" role="dialog">
+        <div class="cat-modal-header">
+            <h2>🚪 Pasillos de {{ store.name }}</h2>
+            <button type="button" class="cat-modal-close" id="storePasillosClose" aria-label="Cerrar">✕</button>
+        </div>
+        <div class="cat-modal-search">
+            <input type="text" id="storePasillosSearch" placeholder="Buscar pasillo...">
+        </div>
+        <div class="cat-modal-body" id="storePasillosBody">
+            <div class="cat-card" data-slug="" data-name="todos">
+                <div class="cat-card-bg" style="background: linear-gradient(135deg, #1a1a2e, #16213e);">
+                    <span class="cat-card-emoji">🛍️</span>
+                </div>
+                <span class="cat-card-name">Todos</span>
+            </div>
+            {% for cat in store_categories %}
+                <div class="cat-card" data-slug="{{ cat.slug }}" data-name="{{ cat.name|lower }}">
+                    <div class="cat-card-bg"
+                         {% if cat.image %}style="background-image: url('{{ cat.image.url }}');"{% else %}style="background: {{ cat.color }};"{% endif %}>
+                        <span class="cat-card-emoji">{% if not cat.image %}{{ cat.emoji }}{% endif %}</span>
+                    </div>
+                    <span class="cat-card-name">{{ cat.name }}</span>
+                </div>
+            {% endfor %}
+        </div>
+        <div class="cat-modal-footer">
+            <button type="button" class="cat-clear-btn" id="storePasillosReset">Ver todos los productos</button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/store_detail.js' %}?v=6"></script>
+<script src="{% static 'js/cart-toast.js' %}?v=2"></script>
+{% endblock %}
