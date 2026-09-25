@@ -44,9 +44,30 @@
             ));
         }
 
+        // ===== SKELETON LOADERS =====
+        function renderSkeletons(count) {
+            var html = '';
+            for (var i = 0; i < count; i++) {
+                html += '<div class="skeleton-card">' +
+                    '<div class="skeleton skeleton-image"></div>' +
+                    '<div class="skeleton-info">' +
+                        '<div class="skeleton skeleton-line title"></div>' +
+                        '<div class="skeleton skeleton-line subtitle"></div>' +
+                        '<div class="skeleton skeleton-line price"></div>' +
+                    '</div>' +
+                '</div>';
+            }
+            return html;
+        }
+
         async function loadProducts(page = 1, search = '', store = '', category = '', sort = 'name') {
             if (isLoading || !hasMore) return;
             isLoading = true;
+
+            // Si es primera carga, mostrar skeletons
+            if (page === 1) {
+                productGrid.innerHTML = renderSkeletons(8);
+            }
             loading.style.display = 'block';
 
             try {
@@ -133,7 +154,7 @@
 
         // ===== BÚSQUEDA Y FILTROS =====
         function performSearch() {
-            productGrid.innerHTML = '';
+            productGrid.innerHTML = renderSkeletons(8);
             currentPage = 1;
             hasMore = true;
             currentSearch = searchInput.value.trim();

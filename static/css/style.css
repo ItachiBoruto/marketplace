@@ -3701,3 +3701,109 @@ header .container.header-container {
         padding: 1px 6px !important;
     }
 }
+
+/* ============================================================
+   SKELETON LOADERS - Placeholders mientras cargan productos
+   ============================================================ */
+.skeleton {
+    background: linear-gradient(90deg, #f0f0f0 25%, #e4e4e4 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: skeleton-loading 1.4s ease-in-out infinite;
+    border-radius: 6px;
+    display: block;
+}
+
+@keyframes skeleton-loading {
+    0%   { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+/* Card skeleton completa (mismo tamano que .product-card) */
+.skeleton-card {
+    background: var(--bg-white);
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+    border: 1px solid rgba(0,0,0,0.04);
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.skeleton-card .skeleton-image {
+    width: 100%;
+    height: 130px;
+    border-radius: 0;
+}
+
+.skeleton-card .skeleton-info {
+    padding: 10px 12px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.skeleton-card .skeleton-line {
+    height: 12px;
+    border-radius: 4px;
+}
+
+.skeleton-card .skeleton-line.title {
+    width: 85%;
+    height: 14px;
+}
+
+.skeleton-card .skeleton-line.subtitle {
+    width: 60%;
+    height: 10px;
+}
+
+.skeleton-card .skeleton-line.price {
+    width: 40%;
+    height: 14px;
+    margin-top: 2px;
+}
+
+/* Card skeleton pequena (para el listado de comercio) */
+.skeleton-variant {
+    background: var(--bg-white);
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+    border: 1px solid rgba(0,0,0,0.04);
+    display: flex;
+    flex-direction: column;
+}
+
+.skeleton-variant .skeleton-image {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    border-radius: 0;
+}
+
+.skeleton-variant .skeleton-info {
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.skeleton-variant .skeleton-line {
+    height: 11px;
+}
+
+.skeleton-variant .skeleton-line.title {
+    width: 80%;
+}
+
+.skeleton-variant .skeleton-line.price {
+    width: 40%;
+    margin-top: 2px;
+}
+
+/* En mobile, ajustar altura de imagen */
+@media (max-width: 768px) {
+    .skeleton-card .skeleton-image {
+        height: 110px;
+    }
+}
