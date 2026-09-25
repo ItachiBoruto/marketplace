@@ -20,14 +20,14 @@
 .analytics-header h1 {
     margin: 0;
     font-size: 1.3rem;
-    color: #1a1a2e;
+    color: var(--primary-color);
 }
 
 /* ============ FILTRO DE RANGO ============ */
 .range-filter {
     display: flex;
     gap: 4px;
-    background: #f0f2f5;
+    background: var(--bg-light);
     padding: 4px;
     border-radius: 50px;
 }
@@ -37,19 +37,19 @@
     border-radius: 50px;
     font-size: 0.78rem;
     font-weight: 600;
-    color: #7f8c8d;
+    color: var(--text-muted);
     text-decoration: none;
     transition: all 0.2s;
     white-space: nowrap;
 }
 
 .range-btn:hover {
-    color: #1a1a2e;
+    color: var(--primary-color);
 }
 
 .range-btn.active {
     background: white;
-    color: #e94560;
+    color: var(--highlight-color);
     box-shadow: 0 2px 6px rgba(0,0,0,0.08);
 }
 
@@ -71,7 +71,7 @@
 
 .metric-label {
     font-size: 0.75rem;
-    color: #7f8c8d;
+    color: var(--text-muted);
     text-transform: uppercase;
     letter-spacing: 0.5px;
     font-weight: 600;
@@ -81,7 +81,7 @@
 .metric-value {
     font-size: 1.5rem;
     font-weight: 700;
-    color: #1a1a2e;
+    color: var(--primary-color);
     line-height: 1.1;
     margin-bottom: 4px;
 }
@@ -91,11 +91,11 @@
     font-weight: 600;
 }
 
-.metric-change.positive { color: #27ae60; }
-.metric-change.negative { color: #e74c3c; }
+.metric-change.positive { color: var(--success-dark); }
+.metric-change.negative { color: var(--danger-color); }
 
 .metric-compare {
-    color: #95a5a6;
+    color: var(--text-lighter);
     font-weight: 400;
     font-size: 0.68rem;
 }
@@ -113,7 +113,7 @@
 .chart-card h3 {
     margin: 0 0 14px;
     font-size: 0.95rem;
-    color: #1a1a2e;
+    color: var(--primary-color);
     font-weight: 700;
 }
 
@@ -127,7 +127,7 @@
     gap: 2px;
     height: 120px;
     padding: 0 2px;
-    border-bottom: 1px solid #e9ecef;
+    border-bottom: 1px solid var(--border-light);
 }
 
 .chart-col {
@@ -142,7 +142,7 @@
 .chart-bar {
     width: 100%;
     max-width: 30px;
-    background: linear-gradient(180deg, #e94560, #c0392b);
+    background: linear-gradient(180deg, var(--highlight-color), var(--highlight-dark));
     border-radius: 3px 3px 0 0;
     min-height: 2px;
     transition: opacity 0.2s;
@@ -156,14 +156,14 @@
     display: flex;
     justify-content: space-between;
     font-size: 0.7rem;
-    color: #95a5a6;
+    color: var(--text-lighter);
     margin-top: 6px;
 }
 
 .chart-empty {
     text-align: center;
     padding: 30px;
-    color: #95a5a6;
+    color: var(--text-lighter);
     font-size: 0.85rem;
 }
 
@@ -192,7 +192,7 @@
 .card h3 {
     margin: 0 0 12px;
     font-size: 0.95rem;
-    color: #1a1a2e;
+    color: var(--primary-color);
     font-weight: 700;
 }
 
@@ -207,11 +207,11 @@
     text-align: left;
     padding: 6px 8px;
     font-size: 0.72rem;
-    color: #7f8c8d;
+    color: var(--text-muted);
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.3px;
-    border-bottom: 1px solid #e9ecef;
+    border-bottom: 1px solid var(--border-light);
 }
 
 .analytics-table thead th.num {
@@ -220,8 +220,8 @@
 
 .analytics-table tbody td {
     padding: 8px 8px;
-    color: #2c3e50;
-    border-bottom: 1px solid #f5f5f5;
+    color: var(--text-dark);
+    border-bottom: 1px solid var(--border-soft);
 }
 
 .analytics-table tbody tr:last-child td {
@@ -234,7 +234,7 @@
 }
 
 .analytics-table td.num.alert {
-    color: #e74c3c;
+    color: var(--danger-color);
 }
 
 /* ============ LISTA DE ESTADOS ============ */
@@ -249,37 +249,37 @@
     justify-content: space-between;
     align-items: center;
     padding: 8px 10px;
-    background: #f8f9fa;
+    background: var(--bg-gray);
     border-radius: 8px;
     font-size: 0.85rem;
 }
 
 .status-label {
-    color: #555;
+    color: var(--text-medium);
     font-size: 0.82rem;
 }
 
 .status-value {
     font-weight: 700;
-    color: #2c3e50;
+    color: var(--text-dark);
     font-size: 0.95rem;
     min-width: 30px;
     text-align: right;
 }
 
 .status-value.alert {
-    color: #e74c3c;
+    color: var(--danger-color);
 }
 
 .status-value.success {
-    color: #27ae60;
+    color: var(--success-dark);
 }
 
 /* ============ BOTONES PEQUENOS ============ */
 .btn-small {
     display: inline-block;
     padding: 4px 10px;
-    background: #3498db;
+    background: var(--info-color);
     color: white;
     border-radius: 6px;
     text-decoration: none;
@@ -296,7 +296,7 @@
 .empty-msg {
     text-align: center;
     padding: 20px;
-    color: #95a5a6;
+    color: var(--text-lighter);
     font-size: 0.85rem;
     margin: 0;
 }
@@ -370,7 +370,7 @@
 
 .custom-field label {
     font-size: 0.72rem;
-    color: #7f8c8d;
+    color: var(--text-muted);
     text-transform: uppercase;
     letter-spacing: 0.3px;
     font-weight: 600;
@@ -382,18 +382,18 @@
     border-radius: 8px;
     font-size: 0.85rem;
     font-family: inherit;
-    color: #2c3e50;
+    color: var(--text-dark);
     background: white;
 }
 
 .custom-field input[type="date"]:focus {
     outline: none;
-    border-color: #e94560;
+    border-color: var(--highlight-color);
 }
 
 .btn-apply-range {
     padding: 9px 18px;
-    background: #e94560;
+    background: var(--highlight-color);
     color: white;
     border: none;
     border-radius: 8px;
@@ -405,19 +405,19 @@
 }
 
 .btn-apply-range:hover {
-    background: #c0392b;
+    background: var(--highlight-dark);
 }
 
 .btn-cancel-range {
     padding: 9px 14px;
-    color: #7f8c8d;
+    color: var(--text-muted);
     text-decoration: none;
     font-size: 0.82rem;
     align-self: flex-end;
 }
 
 .btn-cancel-range:hover {
-    color: #1a1a2e;
+    color: var(--primary-color);
 }
 
 @media (max-width: 480px) {
