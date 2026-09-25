@@ -117,7 +117,7 @@ def create_order_from_cart(user, payment_data, cart, store=None):
         "order_created",
         f"Nuevo pedido {order.reference_code}",
         f"{user.username} hizo un pedido por ${order.total}.",
-        link=f"/admin/orders/order/{order.pk}/change/"
+        link=f"/orders/panel/{order.pk}/"
     )
 
     # Al cliente: pedido registrado
