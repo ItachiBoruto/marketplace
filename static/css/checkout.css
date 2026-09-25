@@ -1465,3 +1465,182 @@
         max-width: 90px !important;
     }
 }
+
+/* ============================================================
+   CHECKOUT PAYMENT ENHANCEMENTS
+   Instrucciones, estados y sticky
+   ============================================================ */
+
+/* ============ INSTRUCCIONES PASO A PASO ============ */
+.payment-steps {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    background: linear-gradient(135deg, #f0f7ff, #e6f2ff);
+    border: 1px solid #cfe3f7;
+    border-radius: 10px;
+    padding: 10px 12px;
+    margin-bottom: 12px;
+}
+
+.step-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.step-num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: #3498db;
+    color: white;
+    font-size: 0.72rem;
+    font-weight: 700;
+    flex-shrink: 0;
+}
+
+.step-text {
+    font-size: 0.82rem;
+    color: #2c3e50;
+    font-weight: 500;
+    line-height: 1.2;
+}
+
+/* ============ BOTON CON ESTADO DE CARGA ============ */
+.btn-checkout {
+    position: relative;
+    transition: background 0.2s, transform 0.1s;
+}
+
+.btn-checkout:active:not(:disabled) {
+    transform: scale(0.98);
+}
+
+.btn-checkout:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+.btn-checkout .btn-loading {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+/* Spinner */
+.spinner {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border: 2px solid rgba(255,255,255,0.4);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spinner-rotate 0.8s linear infinite;
+}
+
+@keyframes spinner-rotate {
+    to { transform: rotate(360deg); }
+}
+
+/* ============ RESUMEN STICKY (desktop) ============ */
+@media (min-width: 769px) {
+    .checkout-card:first-child {
+        position: sticky;
+        top: 20px;
+        align-self: start;
+    }
+}
+
+/* ============ BOTON COPIAR CON MEJOR FEEDBACK ============ */
+.btn-copy {
+    transition: background 0.2s, transform 0.15s;
+}
+
+.btn-copy:active {
+    transform: scale(0.92);
+}
+
+/* ============ VALIDACION EN VIVO DE LA REFERENCIA ============ */
+.input-valid {
+    border-color: #27ae60 !important;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2327ae60' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    padding-right: 32px !important;
+}
+
+.input-invalid {
+    border-color: #e74c3c !important;
+}
+
+.input-invalid:focus {
+    box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.15) !important;
+}
+
+/* ============ ANIMACION DE CAMBIO DE PANEL ============ */
+.pm-panel.show {
+    animation: pm-fade-in 0.3s ease;
+}
+
+@keyframes pm-fade-in {
+    from {
+        opacity: 0;
+        transform: translateY(-6px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ============ BOTON DESCARGA DE QR ============ */
+.qr-actions {
+    display: flex;
+    gap: 6px;
+    justify-content: center;
+    margin-top: 8px;
+    flex-wrap: wrap;
+}
+
+.qr-action-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 5px 10px;
+    background: #f0f2f5;
+    color: #555;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    text-decoration: none;
+    transition: background 0.2s;
+}
+
+.qr-action-btn:hover {
+    background: #e1e4e8;
+    color: #1a1a2e;
+}
+
+/* ============ RESPONSIVE ============ */
+@media (max-width: 768px) {
+    .payment-steps {
+        padding: 8px 10px;
+        gap: 4px;
+    }
+    .step-num {
+        width: 20px;
+        height: 20px;
+        font-size: 0.68rem;
+    }
+    .step-text {
+        font-size: 0.76rem;
+    }
+}

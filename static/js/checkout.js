@@ -163,4 +163,146 @@
         }
     })();
 
+
+
+    // ============================================================
+    // MEJORAS DE UX - Estado de carga, validacion en vivo
+    // ============================================================
+
+    // 1) Estado "Procesando" al enviar el form
+    (function() {
+        var form = document.getElementById('checkoutForm');
+        var btn = document.getElementById('btnConfirmOrder');
+        if (!form || !btn) return;
+
+        form.addEventListener('submit', function() {
+            var textEl = btn.querySelector('.btn-text');
+            var loadingEl = btn.querySelector('.btn-loading');
+            if (textEl) textEl.style.display = 'none';
+            if (loadingEl) loadingEl.style.display = 'inline-flex';
+            btn.disabled = true;
+        });
+    })();
+
+    // 2) Validacion en vivo del campo de referencia
+    (function() {
+        // El input de referencia tiene name="payment_reference"
+        var refInput = document.querySelector('input[name="payment_reference"]');
+        if (!refInput) return;
+
+        function validate() {
+            var val = refInput.value.trim();
+            if (val.length === 0) {
+                refInput.classList.remove('input-valid', 'input-invalid');
+                return;
+            }
+            if (val.length >= 4) {
+                refInput.classList.add('input-valid');
+                refInput.classList.remove('input-invalid');
+            } else {
+                refInput.classList.add('input-invalid');
+                refInput.classList.remove('input-valid');
+            }
+        }
+
+        refInput.addEventListener('input', validate);
+        validate();
+    })();
+
+    // 3) Feedback mejorado del boton copiar
+    (function() {
+        // Sobrescribimos copyToClipboard para mejor feedback
+        var originalCopy = window.copyToClipboard;
+        window.copyToClipboard = function(text, btn) {
+            if (originalCopy) {
+                originalCopy(text, btn);
+            }
+            // Vibracion en mobile (si esta disponible)
+            if (navigator.vibrate) {
+                navigator.vibrate(30);
+            }
+        };
+    })();
+
+    // 4) Descarga de QR (agregar boton si hay QR visible)
+    (function() {
+        var qrImages = document.querySelectorAll('.qr-image');
+        qrImages.forEach(function(qr) {
+            var container = qr.parentNode;
+            if (!container || container.querySelector('.qr-actions')) return;
+
+            var actions = document.createElement('div');
+            actions.className = 'qr-actions';
+            actions.innerHTML =
+                '<button type="button" class="qr-action-btn" data-qr-download>⬇️ Descargar</button>' +
+                '<button type="button" class="qr-action-btn" data-qr-share>📤 Compartir</button>';
+
+            // Insertar despues del QR
+            qr.parentNode.insertBefore(actions, qr.nextSibling);
+
+            // Handlers
+            var dlBtn = actions.querySelector('[data-qr-download]');
+            if (dlBtn) {
+                dlBtn.addEventListener('click', function() {
+                    var link = document.createElement('a');
+                    link.href = qr.src;
+                    link.download = 'qr-pago.png';
+                    link.click();
+                });
+            }
+
+            var shBtn = actions.querySelector('[data-qr-share]');
+            if (shBtn) {
+                if (!navigator.share) {
+                    shBtn.style.display = 'none';
+                } else {
+                    shBtn.addEventListener('click', function() {
+                        fetch(qr.src)
+                            .then(function(r) { return r.blob(); })
+                            .then(function(blob) {
+                                var file = new File([blob], 'qr-pago.png', { type: 'image/png' });
+                                return navigator.share({
+                                    files: [file],
+                                    title: 'QR de pago',
+                                });
+                            })
+                            .catch(function() {});
+                    });
+                }
+            }
+        });
+    })();
+
+    // 5) Animacion al cambiar de metodo de pago
+    (function() {
+        var btns = document.querySelectorAll('.pm-btn');
+        var panels = document.querySelectorAll('.pm-panel');
+
+        function selectWithAnim(method) {
+            btns.forEach(function(b) {
+                b.classList.toggle('selected', b.dataset.method === method);
+            });
+            panels.forEach(function(p) {
+                if (p.dataset.method === method) {
+                    p.classList.remove('show');
+                    // Forzar reflow para reiniciar animacion
+                    void p.offsetWidth;
+                    p.classList.add('show');
+                } else {
+                    p.classList.remove('show');
+                }
+            });
+        }
+
+        // Reemplazar el handler del toggle original
+        // (que ya estaba definido en el codigo)
+        btns.forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                selectWithAnim(btn.dataset.method);
+                var hidden = document.getElementById('paymentMethodInput');
+                if (hidden) hidden.value = btn.dataset.method;
+            });
+        });
+    })();
+
 })();
