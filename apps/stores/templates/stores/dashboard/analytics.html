@@ -1,0 +1,220 @@
+{% extends "stores/dashboard/base.html" %}
+{% load static %}
+
+{% block title %}Analiticas - {{ store.name }}
+{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/analytics.css' %}?v=1">
+{% endblock %}
+
+{% block content %}
+<div class="analytics-wrap">
+
+    <div class="analytics-header">
+        <h1>📊 Analiticas</h1>
+        <div class="range-filter">
+            <a href="?rango=7" class="range-btn {% if rango_dias == 7 %}active{% endif %}">7 dias</a>
+            <a href="?rango=30" class="range-btn {% if rango_dias == 30 %}active{% endif %}">30 dias</a>
+            <a href="?rango=90" class="range-btn {% if rango_dias == 90 %}active{% endif %}">90 dias</a>
+            <button type="button" class="range-btn {% if es_personalizado %}active{% endif %}" id="btnCustomRange">
+                Personalizado
+            </button>
+        </div>
+    </div>
+
+    <!-- ============ RANGO PERSONALIZADO ============ -->
+    <div class="custom-range-wrap" id="customRangeForm" style="display: {% if es_personalizado %}block{% else %}none{% endif %};">
+        <form method="get" class="custom-range-form">
+            <div class="custom-field">
+                <label for="fecha_desde">Desde</label>
+                <input type="date" name="fecha_desde" id="fecha_desde"
+                       value="{{ fecha_desde|default:'' }}"
+                       max="{{ hoy|date:'Y-m-d' }}">
+            </div>
+            <div class="custom-field">
+                <label for="fecha_hasta">Hasta</label>
+                <input type="date" name="fecha_hasta" id="fecha_hasta"
+                       value="{{ fecha_hasta|default:'' }}"
+                       max="{{ hoy|date:'Y-m-d' }}">
+            </div>
+            <button type="submit" class="btn-apply-range">Aplicar</button>
+            <a href="?rango=30" class="btn-cancel-range">Cancelar</a>
+        </form>
+    </div>
+
+
+
+    <!-- ============ TARJETAS DE METRICAS ============ -->
+    <div class="metrics-grid">
+
+        <div class="metric-card">
+            <div class="metric-label">💰 Ventas</div>
+            <div class="metric-value">${{ metricas.total|floatformat:2 }}</div>
+            {% if cambio_ventas is not None %}
+                <div class="metric-change {% if cambio_ventas >= 0 %}positive{% else %}negative{% endif %}">
+                    {% if cambio_ventas >= 0 %}▲{% else %}▼{% endif %} {{ cambio_ventas }}%
+                    <span class="metric-compare">vs periodo anterior</span>
+                </div>
+            {% endif %}
+        </div>
+
+        <div class="metric-card">
+            <div class="metric-label">📦 Pedidos</div>
+            <div class="metric-value">{{ metricas.ordenes }}</div>
+            {% if cambio_ordenes is not None %}
+                <div class="metric-change {% if cambio_ordenes >= 0 %}positive{% else %}negative{% endif %}">
+                    {% if cambio_ordenes >= 0 %}▲{% else %}▼{% endif %} {{ cambio_ordenes }}%
+                    <span class="metric-compare">vs periodo anterior</span>
+                </div>
+            {% endif %}
+        </div>
+
+        <div class="metric-card">
+            <div class="metric-label">🛍️ Unidades</div>
+            <div class="metric-value">{{ metricas.unidades }}</div>
+            {% if cambio_unidades is not None %}
+                <div class="metric-change {% if cambio_unidades >= 0 %}positive{% else %}negative{% endif %}">
+                    {% if cambio_unidades >= 0 %}▲{% else %}▼{% endif %} {{ cambio_unidades }}%
+                    <span class="metric-compare">vs periodo anterior</span>
+                </div>
+            {% endif %}
+        </div>
+
+        <div class="metric-card">
+            <div class="metric-label">🎯 Ticket promedio</div>
+            <div class="metric-value">${{ metricas.ticket|floatformat:2 }}</div>
+            <div class="metric-compare">por pedido</div>
+        </div>
+
+    </div>
+
+    <!-- ============ GRAFICO DE VENTAS ============ -->
+    <div class="chart-card">
+        <h3>📈 Ventas por dia</h3>
+        {% if metricas.total > 0 %}
+        <div class="chart-wrap">
+            <div class="chart-bars">
+                {% for dia in ventas_por_dia %}
+                    <div class="chart-col" title="{{ dia.fecha }}: ${{ dia.total|floatformat:2 }} ({{ dia.ordenes }} pedidos)">
+                        <div class="chart-bar" style="height: {% widthratio dia.total max_venta 100 %}%;"></div>
+                    </div>
+                {% endfor %}
+            </div>
+            <div class="chart-labels">
+                <span>{{ ventas_por_dia.0.fecha|date:"d M" }}</span>
+                <span>{{ ventas_por_dia|length }} dias</span>
+                <span>Hoy</span>
+            </div>
+        </div>
+        {% else %}
+        <div class="chart-empty">
+            <p>No hay ventas registradas en este periodo.</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- ============ TOP PRODUCTOS ============ -->
+    <div class="two-col">
+
+        <div class="card">
+            <h3>🏆 Top 5 productos</h3>
+            {% if top_productos %}
+                <table class="analytics-table">
+                    <thead>
+                        <tr>
+                            <th>Producto</th>
+                            <th class="num">Unid.</th>
+                            <th class="num">Ingresos</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for p in top_productos %}
+                        <tr>
+                            <td>{{ p.product_name }}</td>
+                            <td class="num">{{ p.unidades }}</td>
+                            <td class="num">${{ p.ingresos|floatformat:2 }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p class="empty-msg">Sin ventas en este periodo.</p>
+            {% endif %}
+        </div>
+
+        <div class="card">
+            <h3>📋 Estado de pedidos</h3>
+            <div class="status-list">
+                <div class="status-row">
+                    <span class="status-label">⏳ Pendientes de aprobacion</span>
+                    <span class="status-value {% if pendientes > 0 %}alert{% endif %}">{{ pendientes }}</span>
+                </div>
+                <div class="status-row">
+                    <span class="status-label">📦 Por enviar</span>
+                    <span class="status-value {% if por_enviar > 0 %}alert{% endif %}">{{ por_enviar }}</span>
+                </div>
+                <div class="status-row">
+                    <span class="status-label">🚚 En camino</span>
+                    <span class="status-value">{{ en_camino }}</span>
+                </div>
+                <div class="status-row">
+                    <span class="status-label">✅ Entregados (periodo)</span>
+                    <span class="status-value success">{{ entregados_periodo }}</span>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ============ BAJO STOCK ============ -->
+    <div class="card">
+        <h3>⚠️ Productos con bajo stock</h3>
+        {% if bajo_stock %}
+            <table class="analytics-table">
+                <thead>
+                    <tr>
+                        <th>Producto</th>
+                        <th class="num">Stock</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for p in bajo_stock %}
+                    <tr>
+                        <td>{{ p.name }}</td>
+                        <td class="num {% if p.stock <= 0 %}alert{% endif %}">
+                            {% if p.stock <= 0 %}Sin stock{% else %}{{ p.stock }}{% endif %}
+                        </td>
+                        <td class="num">
+                            <a href="{% url 'stores:stock_adjust' store.id p.id %}" class="btn-small">Ajustar</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p class="empty-msg">Todos los productos tienen stock suficiente.</p>
+        {% endif %}
+    </div>
+
+</div>
+
+<script>
+(function() {
+    var btn = document.getElementById('btnCustomRange');
+    var form = document.getElementById('customRangeForm');
+    if (!btn || !form) return;
+
+    btn.addEventListener('click', function() {
+        var isVisible = form.style.display === 'block';
+        form.style.display = isVisible ? 'none' : 'block';
+        if (!isVisible) {
+            var input = document.getElementById('fecha_desde');
+            if (input) input.focus();
+        }
+    });
+})();
+</script>
+
+{% endblock %}

@@ -7,7 +7,7 @@ from apps.products.views_admin import (
     ProductUpdateView,
 )
 
-from . import views, views_orders, views_payments, views_schedule, views_users
+from . import views, views_analytics, views_orders, views_payments, views_schedule, views_users
 
 app_name = "stores"
 
@@ -18,6 +18,7 @@ urlpatterns = [
 
     # Dashboard del vendedor
     path("dashboard/<int:store_id>/", views.DashboardView.as_view(), name="dashboard"),
+    path("dashboard/<int:store_id>/analytics/", views_analytics.AnalyticsView.as_view(), name="analytics"),
     path("dashboard/<int:store_id>/products/", views.ProductListView.as_view(), name="product_list"),
     path("dashboard/<int:store_id>/products/create/", ProductCreateView.as_view(), name="product_create"),
     path("dashboard/<int:store_id>/products/<int:pk>/update/", ProductUpdateView.as_view(), name="product_update"),

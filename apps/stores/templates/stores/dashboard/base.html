@@ -75,6 +75,7 @@
         <div>
             <!-- El dashboard siempre visible -->
             <a href="{% url 'stores:dashboard' store.id %}">📊 Dashboard</a>
+                <a href="{% url 'stores:analytics' store.id %}">📈 Analiticas</a>
 
             <!-- Opciones según el rol -->
             {% if user.is_superuser or user_role == 'owner' or user_role == 'manager' %}

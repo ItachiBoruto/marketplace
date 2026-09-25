@@ -1,0 +1,441 @@
+/* ============================================================
+   analytics.css - Estilos del dashboard de analiticas
+   ============================================================ */
+
+.analytics-wrap {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 16px;
+}
+
+.analytics-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.analytics-header h1 {
+    margin: 0;
+    font-size: 1.3rem;
+    color: #1a1a2e;
+}
+
+/* ============ FILTRO DE RANGO ============ */
+.range-filter {
+    display: flex;
+    gap: 4px;
+    background: #f0f2f5;
+    padding: 4px;
+    border-radius: 50px;
+}
+
+.range-btn {
+    padding: 6px 14px;
+    border-radius: 50px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: #7f8c8d;
+    text-decoration: none;
+    transition: all 0.2s;
+    white-space: nowrap;
+}
+
+.range-btn:hover {
+    color: #1a1a2e;
+}
+
+.range-btn.active {
+    background: white;
+    color: #e94560;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+}
+
+/* ============ TARJETAS DE METRICAS ============ */
+.metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin-bottom: 14px;
+}
+
+.metric-card {
+    background: white;
+    border-radius: 12px;
+    padding: 14px 16px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    border: 1px solid rgba(0,0,0,0.04);
+}
+
+.metric-label {
+    font-size: 0.75rem;
+    color: #7f8c8d;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 600;
+    margin-bottom: 6px;
+}
+
+.metric-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1a1a2e;
+    line-height: 1.1;
+    margin-bottom: 4px;
+}
+
+.metric-change {
+    font-size: 0.72rem;
+    font-weight: 600;
+}
+
+.metric-change.positive { color: #27ae60; }
+.metric-change.negative { color: #e74c3c; }
+
+.metric-compare {
+    color: #95a5a6;
+    font-weight: 400;
+    font-size: 0.68rem;
+}
+
+/* ============ GRAFICO DE BARRAS ============ */
+.chart-card {
+    background: white;
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 14px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    border: 1px solid rgba(0,0,0,0.04);
+}
+
+.chart-card h3 {
+    margin: 0 0 14px;
+    font-size: 0.95rem;
+    color: #1a1a2e;
+    font-weight: 700;
+}
+
+.chart-wrap {
+    position: relative;
+}
+
+.chart-bars {
+    display: flex;
+    align-items: flex-end;
+    gap: 2px;
+    height: 120px;
+    padding: 0 2px;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.chart-col {
+    flex: 1;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    height: 100%;
+    min-width: 4px;
+}
+
+.chart-bar {
+    width: 100%;
+    max-width: 30px;
+    background: linear-gradient(180deg, #e94560, #c0392b);
+    border-radius: 3px 3px 0 0;
+    min-height: 2px;
+    transition: opacity 0.2s;
+}
+
+.chart-bar:hover {
+    opacity: 0.8;
+}
+
+.chart-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.7rem;
+    color: #95a5a6;
+    margin-top: 6px;
+}
+
+.chart-empty {
+    text-align: center;
+    padding: 30px;
+    color: #95a5a6;
+    font-size: 0.85rem;
+}
+
+/* ============ GRID 2 COLUMNAS ============ */
+.two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-bottom: 14px;
+}
+
+/* ============ TARJETAS GENERALES ============ */
+.card {
+    background: white;
+    border-radius: 12px;
+    padding: 16px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    border: 1px solid rgba(0,0,0,0.04);
+    margin-bottom: 14px;
+}
+
+.card:last-child {
+    margin-bottom: 0;
+}
+
+.card h3 {
+    margin: 0 0 12px;
+    font-size: 0.95rem;
+    color: #1a1a2e;
+    font-weight: 700;
+}
+
+/* ============ TABLAS ============ */
+.analytics-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+}
+
+.analytics-table thead th {
+    text-align: left;
+    padding: 6px 8px;
+    font-size: 0.72rem;
+    color: #7f8c8d;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.analytics-table thead th.num {
+    text-align: right;
+}
+
+.analytics-table tbody td {
+    padding: 8px 8px;
+    color: #2c3e50;
+    border-bottom: 1px solid #f5f5f5;
+}
+
+.analytics-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.analytics-table td.num {
+    text-align: right;
+    font-weight: 600;
+}
+
+.analytics-table td.num.alert {
+    color: #e74c3c;
+}
+
+/* ============ LISTA DE ESTADOS ============ */
+.status-list {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.status-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 10px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    font-size: 0.85rem;
+}
+
+.status-label {
+    color: #555;
+    font-size: 0.82rem;
+}
+
+.status-value {
+    font-weight: 700;
+    color: #2c3e50;
+    font-size: 0.95rem;
+    min-width: 30px;
+    text-align: right;
+}
+
+.status-value.alert {
+    color: #e74c3c;
+}
+
+.status-value.success {
+    color: #27ae60;
+}
+
+/* ============ BOTONES PEQUENOS ============ */
+.btn-small {
+    display: inline-block;
+    padding: 4px 10px;
+    background: #3498db;
+    color: white;
+    border-radius: 6px;
+    text-decoration: none;
+    font-size: 0.72rem;
+    font-weight: 600;
+    transition: background 0.2s;
+}
+
+.btn-small:hover {
+    background: #2980b9;
+}
+
+/* ============ MENSAJES VACIOS ============ */
+.empty-msg {
+    text-align: center;
+    padding: 20px;
+    color: #95a5a6;
+    font-size: 0.85rem;
+    margin: 0;
+}
+
+/* ============ RESPONSIVE ============ */
+@media (max-width: 768px) {
+    .analytics-wrap {
+        padding: 10px;
+    }
+    .analytics-header h1 {
+        font-size: 1.1rem;
+    }
+    .metrics-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+    }
+    .metric-card {
+        padding: 10px 12px;
+    }
+    .metric-value {
+        font-size: 1.2rem;
+    }
+    .metric-label {
+        font-size: 0.68rem;
+    }
+    .two-col {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+    .card {
+        padding: 12px;
+    }
+    .chart-bars {
+        height: 90px;
+    }
+    .analytics-table {
+        font-size: 0.78rem;
+    }
+    .analytics-table thead th,
+    .analytics-table tbody td {
+        padding: 6px 4px;
+    }
+    .range-btn {
+        padding: 5px 10px;
+        font-size: 0.72rem;
+    }
+}
+
+/* ============ RANGO PERSONALIZADO ============ */
+.custom-range-wrap {
+    background: white;
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin-bottom: 14px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    border: 1px solid rgba(0,0,0,0.04);
+}
+
+.custom-range-form {
+    display: flex;
+    align-items: flex-end;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.custom-field {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.custom-field label {
+    font-size: 0.72rem;
+    color: #7f8c8d;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    font-weight: 600;
+}
+
+.custom-field input[type="date"] {
+    padding: 8px 10px;
+    border: 1px solid #dfe3e8;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-family: inherit;
+    color: #2c3e50;
+    background: white;
+}
+
+.custom-field input[type="date"]:focus {
+    outline: none;
+    border-color: #e94560;
+}
+
+.btn-apply-range {
+    padding: 9px 18px;
+    background: #e94560;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background 0.2s;
+}
+
+.btn-apply-range:hover {
+    background: #c0392b;
+}
+
+.btn-cancel-range {
+    padding: 9px 14px;
+    color: #7f8c8d;
+    text-decoration: none;
+    font-size: 0.82rem;
+    align-self: flex-end;
+}
+
+.btn-cancel-range:hover {
+    color: #1a1a2e;
+}
+
+@media (max-width: 480px) {
+    .custom-range-form {
+        gap: 6px;
+    }
+    .custom-field input[type="date"] {
+        padding: 6px 8px;
+        font-size: 0.78rem;
+        width: 100%;
+    }
+    .custom-field {
+        flex: 1 1 45%;
+    }
+    .btn-apply-range,
+    .btn-cancel-range {
+        flex: 1 1 100%;
+        text-align: center;
+        padding: 8px;
+    }
+}
