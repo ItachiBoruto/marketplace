@@ -29,6 +29,8 @@ urlpatterns = [
     # Pedidos del comercio
     path("dashboard/<int:store_id>/orders/", views_orders.StoreOrdersView.as_view(), name="orders"),
     path("dashboard/<int:store_id>/orders/<int:order_id>/", views_orders.StoreOrderDetailView.as_view(), name="order_detail"),
+    path("dashboard/<int:store_id>/orders/<int:order_id>/approve/", views_orders.order_confirm_payment, name="order_confirm_payment"),
+    path("dashboard/<int:store_id>/orders/<int:order_id>/reject/", views_orders.order_reject_payment, name="order_reject_payment"),
     path("dashboard/<int:store_id>/orders/<int:order_id>/items/<int:item_id>/approve/", views_orders.approve_order_item, name="order_item_approve"),
     path("dashboard/<int:store_id>/orders/<int:order_id>/items/<int:item_id>/reject/", views_orders.reject_order_item_view, name="order_item_reject"),
     path("dashboard/<int:store_id>/orders/<int:order_id>/items/<int:item_id>/ship/", views_orders.mark_item_shipped, name="order_item_ship"),

@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ order.reference_code }} - Admin</title>
     {% load static %}
+{% load exchange_filters %}
     <link rel="stylesheet" href="{% static 'css/style.css' %}?v=9">
     <style>
         .detail-wrap { max-width: 900px; margin: 24px auto; padding: 0 16px; }
@@ -303,6 +304,20 @@
                     <span class="lbl">Fecha del pago</span>
                     <span class="val">{{ order.payment_date|date:"d/m/Y"|default:"—" }}</span>
                 </div>
+                <div class="info-row" style="background:#f8f9fa;border-radius:6px;padding:8px 10px;margin:6px 0;">
+                    <span class="lbl" style="font-weight:600;color:#2c3e50;">💵 Monto esperado en USD</span>
+                    <span class="val" style="color:#27ae60;font-size:1rem;">${{ order.grand_total|floatformat:2 }}</span>
+                </div>
+                {% if order.exchange_rate %}
+                <div class="info-row" style="background:#fff8e1;border-radius:6px;padding:8px 10px;margin:6px 0;">
+                    <span class="lbl" style="font-weight:600;color:#856404;">💰 Monto esperado en Bs</span>
+                    <span class="val" style="color:#b9770e;font-size:1rem;font-weight:700;">Bs. {{ order.grand_total|to_bs:order.exchange_rate }}</span>
+                </div>
+                <div class="info-row" style="border:none;">
+                    <span class="lbl" style="font-size:0.78rem;color:#95a5a6;">Tasa BCV del pedido</span>
+                    <span class="val" style="font-size:0.78rem;color:#95a5a6;">{{ order.exchange_rate|floatformat:2 }} Bs/USD</span>
+                </div>
+                {% endif %}
                 {% if order.payment_proof %}
                     <div style="margin-top:12px;">
                         <span class="lbl" style="font-size:0.85rem;color:#7f8c8d;">Comprobante:</span><br>

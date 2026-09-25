@@ -9,7 +9,7 @@ from apps.notifications.email_service import send_order_item_rejected
 from apps.utils.async_tasks import run_async
 from apps.notifications.models import notify
 from apps.orders.models import Order, OrderItem
-from apps.orders.services import reject_order_item
+from apps.orders.services import reject_order_item, release_order_stock
 
 from .mixins import ManagerRequiredMixin, RoleContextMixin
 from .models import Store, StoreUserPermission
@@ -271,3 +271,83 @@ def mark_item_delivered(request, store_id, order_id, item_id):
 
     messages.success(request, f'Item "{item.product_name}" marcado como entregado.')
     return redirect("stores:order_detail", store_id=store.id, order_id=order_id)
+
+# ============================================================
+# Verificacion de pago del pedido (nivel pedido, no item)
+# ============================================================
+@login_required(login_url='login')
+def order_confirm_payment(request, store_id, order_id):
+    """El comercio confirma que recibio el pago del pedido completo."""
+    if request.method != 'POST':
+        return HttpResponseBadRequest("Metodo no permitido")
+
+    store = get_object_or_404(Store, id=store_id)
+    if not _check_store_manager(request, store):
+        raise Http404()
+
+    order = get_object_or_404(Order, id=order_id)
+
+    # Verificar que el pedido tenga items de este comercio
+    if not order.items.filter(store=store).exists():
+        raise Http404()
+
+    if order.status != 'payment_submitted':
+        messages.warning(request, 'Este pedido ya fue procesado.')
+        return redirect('stores:order_detail', store_id=store.id, order_id=order_id)
+
+    order.status = 'confirmed'
+    order.save(update_fields=['status'])
+
+    # Pasar todos los items de este comercio a 'confirmed'
+    # (el pago ya fue verificado, no hace falta que el comercio apruebe uno por uno)
+    order.items.filter(store=store, status='pending').update(status='confirmed')
+
+    notify(
+        order.user,
+        'payment_confirmed',
+        f'Pago confirmado - Pedido {order.reference_code}',
+        f'{store.name} verifico tu pago. Pronto se prepara tu pedido.',
+        link=f'/orders/{order.pk}/'
+    )
+
+    messages.success(request, f'Pago del pedido {order.reference_code} confirmado.')
+    return redirect('stores:order_detail', store_id=store.id, order_id=order_id)
+
+
+@login_required(login_url='login')
+def order_reject_payment(request, store_id, order_id):
+    """El comercio rechaza el pago del pedido. Libera stock y cancela."""
+    if request.method != 'POST':
+        return HttpResponseBadRequest("Metodo no permitido")
+
+    store = get_object_or_404(Store, id=store_id)
+    if not _check_store_manager(request, store):
+        raise Http404()
+
+    order = get_object_or_404(Order, id=order_id)
+
+    if not order.items.filter(store=store).exists():
+        raise Http404()
+
+    if order.status in ('cancelled', 'completed'):
+        messages.warning(request, 'Este pedido ya fue procesado.')
+        return redirect('stores:order_detail', store_id=store.id, order_id=order_id)
+
+    # Liberar stock reservado y cancelar
+    release_order_stock(order, reason=f'Pago rechazado por {store.name}')
+    order.status = 'cancelled'
+    order.save(update_fields=['status'])
+
+    # Marcar los items de este comercio como cancelados
+    order.items.filter(store=store).exclude(status='cancelled').update(status='cancelled')
+
+    notify(
+        order.user,
+        'order_rejected',
+        f'Pedido cancelado - {order.reference_code}',
+        f'{store.name} no pudo verificar tu pago. Contacta al comercio para mas informacion.',
+        link=f'/orders/{order.pk}/'
+    )
+
+    messages.success(request, f'Pedido {order.reference_code} cancelado. Stock liberado.')
+    return redirect('stores:order_detail', store_id=store.id, order_id=order_id)

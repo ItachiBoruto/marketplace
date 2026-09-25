@@ -1,4 +1,5 @@
 {% extends "stores/dashboard/base.html" %}
+{% load exchange_filters %}
 
 {% block title %}Pedido {{ order.reference_code }}{% endblock %}
 
@@ -145,6 +146,13 @@
     .action-icon.icon-package {
         animation: packageShake 0.9s ease-in-out infinite;
     }
+    .action-icon.icon-money {
+        animation: moneyPulse 0.9s ease-in-out infinite;
+    }
+    @keyframes moneyPulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.15); }
+    }
     @keyframes packageShake {
         0%, 100% { transform: rotate(0) scale(1); }
         50% { transform: rotate(-6deg) scale(1.08); }
@@ -233,85 +241,427 @@
         transition: opacity 0.4s;
     }
 
+
+    /* ============================================================
+       LAYOUT 2 COLUMNAS: Info izquierda + Verificar pago derecha
+       ============================================================ */
+    .pedido-dashboard {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 14px;
+        margin-bottom: 16px;
+        align-items: start;
+    }
+    .pedido-col-right .detail-card {
+        position: sticky;
+        top: 16px;
+        border: 2px solid #e9ecef;
+    }
+    .pedido-col-right .detail-card.estado-pending {
+        border-color: #f39c12;
+        background: #fffbf0;
+    }
+    .pedido-col-right .detail-card.estado-confirmed {
+        border-color: #27ae60;
+        background: #f0faf4;
+    }
+    .pago-monto {
+        background: white;
+        border-radius: 8px;
+        padding: 10px 12px;
+        margin-bottom: 8px;
+        border: 1px solid #e9ecef;
+    }
+    .pago-monto .monto-label {
+        font-size: 0.72rem;
+        color: #7f8c8d;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+        font-weight: 600;
+        margin-bottom: 2px;
+    }
+    .pago-monto .monto-valor {
+        font-size: 1.15rem;
+        font-weight: 700;
+    }
+    .pago-monto.usd .monto-valor { color: #27ae60; }
+    .pago-monto.bs .monto-valor { color: #b9770e; }
+    .pago-tasa {
+        font-size: 0.72rem;
+        color: #95a5a6;
+        text-align: right;
+        margin-top: 4px;
+    }
+    .pago-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        margin-top: 12px;
+    }
+    .pago-actions .btn {
+        width: 100%;
+        padding: 12px 16px;
+        font-size: 0.92rem;
+        text-align: center;
+    }
+    .pago-estado {
+        text-align: center;
+        padding: 12px;
+        border-radius: 8px;
+        font-weight: 700;
+        font-size: 0.95rem;
+    }
+    .pago-estado.ok {
+        background: #d4edda;
+        color: #155724;
+        border: 2px solid #27ae60;
+    }
+    .pago-estado.cancelled {
+        background: #f8d7da;
+        color: #721c24;
+        border: 2px solid #e74c3c;
+    }
+    @media (max-width: 768px) {
+        /* Mantener 2 columnas en mobile, solo mas compacto */
+        .pedido-dashboard {
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+        .pedido-dashboard .detail-card {
+            padding: 10px 12px !important;
+        }
+        .pedido-dashboard .detail-card h2 {
+            font-size: 0.82rem !important;
+            margin-bottom: 8px !important;
+        }
+        .pedido-dashboard .info-row {
+            font-size: 0.72rem !important;
+            padding: 4px 0 !important;
+        }
+        .pedido-dashboard .info-row .label {
+            font-size: 0.68rem !important;
+        }
+        .pedido-dashboard .info-row .value {
+            font-size: 0.72rem !important;
+            max-width: 55% !important;
+        }
+        .pago-monto {
+            padding: 6px 8px !important;
+            margin-bottom: 5px !important;
+        }
+        .pago-monto .monto-label {
+            font-size: 0.58rem !important;
+        }
+        .pago-monto .monto-valor {
+            font-size: 0.85rem !important;
+        }
+        .pago-tasa {
+            font-size: 0.6rem !important;
+        }
+        .pago-actions .btn {
+            padding: 8px 6px !important;
+            font-size: 0.72rem !important;
+        }
+        .pago-estado {
+            padding: 8px !important;
+            font-size: 0.72rem !important;
+        }
+        .pedido-col-right .detail-card {
+            position: static;
+        }
+    }
+
+    /* Muy chico: menos de 400px */
+    @media (max-width: 400px) {
+        .pedido-dashboard {
+            gap: 6px;
+        }
+        .pedido-dashboard .detail-card {
+            padding: 8px 10px !important;
+        }
+        .pedido-dashboard .info-row {
+            font-size: 0.68rem !important;
+        }
+        .pago-monto .monto-valor {
+            font-size: 0.78rem !important;
+        }
+        .pago-actions .btn {
+            padding: 7px 4px !important;
+            font-size: 0.68rem !important;
+        }
+    }
+
+    /* ============================================================
+       MICRO-INTERACCIONES Y ANIMACIONES
+       ============================================================ */
+
+    /* 1) Entrada de las cards con fade + slide */
+    @keyframes cardEnter {
+        from {
+            opacity: 0;
+            transform: translateY(12px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .detail-card {
+        animation: cardEnter 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+    /* Stagger: cada card aparece 100ms despues de la anterior */
+    .detail-card:nth-of-type(1) { animation-delay: 0s; }
+    .detail-card:nth-of-type(2) { animation-delay: 0.08s; }
+    .detail-card:nth-of-type(3) { animation-delay: 0.16s; }
+    .detail-card:nth-of-type(4) { animation-delay: 0.24s; }
+
+    /* 2) Hover en filas de info */
+    .info-row {
+        transition: background 0.2s ease, transform 0.2s ease;
+        border-radius: 6px;
+    }
+    .info-row:hover {
+        background: linear-gradient(90deg, rgba(233, 69, 96, 0.03), transparent);
+        transform: translateX(3px);
+    }
+
+    /* 3) Badge de estado con pulso si esta pendiente */
+    .item-block-status.status-pending {
+        animation: pendingPulse 2s ease-in-out infinite;
+    }
+    @keyframes pendingPulse {
+        0%, 100% {
+            box-shadow: 0 0 0 0 rgba(243, 156, 18, 0.4);
+        }
+        50% {
+            box-shadow: 0 0 0 6px rgba(243, 156, 18, 0);
+        }
+    }
+
+    /* 4) Efecto de "shine" en el boton principal */
+    .btn {
+        position: relative;
+        overflow: hidden;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .btn::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(
+            90deg,
+            transparent,
+            rgba(255, 255, 255, 0.25),
+            transparent
+        );
+        transition: left 0.6s ease;
+    }
+    .btn:hover::before {
+        left: 100%;
+    }
+    .btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+    }
+    .btn:active {
+        transform: translateY(0);
+    }
+
+    /* 5) Aparicion progresiva de los items */
+    .item-block {
+        animation: itemEnter 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+    .item-block:nth-of-type(1) { animation-delay: 0.1s; }
+    .item-block:nth-of-type(2) { animation-delay: 0.2s; }
+    .item-block:nth-of-type(3) { animation-delay: 0.3s; }
+    .item-block:nth-of-type(4) { animation-delay: 0.4s; }
+    .item-block:nth-of-type(5) { animation-delay: 0.5s; }
+    @keyframes itemEnter {
+        from {
+            opacity: 0;
+            transform: scale(0.97) translateY(6px);
+        }
+        to {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+        }
+    }
+    .item-block:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    /* 6) Shine en el boton "Volver a pedidos" */
+    .btn-back {
+        transition: color 0.2s, transform 0.2s;
+    }
+    .btn-back:hover {
+        transform: translateX(-3px);
+    }
+
+    /* 7) Animacion de pulso en el icono del monto (llamando la atencion) */
+    .pago-monto.usd .monto-valor {
+        animation: montoGlow 2.5s ease-in-out infinite;
+    }
+    @keyframes montoGlow {
+        0%, 100% {
+            text-shadow: 0 0 0 rgba(39, 174, 96, 0);
+        }
+        50% {
+            text-shadow: 0 0 8px rgba(39, 174, 96, 0.35);
+        }
+    }
+
+    /* 8) Alerta parpadeante si esta en pending (llamar la atencion) */
+    .pedido-col-right .detail-card.estado-pending {
+        animation: cardEnter 0.5s cubic-bezier(0.22, 1, 0.36, 1) both,
+                   borderPulse 2.5s ease-in-out infinite 0.5s;
+    }
+    @keyframes borderPulse {
+        0%, 100% {
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+        }
+        50% {
+            box-shadow: 0 4px 16px rgba(243, 156, 18, 0.35);
+        }
+    }
+
+    /* 9) Respetar "prefers-reduced-motion" */
+    @media (prefers-reduced-motion: reduce) {
+        *, *::before, *::after {
+            animation-duration: 0.01ms !important;
+            animation-iteration-count: 1 !important;
+            transition-duration: 0.01ms !important;
+        }
+    }
 </style>
 
 <a href="{% url 'stores:orders' store.id %}" class="btn-back">← Volver a pedidos</a>
 
-<!-- Info general -->
-<div class="detail-card">
-    <h2>📋 Información del pedido</h2>
-    <div class="info-row">
-        <span class="label">Pedido</span>
-        <span class="value">{{ order.reference_code }}</span>
-    </div>
-    <div class="info-row">
-        <span class="label">Fecha</span>
-        <span class="value">{{ order.created_at|date:"d/m/Y H:i" }}</span>
-    </div>
-    <div class="info-row">
-        <span class="label">Cliente</span>
-        <span class="value">{{ order.user.username }}</span>
-    </div>
-    {% if user.is_superuser or user_role == 'owner' %}
-        <div class="info-row">
-            <span class="label">Banco emisor</span>
-            <span class="value">{{ order.payment_bank|default:"—" }}</span>
-        </div>
-        <div class="info-row">
-            <span class="label">Referencia</span>
-            <span class="value">{{ order.payment_reference|default:"—" }}</span>
-        </div>
-        {% if order.payment_proof %}
+<!-- Info general + Verificar pago -->
+<div class="pedido-dashboard">
+
+    <!-- COLUMNA IZQUIERDA: Info del pedido -->
+    <div class="pedido-col-left">
+        <div class="detail-card">
+            <h2>📋 Información del pedido</h2>
             <div class="info-row">
-                <span class="label">Comprobante</span>
+                <span class="label">Pedido</span>
+                <span class="value">{{ order.reference_code }}</span>
+            </div>
+            <div class="info-row">
+                <span class="label">Fecha</span>
+                <span class="value">{{ order.created_at|date:"d/m/Y H:i" }}</span>
+            </div>
+            <div class="info-row">
+                <span class="label">Cliente</span>
+                <span class="value">{{ order.user.username }}</span>
+            </div>
+            <div class="info-row">
+                <span class="label">Entrega</span>
                 <span class="value">
-                    <a href="{{ order.payment_proof.url }}" target="_blank">Ver imagen</a>
+                    {% if order.shipping_method == 'delivery' %}
+                        🛵 Delivery a domicilio
+                    {% else %}
+                        🏪 Retiro en tienda
+                    {% endif %}
                 </span>
             </div>
-        {% endif %}
-    {% endif %}
-</div>
+            {% if order.shipping_method == 'delivery' and order.delivery_address %}
+            <div class="info-row" style="align-items:flex-start;">
+                <span class="label">📍 Dirección</span>
+                <span class="value" style="max-width:65%;text-align:right;line-height:1.35;">{{ order.delivery_address|linebreaksbr }}</span>
+            </div>
+            {% endif %}
+            {% if order.notes %}
+            <div class="info-row">
+                <span class="label">Notas</span>
+                <span class="value">{{ order.notes }}</span>
+            </div>
+            {% endif %}
+        </div>
+    </div>
 
-<!-- Envío -->
-<div class="detail-card">
-    <h2>🚚 Entrega</h2>
+    <!-- COLUMNA DERECHA: Verificar pago -->
+    {% if user.is_superuser or user_role == 'owner' %}
+    <div class="pedido-col-right">
+        <div class="detail-card {% if order.status == 'payment_submitted' %}estado-pending{% elif order.status == 'confirmed' or order.status == 'shipped' or order.status == 'completed' %}estado-confirmed{% endif %}">
+            <h2>💳 Verificar pago</h2>
 
-    {% if order.shipping_method == 'delivery' %}
-        <div class="shipping-banner delivery">
-            <span class="icon">🛵</span>
-            <div>
-                <div class="info-title">Delivery a domicilio</div>
-                <div class="info-sub">
-                    Costo de envío cobrado al cliente: <strong>${{ order.shipping_fee|floatformat:2 }}</strong>
+            <!-- Monto esperado -->
+            <div class="pago-monto usd">
+                <div class="monto-label">Monto esperado en USD</div>
+                <div class="monto-valor">${{ order.grand_total|floatformat:2 }}</div>
+            </div>
+
+            {% if order.exchange_rate %}
+            <div class="pago-monto bs">
+                <div class="monto-label">Monto esperado en Bs</div>
+                <div class="monto-valor">Bs. {{ order.grand_total|to_bs:order.exchange_rate }}</div>
+                <div class="pago-tasa">Tasa BCV: {{ order.exchange_rate|floatformat:2 }} Bs/USD</div>
+            </div>
+            {% endif %}
+
+            <!-- Datos del pago del cliente -->
+            <div style="font-size:0.78rem;margin-top:12px;padding-top:12px;border-top:1px solid #e9ecef;">
+                <div style="display:flex;justify-content:space-between;padding:3px 0;">
+                    <span style="color:#7f8c8d;">Banco emisor:</span>
+                    <span style="font-weight:600;">{{ order.payment_bank|default:"—" }}</span>
                 </div>
+                <div style="display:flex;justify-content:space-between;padding:3px 0;">
+                    <span style="color:#7f8c8d;">Referencia:</span>
+                    <span style="font-weight:600;">{{ order.payment_reference|default:"—" }}</span>
+                </div>
+                {% if order.payment_date %}
+                <div style="display:flex;justify-content:space-between;padding:3px 0;">
+                    <span style="color:#7f8c8d;">Fecha pago:</span>
+                    <span style="font-weight:600;">{{ order.payment_date|date:"d/m/Y" }}</span>
+                </div>
+                {% endif %}
+                {% if order.payment_proof %}
+                <div style="text-align:center;margin-top:8px;">
+                    <a href="{{ order.payment_proof.url }}" target="_blank" style="font-size:0.82rem;color:#3498db;text-decoration:none;font-weight:600;">
+                        📎 Ver comprobante
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Estado / acciones -->
+            <div class="pago-actions">
+                {% if order.status == 'payment_submitted' %}
+                    <form method="post" action="{% url 'stores:order_confirm_payment' store.id order.pk %}" style="margin:0;">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-approve" data-confirm-payment>
+                            ✅ Confirmar pago recibido
+                        </button>
+                    </form>
+                    <form method="post" action="{% url 'stores:order_reject_payment' store.id order.pk %}" style="margin:0;"
+                          onsubmit="return confirm('¿Rechazar este pago? El pedido será cancelado y se liberará el stock.');">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-reject">
+                            ❌ Pago no recibido
+                        </button>
+                    </form>
+                {% elif order.status == 'confirmed' %}
+                    <div class="pago-estado ok">✅ Pago verificado</div>
+                {% elif order.status == 'shipped' or order.status == 'completed' %}
+                    <div class="pago-estado ok">✅ Completado</div>
+                {% elif order.status == 'cancelled' %}
+                    <div class="pago-estado cancelled">❌ Cancelado</div>
+                {% endif %}
             </div>
         </div>
-
-        {% if order.delivery_address %}
-            <div class="address-box">
-                <strong>📍 Dirección de entrega:</strong><br>
-                {{ order.delivery_address|linebreaksbr }}
-            </div>
-        {% endif %}
-
-    {% else %}
-        <div class="shipping-banner pickup">
-            <span class="icon">🏪</span>
-            <div>
-                <div class="info-title">Retiro en tienda</div>
-                <div class="info-sub">El cliente retirará el pedido en tu comercio.</div>
-            </div>
-        </div>
-
-        {% if store.address %}
-            <div class="address-box">
-                <strong>📍 Dirección del comercio:</strong><br>
-                {{ store.address|linebreaksbr }}
-                {% if store.phone %}<br><strong>📞</strong> {{ store.phone }}{% endif %}
-            </div>
-        {% endif %}
+    </div>
     {% endif %}
+
 </div>
+
 
 <!-- Items -->
 <div class="detail-card">
@@ -333,19 +683,15 @@
             </div>
 
             <div class="item-actions">
-                {% if item.status == 'pending' %}
-                    <form method="post" action="{% url 'stores:order_item_approve' store.id order.pk item.pk %}" style="display: inline;">
-                        {% csrf_token %}
-                        <button type="submit" class="btn btn-approve">✅ Aprobar</button>
-                    </form>
-                    <form method="post" action="{% url 'stores:order_item_reject' store.id order.pk item.pk %}" style="display: inline;" onsubmit="return confirm('¿Rechazar este item? Se devolverá el stock.');">
-                        {% csrf_token %}
-                        <button type="submit" class="btn btn-reject">❌ Rechazar</button>
-                    </form>
-                {% elif item.status == 'confirmed' %}
+                {% if item.status == 'confirmed' %}
                     <form method="post" action="{% url 'stores:order_item_ship' store.id order.pk item.pk %}" style="display: inline;">
                         {% csrf_token %}
                         <button type="submit" class="btn btn-ship">🚚 Marcar como enviado</button>
+                    </form>
+                {% elif item.status == 'shipped' %}
+                    <form method="post" action="{% url 'stores:order_item_delivered' store.id order.pk item.pk %}" style="display: inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-approve">✅ Marcar como entregado</button>
                     </form>
                 {% endif %}
             </div>
@@ -386,6 +732,7 @@
 
     var TRUCK_EMOJI = '\uD83D\uDE9A'; // camion
     var PACKAGE_EMOJI = '\uD83D\uDCE6'; // caja
+    var MONEY_EMOJI = '\uD83D\uDCB0'; // dinero
 
     function showAnimation(type, onComplete) {
         var icon = document.getElementById('actionIcon');
@@ -394,6 +741,7 @@
         var progressBar = document.getElementById('actionProgressBar');
         var success = document.getElementById('actionSuccess');
         var successText = document.getElementById('actionSuccessText');
+        var successSub = document.getElementById('actionSuccessSub');
         var modal = document.getElementById('actionModal');
 
         // Reset estado
@@ -408,12 +756,20 @@
             icon.textContent = TRUCK_EMOJI;
             icon.classList.add('icon-truck');
             text.textContent = 'Marcando como enviado...';
-            successText.textContent = '\u00A1Enviado!';
+            successText.textContent = '\u00A1Pedido enviado!';
+            if (successSub) successSub.textContent = 'El cliente ya fue notificado.';
+        } else if (type === 'payment') {
+            icon.textContent = MONEY_EMOJI;
+            icon.classList.add('icon-money');
+            text.textContent = 'Confirmando pago...';
+            successText.textContent = '\u00A1Pago confirmado!';
+            if (successSub) successSub.textContent = 'Ya puedes aprobar y enviar los items.';
         } else {
             icon.textContent = PACKAGE_EMOJI;
             icon.classList.add('icon-package');
             text.textContent = 'Marcando como entregado...';
-            successText.textContent = '\u00A1Entregado!';
+            successText.textContent = '\u00A1Pedido entregado!';
+            if (successSub) successSub.textContent = 'El cliente ya puede ver el cambio.';
         }
 
         // Animar barra de progreso
@@ -449,6 +805,8 @@
             type = 'shipped';
         } else if (action.indexOf('order_item_delivered') !== -1) {
             type = 'delivered';
+        } else if (action.indexOf('order_confirm_payment') !== -1) {
+            type = 'payment';
         }
 
         if (!type) return;
