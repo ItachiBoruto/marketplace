@@ -1,29 +1,15 @@
+{% extends "base.html" %}
 {% load static %}
 {% load exchange_filters %}
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Finalizar compra - Mi Marketplace</title>
-    {% include 'partials/_meta_tags.html' %}
-    <link rel="stylesheet" href="{% static 'css/style.css' %}?v=9">
-        <link rel="stylesheet" href="{% static 'css/checkout.css' %}?v=1">
-</head>
-<body>
-    <header>
-        <div class="container">
-            <h1>🛒 Mi Marketplace</h1>
-            <nav>
-                <a href="/">🏠 Inicio</a>
-                <a href="{% url 'cart:view' %}" class="header-cart-link"><span class="cart-icon-text">🛒 Carrito</span><span class="cart-count-badge" {% if not cart_count %}style="display:none;"{% endif %}>{{ cart_count|default:0 }}</span></a>
-                <span style="color: rgba(255,255,255,0.7); margin: 0 10px;">👤 {{ user.username }}</span>
-            </nav>
-        </div>
-    </header>
 
-    <main>
-        <div class="container">
+{% block title %}Finalizar compra - Mi Marketplace{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/checkout.css' %}?v=1">
+{% endblock %}
+
+{% block content %}
+<div class="container">
             {% if messages %}
                 <div class="messages" style="margin: 16px 0;">
                     {% for message in messages %}
@@ -292,7 +278,6 @@
                 </div>
             </form>
         </div>
-    </main>
 
     {{ subtotal|stringformat:"f"|json_script:"data-subtotal" }}
     {{ total_delivery_fee|stringformat:"f"|json_script:"data-shipping" }}
@@ -300,8 +285,8 @@
     {{ delivery_available|json_script:'data-delivery-available' }}
     {{ bank_info|json_script:'data-bank-transfer' }}
     {{ mobile_info|json_script:'data-bank-mobile' }}
+{% endblock %}
 
-    <script src="{% static 'js/checkout.js' %}?v=1"></script>
-    <script src="/static/js/email-verify-banner.js"></script>
-</body>
-</html>
+{% block extra_js %}
+<script src="{% static 'js/checkout.js' %}?v=1"></script>
+{% endblock %}
