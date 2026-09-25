@@ -83,6 +83,11 @@ class StoreOrdersView(RoleContextMixin, ManagerRequiredMixin, ListView):
                 Q(payment_reference__icontains=search)
             ).distinct()
 
+        # Ordenamiento:
+        # - Pendientes: FIFO (el mas viejo primero) para no acumular trabajo
+        # - Otros estados: el mas reciente primero
+        if status_filter == 'pending':
+            return qs.order_by('created_at')
         return qs.order_by('-created_at')
 
     def get_context_data(self, **kwargs):

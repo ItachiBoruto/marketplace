@@ -10,7 +10,8 @@ from .models import Notification
 @login_required(login_url="login")
 def dropdown(request):
     """HTML parcial con las ultimas notificaciones (para el dropdown del header)."""
-    notifications = request.user.notifications.all()[:8]
+    # Sin leer primero, luego las leidas, cada grupo por fecha descendente
+    notifications = request.user.notifications.order_by('is_read', '-created_at')[:8]
     unread = request.user.notifications.filter(is_read=False).count()
     html = render_to_string(
         "notifications/_dropdown.html",
@@ -34,6 +35,8 @@ def notification_list(request):
     unread_only = request.GET.get("unread") == "1"
     if unread_only:
         qs = qs.filter(is_read=False)
+    # Sin leer primero, luego las leidas, cada grupo por fecha descendente
+    qs = qs.order_by('is_read', '-created_at')
     return render(request, "notifications/list.html", {
         "notifications": qs[:100],
         "unread_count": request.user.notifications.filter(is_read=False).count(),
