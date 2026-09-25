@@ -3,6 +3,10 @@
 
 {% block title %}Mi Carrito - Mi Marketplace{% endblock %}
 
+{% block extra_js %}
+<script src="{% static 'js/cart.js' %}?v=1"></script>
+{% endblock %}
+
 {% block extra_head %}
 <link rel="stylesheet" href="{% static 'css/cart.css' %}?v=1">
 {% endblock %}
@@ -25,7 +29,7 @@
             <h3>Resumen</h3>
             <div class="grand-row">
                 <span>Total de {{ groups|length }} comercio{{ groups|length|pluralize:"s" }}</span>
-                <span>${{ grand_total_no_delivery|floatformat:2 }}</span>
+                <span data-grand-total>${{ grand_total_no_delivery|floatformat:2 }}</span>
             </div>
             <div class="grand-note">
                 📌 Cada comercio se paga por separado. Haz clic en "Pagar este carrito" en cada bloque.
@@ -59,16 +63,14 @@
                             <h4>{{ item.product.name }}</h4>
                             <span class="unit-price">${{ item.price|floatformat:2 }} c/u</span>
                         </div>
-                        <div class="cart-item-actions">
-                            <form action="{% url 'cart:update' item.id %}" method="post" class="qty-form">
-                                {% csrf_token %}
-                                <input type="number" name="quantity" value="{{ item.quantity }}" min="0" onchange="this.form.submit()">
-                            </form>
-                            <span class="cart-item-subtotal">${{ item.get_total|floatformat:2 }}</span>
-                            <form action="{% url 'cart:remove' item.id %}" method="post" style="display:inline;">
-                                {% csrf_token %}
-                                <button type="submit" class="btn-remove">🗑️</button>
-                            </form>
+                        <div class="cart-item-actions" data-item-id="{{ item.id }}" data-store-id="{{ item.product.store.id }}">
+                            <div class="qty-selector" data-item-id="{{ item.id }}">
+                                <button type="button" class="qty-btn qty-minus" data-action="decrease" aria-label="Restar">−</button>
+                                <span class="qty-value">{{ item.quantity }}</span>
+                                <button type="button" class="qty-btn qty-plus" data-action="increase" aria-label="Sumar">+</button>
+                            </div>
+                            <span class="cart-item-subtotal" data-item-subtotal="{{ item.id }}">${{ item.get_total|floatformat:2 }}</span>
+                            <button type="button" class="btn-remove" data-remove-item="{{ item.id }}" aria-label="Eliminar">🗑️</button>
                         </div>
                     </div>
                 {% endfor %}
@@ -89,7 +91,7 @@
                     {% endif %}
                     <div class="total-line grand">
                         <span>Total</span>
-                        <span>${{ group.total|floatformat:2 }}</span>
+                        <span data-store-total="{{ group.store.id }}">${{ group.total|floatformat:2 }}</span>
                     </div>
                     <div class="group-actions">
                         <a href="{% url 'orders:checkout' %}?store={{ group.store.id }}" class="btn-pay-store">

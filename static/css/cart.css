@@ -314,3 +314,194 @@
             .cart-item { flex-wrap: wrap; }
             .cart-item-actions { flex-wrap: wrap; }
         }
+
+/* ============================================================
+   QTY SELECTOR - Botones - / +
+   ============================================================ */
+.qty-selector {
+    display: inline-flex;
+    align-items: center;
+    gap: 0;
+    border: 1px solid #dfe3e8;
+    border-radius: 8px;
+    overflow: hidden;
+    background: white;
+    height: 32px;
+}
+
+.qty-btn {
+    width: 30px;
+    height: 100%;
+    background: white;
+    border: none;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #2c3e50;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s, color 0.15s;
+    font-family: inherit;
+    padding: 0;
+    line-height: 1;
+}
+
+.qty-btn:hover:not(:disabled) {
+    background: #f0f2f5;
+    color: #e94560;
+}
+
+.qty-btn:active:not(:disabled) {
+    background: #e1e4e8;
+    transform: scale(0.95);
+}
+
+.qty-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.qty-value {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 32px;
+    height: 100%;
+    padding: 0 6px;
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #1a1a2e;
+    background: white;
+    border-left: 1px solid #dfe3e8;
+    border-right: 1px solid #dfe3e8;
+    transition: background 0.3s, color 0.3s;
+}
+
+/* Animacion cuando el valor cambia */
+.qty-value.updated {
+    background: #d5f4e6;
+    color: #0f5132;
+}
+
+/* Animacion cuando el subtotal cambia */
+.cart-item-subtotal.updated {
+    background: #d5f4e6;
+    color: #0f5132 !important;
+    border-radius: 4px;
+    padding: 2px 6px !important;
+}
+
+/* Boton eliminar */
+.btn-remove {
+    background: #fdedec;
+    color: #c0392b;
+    border: none;
+    padding: 6px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.82rem;
+    font-family: inherit;
+    font-weight: 600;
+    transition: background 0.15s, transform 0.1s;
+}
+
+.btn-remove:hover {
+    background: #fadbd8;
+}
+
+.btn-remove:active {
+    transform: scale(0.95);
+}
+
+/* Mobile: botones mas grandes para dedos */
+@media (max-width: 600px) {
+    .qty-selector {
+        height: 36px;
+    }
+    .qty-btn {
+        width: 36px;
+        font-size: 1.2rem;
+    }
+    .qty-value {
+        min-width: 36px;
+    }
+}
+
+/* ============================================================
+   CART TOAST NOTIFICATIONS - Notificaciones elegantes
+   ============================================================ */
+.cart-notification {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: #2c3e50;
+    color: white;
+    padding: 12px 20px;
+    border-radius: 10px;
+    font-size: 0.88rem;
+    font-weight: 500;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    max-width: calc(100vw - 32px);
+    opacity: 0;
+    transition: opacity 0.3s, transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    pointer-events: none;
+}
+
+.cart-notification.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+    pointer-events: auto;
+}
+
+.cart-notification .notif-icon {
+    font-size: 1.2rem;
+    flex-shrink: 0;
+}
+
+.cart-notification.warning {
+    background: linear-gradient(135deg, #f39c12, #e67e22);
+}
+
+.cart-notification.error {
+    background: linear-gradient(135deg, #e74c3c, #c0392b);
+}
+
+.cart-notification.success {
+    background: linear-gradient(135deg, #2ecc71, #27ae60);
+}
+
+.cart-notification .notif-close {
+    background: rgba(255,255,255,0.2);
+    border: none;
+    color: white;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 0.8rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: 6px;
+    flex-shrink: 0;
+    font-family: inherit;
+    transition: background 0.2s;
+}
+
+.cart-notification .notif-close:hover {
+    background: rgba(255,255,255,0.35);
+}
+
+@media (max-width: 480px) {
+    .cart-notification {
+        bottom: 16px;
+        padding: 10px 16px;
+        font-size: 0.82rem;
+    }
+}

@@ -121,29 +121,102 @@ def view_cart(request):
 
 @login_required(login_url='login')
 def update_cart_item(request, item_id):
+    from django.http import JsonResponse
+
     cart = get_or_create_cart(request)
     cart_item = get_object_or_404(CartItem, id=item_id, cart=cart)
 
-    if request.method == 'POST':
+    is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
+
+    if request.method != 'POST':
+        if is_ajax:
+            return JsonResponse({'success': False, 'error': 'Metodo no permitido'}, status=405)
+        return redirect('cart:view')
+
+    try:
         quantity = int(request.POST.get('quantity', 1))
-        if quantity <= 0:
-            cart_item.delete()
+    except (ValueError, TypeError):
+        if is_ajax:
+            return JsonResponse({'success': False, 'error': 'Cantidad invalida'}, status=400)
+        return redirect('cart:view')
+
+    # Validar stock
+    if quantity > 0 and quantity > cart_item.product.stock:
+        error_msg = f'No hay suficiente stock. Disponibles: {cart_item.product.stock}.'
+        if is_ajax:
+            return JsonResponse({
+                'success': False,
+                'error': error_msg,
+                'max_quantity': cart_item.product.stock,
+            }, status=400)
+        messages.warning(request, error_msg)
+        return redirect('cart:view')
+
+    # Eliminar si cantidad <= 0
+    removed = False
+    if quantity <= 0:
+        cart_item.delete()
+        removed = True
+        if not is_ajax:
             messages.info(request, 'Producto eliminado del carrito.')
-        else:
-            if quantity > cart_item.product.stock:
-                messages.warning(request, f'No hay suficiente stock. Disponibles: {cart_item.product.stock}.')
-                return redirect('cart:view')
-            cart_item.quantity = quantity
-            cart_item.save()
+    else:
+        cart_item.quantity = quantity
+        cart_item.save()
+        if not is_ajax:
             messages.success(request, 'Cantidad actualizada.')
+
+    # Si es AJAX, devolver JSON con los nuevos totales
+    if is_ajax:
+        if removed:
+            return JsonResponse({
+                'success': True,
+                'removed': True,
+                'item_id': item_id,
+                'cart_count': cart.get_total_items(),
+                'cart_total': str(cart.get_total()),
+            })
+
+        # Recalcular subtotales del grupo
+        store_items = CartItem.objects.filter(
+            cart=cart,
+            product__store=cart_item.product.store,
+        ).select_related('product')
+
+        store_subtotal = sum(i.get_total() for i in store_items)
+        store_obj = cart_item.product.store
+        delivery_fee = store_obj.delivery_fee if store_obj.offers_delivery else 0
+
+        return JsonResponse({
+            'success': True,
+            'removed': False,
+            'item_id': item_id,
+            'quantity': cart_item.quantity,
+            'item_subtotal': str(cart_item.get_total()),
+            'store_subtotal': str(store_subtotal),
+            'store_delivery': str(delivery_fee),
+            'cart_count': cart.get_total_items(),
+            'cart_total': str(cart.get_total()),
+        })
 
     return redirect('cart:view')
 
 
 @login_required(login_url='login')
 def remove_from_cart(request, item_id):
+    from django.http import JsonResponse
+
     cart = get_or_create_cart(request)
     cart_item = get_object_or_404(CartItem, id=item_id, cart=cart)
     cart_item.delete()
+
+    is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
+    if is_ajax:
+        return JsonResponse({
+            'success': True,
+            'item_id': item_id,
+            'cart_count': cart.get_total_items(),
+            'cart_total': str(cart.get_total()),
+        })
+
     messages.info(request, 'Producto eliminado del carrito.')
     return redirect('cart:view')
