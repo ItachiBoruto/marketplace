@@ -13,7 +13,6 @@
         const searchInput = document.getElementById('storeSearchInput');
         const searchBtn = document.getElementById('storeSearchBtn');
         const detailContainer = document.getElementById('product-detail-container');
-
         // Modal de pasillos
         const pasillosBtn = document.getElementById('storePasillosBtn');
         const pasillosClear = document.getElementById('storePasillosClear');
@@ -189,6 +188,7 @@
             pasillosModal.setAttribute('aria-hidden', 'true');
             document.body.style.overflow = '';
         }
+            // Buscar la tarjeta de la categoria para leer sus datos
 
         function applyCategory(slug) {
             currentCategory = slug || '';

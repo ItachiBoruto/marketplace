@@ -8,6 +8,11 @@
 {% endblock %}
 
 {% block content %}
+<div class="pasillo-bg-color" id="pasilloBgColor"></div>
+    <div class="pasillo-bg-icon left" id="pasilloBgIconLeft"></div>
+    <div class="pasillo-bg-icon right" id="pasilloBgIconRight"></div>
+</div>
+
 <div class="container" data-store-id="{{ store.id }}">
     <div class="profile-header">
         <div class="profile-cover"></div>
@@ -162,7 +167,6 @@
         📦 Cargando mas productos...
     </div>
 </div>
-
 <!-- Modal de pasillos -->
 <div class="cat-modal-overlay" id="storePasillosModal" aria-hidden="true">
     <div class="cat-modal" role="dialog">
@@ -176,15 +180,23 @@
         <div class="cat-modal-body" id="storePasillosBody">
             <div class="cat-card" data-slug="" data-name="todos">
                 <div class="cat-card-bg" style="background: linear-gradient(135deg, #1a1a2e, #16213e);">
-                    <span class="cat-card-emoji">🛍️</span>
+                    <img src="{% static 'icons/categories/_todas.svg' %}"
+                         alt="Todas"
+                         class="cat-card-icon">
                 </div>
                 <span class="cat-card-name">Todos</span>
             </div>
             {% for cat in store_categories %}
-                <div class="cat-card" data-slug="{{ cat.slug }}" data-name="{{ cat.name|lower }}">
+                <div class="cat-card" data-slug="{{ cat.slug }}" data-name="{{ cat.name|lower }}" data-color="{{ cat.color }}" data-image="{% if cat.image %}{{ cat.image.url }}{% endif %}" data-emoji="{{ cat.emoji }}">
                     <div class="cat-card-bg"
                          {% if cat.image %}style="background-image: url('{{ cat.image.url }}');"{% else %}style="background: {{ cat.color }};"{% endif %}>
-                        <span class="cat-card-emoji">{% if not cat.image %}{{ cat.emoji }}{% endif %}</span>
+                        {% if not cat.image %}
+                            <img src="{% static 'icons/categories/' %}{{ cat.slug }}.svg"
+                                 alt="{{ cat.name }}"
+                                 class="cat-card-icon"
+                                 onerror="this.style.display='none';this.nextElementSibling.style.display='inline-block';">
+                            <span class="cat-card-emoji" style="display:none;">{{ cat.emoji }}</span>
+                        {% endif %}
                     </div>
                     <span class="cat-card-name">{{ cat.name }}</span>
                 </div>
