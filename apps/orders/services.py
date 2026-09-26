@@ -203,7 +203,15 @@ def expire_old_reservations():
     """
     Libera el stock de pedidos cuya reserva expiró.
     Devuelve el número de pedidos expirados.
+
+    Acciones por pedido:
+    1. Libera el stock reservado (via release_order_stock)
+    2. Marca el pedido como 'expired'
+    3. Cancela los items que quedaron en 'pending' (evita items huerfanos)
     """
+    import logging
+    logger = logging.getLogger(__name__)
+
     now = timezone.now()
     expired = Order.objects.filter(
         status='payment_submitted',
@@ -211,12 +219,31 @@ def expire_old_reservations():
         reservation_expires_at__lt=now,
     )
     count = 0
+    errores = 0
+
     for order in expired:
         try:
             release_order_stock(order, reason='Reserva expirada')
+
             order.status = 'expired'
             order.save(update_fields=['status'])
+
+            # Cancelar items que quedaron en pending (fix: antes quedaban huerfanos)
+            items_cancelados = order.items.filter(status='pending').update(status='cancelled')
+
             count += 1
-        except Exception:
-            continue
+            logger.info(
+                "Reserva expirada: pedido %s liberado, %d items cancelados",
+                order.reference_code, items_cancelados
+            )
+        except Exception as e:
+            errores += 1
+            logger.exception(
+                "Error al expirar pedido %s: %s",
+                getattr(order, 'reference_code', order.pk), e
+            )
+
+    if errores:
+        logger.warning("expire_old_reservations: %d errores de %d pedidos", errores, count + errores)
+
     return count
