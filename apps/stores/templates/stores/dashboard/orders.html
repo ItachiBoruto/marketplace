@@ -299,6 +299,187 @@
         .order-actions-row { justify-content: stretch; }
         .order-actions-row .btn-action { flex: 1; justify-content: center; }
     }
+
+    /* ============================================================
+       NUEVA TARJETA DE PEDIDO - ULTRA COMPACTA
+       ============================================================ */
+
+    .order-card {
+        padding: 10px 12px !important;
+        margin-bottom: 8px !important;
+    }
+    .order-card-header {
+        margin-bottom: 6px !important;
+        font-size: 0.85rem !important;
+    }
+
+    /* ============ PAGO BLOCK ============ */
+    .pago-block {
+        background: #fffbee;
+        border: 1px solid #ffeeba;
+        border-radius: 6px;
+        padding: 8px 10px;
+        margin-top: 6px;
+    }
+
+    /* Info: una linea, muy compacta */
+    .pago-info-grid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px 12px;
+        margin-bottom: 8px;
+        padding-bottom: 6px;
+        border-bottom: 1px dashed #f0e5cc;
+        font-size: 0.72rem;
+    }
+    .pago-info-item {
+        display: flex;
+        align-items: baseline;
+        gap: 4px;
+    }
+    .pago-info-label {
+        color: #7f8c8d;
+        font-weight: 600;
+        font-size: 0.68rem;
+    }
+    .pago-info-value {
+        font-weight: 700;
+        color: #2c3e50;
+        font-size: 0.75rem;
+    }
+    .pago-info-link {
+        font-size: 0.72rem;
+        color: #3498db;
+        font-weight: 600;
+        text-decoration: none;
+    }
+
+    /* Montos: inline, muy chicos */
+    .pago-montos {
+        display: flex;
+        gap: 6px;
+        margin-bottom: 8px;
+    }
+    .pago-monto-box {
+        flex: 1;
+        background: white;
+        border-radius: 5px;
+        padding: 5px 8px;
+        border: 1px solid #e9ecef;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 6px;
+    }
+    .pago-monto-box.usd { border-left: 3px solid #27ae60; }
+    .pago-monto-box.bs { border-left: 3px solid #b9770e; }
+    .pago-monto-box .monto-label {
+        font-size: 0.6rem;
+        color: #7f8c8d;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.2px;
+        line-height: 1.1;
+    }
+    .pago-monto-box .monto-valor {
+        font-size: 0.85rem;
+        font-weight: 700;
+        line-height: 1;
+    }
+    .pago-monto-box.usd .monto-valor { color: #27ae60; }
+    .pago-monto-box.bs .monto-valor { color: #b9770e; }
+    .pago-monto-box .monto-tasa {
+        font-size: 0.55rem;
+        color: #95a5a6;
+        display: block;
+    }
+
+    /* Botones mini */
+    .order-actions-row {
+        display: flex;
+        gap: 5px;
+        flex-wrap: wrap;
+    }
+    .action-form { display: inline; margin: 0; }
+    .order-actions-row .btn-action {
+        padding: 5px 10px !important;
+        font-size: 0.75rem !important;
+        border-radius: 6px !important;
+    }
+    .btn-confirm-pay { background: #27ae60; color: white; }
+    .btn-confirm-pay:hover { background: #1e8449; }
+    .btn-reject-pay { background: #e74c3c; color: white; }
+    .btn-reject-pay:hover { background: #c0392b; }
+
+    /* ============ ESTADO Y ITEMS ============ */
+    .estado-badge {
+        display: inline-block;
+        padding: 3px 10px;
+        border-radius: 20px;
+        font-size: 0.68rem;
+        font-weight: 700;
+        margin: 4px 0;
+    }
+    .estado-badge.ok { background: #d4edda; color: #155724; }
+    .estado-badge.cancelled { background: #f8d7da; color: #721c24; }
+
+    .items-to-pack-list {
+        background: #f8f9fa;
+        border-radius: 6px;
+        padding: 6px 10px;
+        margin: 4px 0 8px;
+    }
+    .items-to-pack-title {
+        font-size: 0.65rem;
+        font-weight: 700;
+        color: #2c3e50;
+        text-transform: uppercase;
+        letter-spacing: 0.2px;
+        margin-bottom: 4px;
+        padding-bottom: 4px;
+        border-bottom: 1px solid #e9ecef;
+    }
+    .order-item-line {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 8px;
+        padding: 3px 0;
+        font-size: 0.75rem;
+        border-bottom: 1px solid #f0f0f0;
+    }
+    .order-item-line:last-of-type { border-bottom: none; }
+    .item-qty-name { color: #2c3e50; }
+    .item-right {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        font-weight: 600;
+        color: #2c3e50;
+        flex-shrink: 0;
+    }
+    .items-subtotal {
+        display: flex;
+        justify-content: space-between;
+        padding-top: 4px;
+        margin-top: 4px;
+        border-top: 1px solid #e9ecef;
+        font-size: 0.78rem;
+        font-weight: 700;
+        color: #2c3e50;
+    }
+    .status-mini {
+        padding: 1px 5px !important;
+        font-size: 0.58rem !important;
+    }
+
+    @media (max-width: 600px) {
+        .pago-montos { flex-direction: column; gap: 4px; }
+        .pago-monto-box { width: 100%; }
+        .order-actions-row { flex-direction: column; }
+        .order-actions-row .btn-action { width: 100%; justify-content: center; }
+        .order-card { padding: 8px 10px !important; }
+    }
 </style>
 
 <div class="orders-header">
@@ -331,6 +512,7 @@
 
 {% for order in orders %}
     <div class="order-card {{ order.status }}">
+        <!-- HEADER -->
         <div class="order-card-header">
             <div>
                 <span class="order-id">{{ order.reference_code }}</span>
@@ -339,57 +521,142 @@
             <span class="order-meta">Cliente: <strong>{{ order.user.username }}</strong></span>
         </div>
 
-        <div class="order-items-preview">
-            {% for item in order.items.all %}
-                {% if item.store == store %}
+        {% if order.status == 'payment_submitted' %}
+            <!-- ============ VERIFICAR PAGO ============ -->
+            <div class="pago-block">
+                <div class="pago-info-grid">
+                    <div class="pago-info-item">
+                        <span class="pago-info-label">🔖 Referencia</span>
+                        <span class="pago-info-value">{{ order.payment_reference|default:"—" }}</span>
+                    </div>
+                    <div class="pago-info-item">
+                        <span class="pago-info-label">🏦 Banco emisor</span>
+                        <span class="pago-info-value">{{ order.payment_bank|default:"—" }}</span>
+                    </div>
+                    {% if order.payment_date %}
+                    <div class="pago-info-item">
+                        <span class="pago-info-label">📅 Fecha pago</span>
+                        <span class="pago-info-value">{{ order.payment_date|date:"d/m/Y" }}</span>
+                    </div>
+                    {% endif %}
+                    {% if order.payment_proof %}
+                    <div class="pago-info-item">
+                        <span class="pago-info-label">📎 Comprobante</span>
+                        <a href="{{ order.payment_proof.url }}" target="_blank" class="pago-info-link">Ver imagen</a>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <div class="pago-montos">
+                    <div class="pago-monto-box usd">
+                        <div class="monto-label">Monto esperado en USD</div>
+                        <div class="monto-valor">${{ order.grand_total|floatformat:2 }}</div>
+                    </div>
+                    {% if order.exchange_rate %}
+                    <div class="pago-monto-box bs">
+                        <div class="monto-label">Monto esperado en Bs</div>
+                        <div class="monto-valor">Bs. {{ order.my_total_bs|floatformat:2 }}</div>
+                        <div class="monto-tasa">Tasa BCV: {{ order.exchange_rate|floatformat:2 }}</div>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <div class="order-actions-row">
+                    <form method="post" action="{% url 'stores:order_confirm_payment' store.id order.pk %}" class="action-form">
+                        {% csrf_token %}
+                        <button type="submit" class="btn-action btn-confirm-pay">
+                            ✅ Confirmar pago recibido
+                        </button>
+                    </form>
+                    <form method="post" action="{% url 'stores:order_reject_payment' store.id order.pk %}" class="action-form"
+                          onsubmit="return confirm('¿Marcar como pago no recibido? El pedido será cancelado y se liberará el stock.');">
+                        {% csrf_token %}
+                        <button type="submit" class="btn-action btn-reject-pay">
+                            ❌ Pago no recibido
+                        </button>
+                    </form>
+                    <a href="{% url 'stores:order_detail' store.id order.pk %}" class="btn-action btn-view">
+                        👁️ Ver detalle
+                    </a>
+                </div>
+            </div>
+
+        {% elif order.status == 'confirmed' or order.status == 'shipped' or order.status == 'completed' %}
+            <!-- ============ PEDIDO CONFIRMADO: ITEMS A EMPACAR ============ -->
+            <div class="estado-badge ok">✅ Pago verificado</div>
+
+            <div class="items-to-pack-list">
+                <div class="items-to-pack-title">
+                    📦 Items a empacar ({{ order.my_items_count }})
+                </div>
+                {% for item in order.my_items %}
                     <div class="order-item-line">
-                        <span>{{ item.quantity }} × {{ item.product_name }}</span>
-                        <span>
+                        <span class="item-qty-name">
+                            <strong>{{ item.quantity }}×</strong> {{ item.product_name }}
+                        </span>
+                        <span class="item-right">
                             ${{ item.get_subtotal|floatformat:2 }}
                             <span class="status-mini {{ item.status }}">{{ item.get_status_display }}</span>
                         </span>
                     </div>
-                {% endif %}
-            {% endfor %}
-        </div>
+                {% endfor %}
+                <div class="items-subtotal">
+                    <span>Subtotal de tus items</span>
+                    <span>${{ order.my_subtotal|floatformat:2 }}</span>
+                </div>
+            </div>
 
-        <div class="order-actions-row">
-            <a href="{% url 'stores:order_detail' store.id order.pk %}" class="btn-action btn-view">
-                👁️ Ver detalle
-            </a>
+            <div class="order-actions-row">
+                <a href="{% url 'stores:order_detail' store.id order.pk %}" class="btn-action btn-view">
+                    👁️ Ver detalle y gestionar envíos
+                </a>
+            </div>
 
-            {% for item in order.items.all %}
-                {% if item.store == store %}
-                    {% if item.status == 'pending' %}
-                        <button type="button" class="btn-action btn-approve"
-                                data-order-id="{{ order.pk }}" onclick="confirmAction('approve', {{ item.pk }}, '{{ order.reference_code }}', '{{ item.product_name|escapejs }}', this)">
-                            ✅ Aprobar
-                        </button>
-                        <button type="button" class="btn-action btn-reject"
-                                data-order-id="{{ order.pk }}" onclick="confirmAction('reject', {{ item.pk }}, '{{ order.reference_code }}', '{{ item.product_name|escapejs }}', this)">
-                            ❌ Rechazar
-                        </button>
-                    {% elif item.status == 'confirmed' %}
-                        {% if order.shipping_method == 'pickup' %}
-                            <button type="button" class="btn-action btn-deliver"
-                                    data-order-id="{{ order.pk }}" onclick="confirmAction('deliver', {{ item.pk }}, '{{ order.reference_code }}', '{{ item.product_name|escapejs }}', this)">
-                                📦 Marcar entregado
-                            </button>
-                        {% else %}
-                            <button type="button" class="btn-action btn-ship"
-                                    data-order-id="{{ order.pk }}" onclick="confirmAction('ship', {{ item.pk }}, '{{ order.reference_code }}', '{{ item.product_name|escapejs }}', this)">
-                                🚚 Marcar enviado
-                            </button>
-                        {% endif %}
-                    {% elif item.status == 'shipped' %}
-                        <button type="button" class="btn-action btn-deliver"
-                                data-order-id="{{ order.pk }}" onclick="confirmAction('deliver', {{ item.pk }}, '{{ order.reference_code }}', '{{ item.product_name|escapejs }}', this)">
-                            📦 Marcar entregado
-                        </button>
-                    {% endif %}
-                {% endif %}
-            {% endfor %}
-        </div>
+        {% elif order.status == 'cancelled' %}
+            <!-- ============ CANCELADO ============ -->
+            <div class="estado-badge cancelled">❌ Pedido cancelado</div>
+
+            <div class="items-to-pack-list">
+                {% for item in order.my_items %}
+                    <div class="order-item-line">
+                        <span class="item-qty-name">
+                            <strong>{{ item.quantity }}×</strong> {{ item.product_name }}
+                        </span>
+                        <span class="item-right">
+                            ${{ item.get_subtotal|floatformat:2 }}
+                        </span>
+                    </div>
+                {% endfor %}
+            </div>
+
+            <div class="order-actions-row">
+                <a href="{% url 'stores:order_detail' store.id order.pk %}" class="btn-action btn-view">
+                    👁️ Ver detalle
+                </a>
+            </div>
+
+        {% else %}
+            <!-- ============ OTROS ESTADOS ============ -->
+            <div class="items-to-pack-list">
+                {% for item in order.my_items %}
+                    <div class="order-item-line">
+                        <span class="item-qty-name">
+                            <strong>{{ item.quantity }}×</strong> {{ item.product_name }}
+                        </span>
+                        <span class="item-right">
+                            ${{ item.get_subtotal|floatformat:2 }}
+                            <span class="status-mini {{ item.status }}">{{ item.get_status_display }}</span>
+                        </span>
+                    </div>
+                {% endfor %}
+            </div>
+
+            <div class="order-actions-row">
+                <a href="{% url 'stores:order_detail' store.id order.pk %}" class="btn-action btn-view">
+                    👁️ Ver detalle
+                </a>
+            </div>
+        {% endif %}
     </div>
 {% empty %}
     <div class="empty-state">

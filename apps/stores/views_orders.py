@@ -96,6 +96,21 @@ class StoreOrdersView(RoleContextMixin, ManagerRequiredMixin, ListView):
         context['store'] = store
         context['current_status'] = self.request.GET.get('status', 'pending')
 
+        # Enriquecer cada pedido con datos de ESTE comercio
+        orders_enriquecidos = []
+        for order in context['page_obj'] if context.get('page_obj') else context['orders']:
+            # Items del comercio en este pedido
+            my_items = [i for i in order.items.all() if i.store_id == store.id]
+            order.my_items = my_items
+            order.my_subtotal = sum(i.get_subtotal() for i in my_items)
+            order.my_items_count = len(my_items)
+            # Referencia bancaria (ya viene del cliente en el checkout)
+            order.my_total_bs = (
+                order.grand_total * order.exchange_rate
+                if order.exchange_rate else None
+            )
+            orders_enriquecidos.append(order)
+
         base = OrderItem.objects.filter(store=store)
         context['count_pending'] = base.filter(status='pending').count()
         context['count_confirmed'] = base.filter(status='confirmed').count()
@@ -121,7 +136,10 @@ class StoreOrderDetailView(RoleContextMixin, ManagerRequiredMixin, DetailView):
         context = super().get_context_data(**kwargs)
         store = self.get_store()
         context['store'] = store
-        context['my_items'] = self.object.items.filter(store=store).select_related('product')
+        my_items = self.object.items.filter(store=store).select_related('product')
+        context['my_items'] = my_items
+        # Subtotal de solo los items de este comercio
+        context['order_subtotal'] = sum(item.get_subtotal() for item in my_items)
         # Otros items del pedido (de otras tiendas) — sin datos sensibles
         context['other_items_count'] = self.object.items.exclude(store=store).count()
         return context

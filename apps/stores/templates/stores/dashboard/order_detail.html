@@ -246,11 +246,11 @@
        LAYOUT 2 COLUMNAS: Info izquierda + Verificar pago derecha
        ============================================================ */
     .pedido-dashboard {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 14px;
+        display: block;
         margin-bottom: 16px;
-        align-items: start;
+    }
+    .pedido-dashboard .detail-card {
+        margin-bottom: 14px;
     }
     .pedido-col-right .detail-card {
         position: sticky;
@@ -539,61 +539,191 @@
             transition-duration: 0.01ms !important;
         }
     }
+
+
+/* ============================================================
+       FIX: ITEMS A EMPACAR - Tamano correcto de imagen
+       ============================================================ */
+    .pack-item {
+        display: grid !important;
+        grid-template-columns: 60px 1fr auto !important;
+        gap: 12px !important;
+        align-items: center !important;
+        padding: 10px 0 !important;
+        border-bottom: 1px solid #f0f0f0 !important;
+    }
+    .pack-item:last-of-type {
+        border-bottom: none !important;
+    }
+    .pack-item-img {
+        width: 60px !important;
+        height: 60px !important;
+        border-radius: 8px !important;
+        overflow: hidden !important;
+        background: #f5f7fa !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        flex-shrink: 0 !important;
+        border: 1px solid #e9ecef !important;
+    }
+    .pack-item-img img {
+        width: 100% !important;
+        height: 100% !important;
+        object-fit: cover !important;
+        max-width: 100% !important;
+        max-height: 100% !important;
+    }
+    .pack-item-no-img {
+        color: #ccc !important;
+        font-size: 1.3rem !important;
+    }
+    .pack-item-info {
+        min-width: 0 !important;
+    }
+    .pack-item-name {
+        font-weight: 600 !important;
+        font-size: 0.9rem !important;
+        color: #2c3e50 !important;
+        line-height: 1.25 !important;
+        margin-bottom: 2px !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        display: -webkit-box !important;
+        -webkit-line-clamp: 2 !important;
+        -webkit-box-orient: vertical !important;
+    }
+    .pack-item-detail {
+        font-size: 0.78rem !important;
+        color: #7f8c8d !important;
+    }
+    .pack-item-right {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: flex-end !important;
+        gap: 4px !important;
+        flex-shrink: 0 !important;
+    }
+    .pack-item-subtotal {
+        font-weight: 700 !important;
+        font-size: 0.95rem !important;
+        color: #2c3e50 !important;
+    }
+    .pack-item-status {
+        font-size: 0.65rem !important;
+        font-weight: 700 !important;
+        padding: 2px 8px !important;
+        border-radius: 20px !important;
+        text-transform: uppercase !important;
+    }
+    .pack-item-actions {
+        grid-column: 1 / -1 !important;
+        margin-top: 4px !important;
+    }
+    .pack-item-actions form {
+        display: inline !important;
+        margin: 0 !important;
+    }
+    .btn-ship-mini,
+    .btn-deliver-mini {
+        padding: 6px 12px !important;
+        font-size: 0.75rem !important;
+        border-radius: 6px !important;
+        border: none !important;
+        cursor: pointer !important;
+        font-weight: 600 !important;
+        font-family: inherit !important;
+    }
+    .btn-ship-mini {
+        background: #6c3483 !important;
+        color: white !important;
+    }
+    .btn-ship-mini:hover {
+        background: #4a235a !important;
+    }
+    .btn-deliver-mini {
+        background: #27ae60 !important;
+        color: white !important;
+    }
+    .btn-deliver-mini:hover {
+        background: #1e8449 !important;
+    }
 </style>
 
 <a href="{% url 'stores:orders' store.id %}" class="btn-back">← Volver a pedidos</a>
 
-<!-- Info general + Verificar pago -->
+<!-- ============ GRID PRINCIPAL ============ -->
 <div class="pedido-dashboard">
 
-    <!-- COLUMNA IZQUIERDA: Info del pedido -->
+    <!-- ============ COLUMNA IZQUIERDA ============ -->
     <div class="pedido-col-left">
+
+        <!-- Info compacta: solo pedido + referencia -->
         <div class="detail-card">
-            <h2>📋 Información del pedido</h2>
+            <h2>📋 Pedido</h2>
             <div class="info-row">
-                <span class="label">Pedido</span>
+                <span class="label">Código</span>
                 <span class="value">{{ order.reference_code }}</span>
             </div>
             <div class="info-row">
-                <span class="label">Fecha</span>
-                <span class="value">{{ order.created_at|date:"d/m/Y H:i" }}</span>
+                <span class="label">🔖 Referencia</span>
+                <span class="value">{{ order.payment_reference|default:"—" }}</span>
             </div>
-            <div class="info-row">
-                <span class="label">Cliente</span>
-                <span class="value">{{ order.user.username }}</span>
-            </div>
-            <div class="info-row">
-                <span class="label">Entrega</span>
-                <span class="value">
-                    {% if order.shipping_method == 'delivery' %}
-                        🛵 Delivery a domicilio
-                    {% else %}
-                        🏪 Retiro en tienda
+        </div>
+
+        <!-- Items a empacar -->
+        <div class="detail-card items-to-pack">
+            <h2>📦 Items a empacar</h2>
+
+            {% for item in my_items %}
+                <div class="pack-item" data-item-id="{{ item.pk }}">
+                    <div class="pack-item-img">
+                        {% if item.product and item.product.image %}
+                            <img src="{{ item.product.image.url }}" alt="{{ item.product_name }}" loading="lazy">
+                        {% else %}
+                            <div class="pack-item-no-img">📷</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="pack-item-info">
+                        <div class="pack-item-name">{{ item.product_name }}</div>
+                        <div class="pack-item-detail">{{ item.quantity }} × ${{ item.product_price|floatformat:2 }}</div>
+                    </div>
+
+                    <div class="pack-item-right">
+                        <div class="pack-item-subtotal">${{ item.get_subtotal|floatformat:2 }}</div>
+                        <span class="pack-item-status status-{{ item.status }}">{{ item.get_status_display }}</span>
+                    </div>
+
+                    {% if item.status == 'confirmed' or item.status == 'shipped' %}
+                    <div class="pack-item-actions">
+                        {% if item.status == 'confirmed' %}
+                            <form method="post" action="{% url 'stores:order_item_ship' store.id order.pk item.pk %}">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-ship-mini">🚚 Marcar enviado</button>
+                            </form>
+                        {% elif item.status == 'shipped' %}
+                            <form method="post" action="{% url 'stores:order_item_deliver' store.id order.pk item.pk %}">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-deliver-mini">✅ Marcar entregado</button>
+                            </form>
+                        {% endif %}
+                    </div>
                     {% endif %}
-                </span>
-            </div>
-            {% if order.shipping_method == 'delivery' and order.delivery_address %}
-            <div class="info-row" style="align-items:flex-start;">
-                <span class="label">📍 Dirección</span>
-                <span class="value" style="max-width:65%;text-align:right;line-height:1.35;">{{ order.delivery_address|linebreaksbr }}</span>
-            </div>
-            {% endif %}
-            {% if order.notes %}
-            <div class="info-row">
-                <span class="label">Notas</span>
-                <span class="value">{{ order.notes }}</span>
-            </div>
+                </div>
+            {% endfor %}
+
+            {% if other_items_count %}
+                <div class="other-items-note">
+                    Este pedido también incluye {{ other_items_count }} item(s) de otros comercios.
+                </div>
             {% endif %}
         </div>
-    </div>
 
-    <!-- COLUMNA DERECHA: Verificar pago -->
-    {% if user.is_superuser or user_role == 'owner' %}
-    <div class="pedido-col-right">
-        <div class="detail-card {% if order.status == 'payment_submitted' %}estado-pending{% elif order.status == 'confirmed' or order.status == 'shipped' or order.status == 'completed' %}estado-confirmed{% endif %}">
+    </div>
+">
             <h2>💳 Verificar pago</h2>
 
-            <!-- Monto esperado -->
             <div class="pago-monto usd">
                 <div class="monto-label">Monto esperado en USD</div>
                 <div class="monto-valor">${{ order.grand_total|floatformat:2 }}</div>
@@ -607,15 +737,10 @@
             </div>
             {% endif %}
 
-            <!-- Datos del pago del cliente -->
             <div style="font-size:0.78rem;margin-top:12px;padding-top:12px;border-top:1px solid #e9ecef;">
                 <div style="display:flex;justify-content:space-between;padding:3px 0;">
                     <span style="color:#7f8c8d;">Banco emisor:</span>
                     <span style="font-weight:600;">{{ order.payment_bank|default:"—" }}</span>
-                </div>
-                <div style="display:flex;justify-content:space-between;padding:3px 0;">
-                    <span style="color:#7f8c8d;">Referencia:</span>
-                    <span style="font-weight:600;">{{ order.payment_reference|default:"—" }}</span>
                 </div>
                 {% if order.payment_date %}
                 <div style="display:flex;justify-content:space-between;padding:3px 0;">
@@ -632,7 +757,6 @@
                 {% endif %}
             </div>
 
-            <!-- Estado / acciones -->
             <div class="pago-actions">
                 {% if order.status == 'payment_submitted' %}
                     <form method="post" action="{% url 'stores:order_confirm_payment' store.id order.pk %}" style="margin:0;">
@@ -642,7 +766,7 @@
                         </button>
                     </form>
                     <form method="post" action="{% url 'stores:order_reject_payment' store.id order.pk %}" style="margin:0;"
-                          onsubmit="return confirm('¿Rechazar este pago? El pedido será cancelado y se liberará el stock.');">
+                          onsubmit="return confirm('¿Marcar como pago no recibido? El pedido será cancelado.');">
                         {% csrf_token %}
                         <button type="submit" class="btn btn-reject">
                             ❌ Pago no recibido
@@ -658,53 +782,8 @@
             </div>
         </div>
     </div>
-    {% endif %}
 
 </div>
-
-
-<!-- Items -->
-<div class="detail-card">
-    <h2>📦 Tus items en este pedido</h2>
-
-    {% for item in my_items %}
-        <div class="item-block {{ item.status }}">
-            <div class="item-block-header">
-                <div>
-                    <div class="item-block-title">{{ item.quantity }} × {{ item.product_name }}</div>
-                    <div class="item-block-meta">
-                        Precio unitario: ${{ item.product_price|floatformat:2 }}
-                        · Subtotal: <strong>${{ item.get_subtotal|floatformat:2 }}</strong>
-                    </div>
-                </div>
-                <span class="item-block-status status-{{ item.status }}">
-                    {{ item.get_status_display }}
-                </span>
-            </div>
-
-            <div class="item-actions">
-                {% if item.status == 'confirmed' %}
-                    <form method="post" action="{% url 'stores:order_item_ship' store.id order.pk item.pk %}" style="display: inline;">
-                        {% csrf_token %}
-                        <button type="submit" class="btn btn-ship">🚚 Marcar como enviado</button>
-                    </form>
-                {% elif item.status == 'shipped' %}
-                    <form method="post" action="{% url 'stores:order_item_deliver' store.id order.pk item.pk %}" style="display: inline;">
-                        {% csrf_token %}
-                        <button type="submit" class="btn btn-approve">✅ Marcar como entregado</button>
-                    </form>
-                {% endif %}
-            </div>
-        </div>
-    {% endfor %}
-
-    {% if other_items_count %}
-        <div class="other-items-note">
-            Este pedido también incluye {{ other_items_count }} item(s) de otros comercios.
-        </div>
-    {% endif %}
-</div>
-
 
 <script>
 (function() {
