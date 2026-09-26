@@ -30,7 +30,12 @@ class PaymentForm(forms.ModelForm):
             }),
             'payment_reference': forms.TextInput(attrs={
                 'class': 'form-control',
-                'placeholder': 'Número de referencia del pago'
+                'placeholder': 'Solo números (4 a 12 dígitos)',
+                'inputmode': 'numeric',
+                'pattern': '[0-9]{4,12}',
+                'maxlength': '12',
+                'minlength': '4',
+                'autocomplete': 'off',
             }),
             'payment_date': forms.DateInput(attrs={
                 'class': 'form-control',
@@ -102,8 +107,14 @@ class PaymentForm(forms.ModelForm):
 
     def clean_payment_reference(self):
         ref = self.cleaned_data.get('payment_reference', '').strip()
+        # Solo numeros
+        if not ref.isdigit():
+            raise forms.ValidationError('La referencia solo puede contener numeros.')
+        # Longitud
         if len(ref) < 4:
-            raise forms.ValidationError('La referencia debe tener al menos 4 caracteres.')
+            raise forms.ValidationError('La referencia debe tener al menos 4 digitos.')
+        if len(ref) > 12:
+            raise forms.ValidationError('La referencia no puede tener mas de 12 digitos.')
         return ref
 
     def clean_payment_proof(self):

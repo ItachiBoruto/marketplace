@@ -305,4 +305,100 @@
         });
     })();
 
+
+
+    // ============================================================
+    // REFERENCIA DE PAGO: solo numeros, 4-12 digitos
+    // Con contador visual, check animado y shake en error
+    // ============================================================
+    (function() {
+        var refInput = document.querySelector('input[name="payment_reference"]');
+        if (!refInput) return;
+
+        // 1) Envolver el input en un wrapper
+        var wrapper = document.createElement('div');
+        wrapper.className = 'ref-wrapper';
+        refInput.parentNode.insertBefore(wrapper, refInput);
+        wrapper.appendChild(refInput);
+
+        // 2) Agregar el check animado dentro del wrapper
+        var check = document.createElement('span');
+        check.className = 'ref-check';
+        check.innerHTML = '\u2713';  // check
+        wrapper.appendChild(check);
+
+        // 3) Agregar el contador debajo
+        var counter = document.createElement('div');
+        counter.className = 'ref-counter';
+        counter.innerHTML = '<span class="ref-count">0 / 12</span><span class="ref-hint">minimo 4 digitos</span>';
+        wrapper.parentNode.insertBefore(counter, wrapper.nextSibling);
+
+        var countEl = counter.querySelector('.ref-count');
+        var hintEl = counter.querySelector('.ref-hint');
+
+        // 4) Actualizar estado visual
+        function updateState() {
+            var val = refInput.value;
+            var len = val.length;
+            countEl.textContent = len + ' / 12';
+
+            if (len >= 4 && len <= 12) {
+                wrapper.classList.add('valid');
+                wrapper.classList.remove('invalid');
+                hintEl.textContent = 'referencia valida';
+            } else {
+                wrapper.classList.remove('valid');
+                if (len === 0) {
+                    hintEl.textContent = 'formato incorrecto';
+                } else {
+                    hintEl.textContent = 'formato incorrecto';
+                    wrapper.classList.add('invalid');
+                }
+                if (len > 0) {
+                    wrapper.classList.add('invalid');
+                }
+            }
+        }
+
+        // 5) Shake cuando se rechaza un caracter
+        function shake() {
+            wrapper.classList.remove('shake');
+            void wrapper.offsetWidth;
+            wrapper.classList.add('shake');
+            setTimeout(function() {
+                wrapper.classList.remove('shake');
+            }, 400);
+        }
+
+        // 6) Filtrar input: solo numeros, max 12
+        refInput.addEventListener('input', function() {
+            var original = this.value;
+            var cleaned = original.replace(/[^0-9]/g, '');
+            if (cleaned.length > 12) {
+                cleaned = cleaned.slice(0, 12);
+            }
+            // Detectar si se filtro algo (para shake)
+            if (cleaned !== original) {
+                this.value = cleaned;
+                shake();
+            }
+            updateState();
+        });
+
+        // 7) Pegar: filtrar
+        refInput.addEventListener('paste', function(e) {
+            e.preventDefault();
+            var pasted = (e.clipboardData || window.clipboardData).getData('text');
+            var cleaned = pasted.replace(/[^0-9]/g, '').slice(0, 12);
+            var start = this.selectionStart;
+            var end = this.selectionEnd;
+            this.value = this.value.slice(0, start) + cleaned + this.value.slice(end);
+            this.value = this.value.replace(/[^0-9]/g, '').slice(0, 12);
+            updateState();
+        });
+
+        // 8) Estado inicial
+        updateState();
+    })();
+
 })();

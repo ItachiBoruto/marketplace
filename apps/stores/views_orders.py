@@ -111,11 +111,13 @@ class StoreOrdersView(RoleContextMixin, ManagerRequiredMixin, ListView):
             )
             orders_enriquecidos.append(order)
 
-        base = OrderItem.objects.filter(store=store)
-        context['count_pending'] = base.filter(status='pending').count()
-        context['count_confirmed'] = base.filter(status='confirmed').count()
-        context['count_shipped'] = base.filter(status__in=['shipped', 'delivered']).count()
-        context['count_cancelled'] = base.filter(status='cancelled').count()
+        # Contadores: contar PEDIDOS (no items). Un pedido con 3 items pendientes
+        # cuenta como 1 pedido pendiente.
+        base = Order.objects.filter(items__store=store)
+        context['count_pending'] = base.filter(items__status='pending').distinct().count()
+        context['count_confirmed'] = base.filter(items__status='confirmed').distinct().count()
+        context['count_shipped'] = base.filter(items__status__in=['shipped', 'delivered']).distinct().count()
+        context['count_cancelled'] = base.filter(items__status='cancelled').distinct().count()
         context['search'] = self.request.GET.get('q', '').strip()
 
         return context
