@@ -1,151 +1,219 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Iniciar sesión - Mi Marketplace</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #1a1a2e, #16213e);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            margin: 0;
-            padding: 20px;
-        }
-        .login-container {
-            background: white;
-            padding: 40px 32px;
-            border-radius: 16px;
-            box-shadow: 0 8px 40px rgba(0,0,0,0.3);
-            width: 100%;
-            max-width: 380px;
-        }
-        .login-container h1 {
-            text-align: center;
-            font-size: 2rem;
-            font-weight: 700;
-            color: #1a1a2e;
-            margin-bottom: 8px;
-        }
-        .login-container .subtitle {
-            text-align: center;
-            color: #7f8c8d;
-            font-size: 0.9rem;
-            margin-bottom: 28px;
-        }
-        .login-container form p {
-            margin-bottom: 16px;
-        }
-        .login-container label {
-            display: block;
-            font-weight: 600;
-            font-size: 0.9rem;
-            color: #333;
-            margin-bottom: 4px;
-        }
-        .login-container input[type="text"],
-        .login-container input[type="password"] {
-            width: 100%;
-            padding: 12px 14px;
-            border: 2px solid #e9ecef;
-            border-radius: 8px;
-            font-size: 1rem;
-            transition: border-color 0.3s, box-shadow 0.3s;
-            background: #f8f9fa;
-        }
-        .login-container input:focus {
-            outline: none;
-            border-color: #e94560;
-            box-shadow: 0 0 0 3px rgba(233,69,96,0.15);
-            background: white;
-        }
-        .login-container button {
-            width: 100%;
-            padding: 14px;
-            background: #e94560;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: background 0.3s, transform 0.2s;
-            margin-top: 8px;
-        }
-        .login-container button:hover {
-            background: #c0392b;
-            transform: scale(1.02);
-        }
-        .login-container .register-link {
-            text-align: center;
-            margin-top: 16px;
-            font-size: 0.9rem;
-            color: #666;
-        }
-        .login-container .register-link a {
-            color: #e94560;
-            text-decoration: none;
-            font-weight: 600;
-        }
-        .login-container .register-link a:hover {
-            text-decoration: underline;
-        }
-        .login-container .logo {
-            text-align: center;
-            font-size: 3rem;
-            margin-bottom: 8px;
-        }
+{% extends "base.html" %}
+{% load static %}
 
-        /* ===== MENSAJES (aviso de intentos, errores, etc.) ===== */
-        .messages {
-            margin-bottom: 16px;
-        }
-        .message {
-            padding: 10px 14px;
-            border-radius: 8px;
-            margin: 6px 0;
-            font-size: 0.88rem;
-            line-height: 1.4;
-            text-align: left;
-        }
-        .message.error {
-            background: #fdedec;
-            color: #c0392b;
-            border-left: 4px solid #e74c3c;
-        }
-        .message.warning {
-            background: #fef5e7;
-            color: #b9770e;
-            border-left: 4px solid #f39c12;
-        }
-        .message.success {
-            background: #eafaf1;
-            color: #229954;
-            border-left: 4px solid #2ecc71;
-        }
-        .message.info {
-            background: #eaf2f8;
-            color: #21618c;
-            border-left: 4px solid #3498db;
-        }
+{% block title %}Iniciar sesion - Mi Marketplace{% endblock %}
 
-        @media (max-width: 480px) {
-            .login-container { padding: 28px 20px; }
+{% block footer %}{% endblock %}
+
+{% block extra_head %}
+<style>
+    /* ============================================================
+       LOGIN - Pagina de autenticacion
+       ============================================================ */
+
+    /* Contenedor a pantalla completa con fondo oscuro */
+    .auth-page {
+        background: linear-gradient(135deg, #1a1a2e, #16213e);
+        min-height: calc(100vh - 120px);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 40px 20px;
+        margin: -20px 0;
+    }
+
+    /* Tarjeta blanca centrada */
+    .auth-card {
+        background: white;
+        border-radius: 16px;
+        padding: 36px 32px;
+        box-shadow: 0 12px 48px rgba(0, 0, 0, 0.35);
+        width: 100%;
+        max-width: 380px;
+        animation: authCardIn 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    @keyframes authCardIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
         }
-    </style>
-</head>
-<body>
-    <div class="login-container">
-        <div class="logo">🛒</div>
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Logo y titulo */
+    .auth-logo {
+        text-align: center;
+        font-size: 2.8rem;
+        margin-bottom: 8px;
+        line-height: 1;
+    }
+    .auth-card h1 {
+        text-align: center;
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #1a1a2e;
+        margin: 0 0 6px;
+        line-height: 1.2;
+    }
+    .auth-subtitle {
+        text-align: center;
+        color: #7f8c8d;
+        font-size: 0.88rem;
+        margin: 0 0 24px;
+        line-height: 1.3;
+    }
+
+    /* Mensajes */
+    .auth-messages {
+        margin-bottom: 16px;
+    }
+    .auth-messages .message {
+        padding: 10px 14px;
+        border-radius: 8px;
+        margin: 6px 0;
+        font-size: 0.85rem;
+        line-height: 1.4;
+        border-left: 4px solid transparent;
+    }
+    .auth-messages .message.error   { background: #fdedec; color: #c0392b; border-left-color: #e74c3c; }
+    .auth-messages .message.warning { background: #fef5e7; color: #b9770e; border-left-color: #f39c12; }
+    .auth-messages .message.success { background: #eafaf1; color: #229954; border-left-color: #2ecc71; }
+    .auth-messages .message.info    { background: #eaf2f8; color: #21618c; border-left-color: #3498db; }
+
+    /* Formulario */
+    .auth-card form p {
+        margin: 0 0 14px;
+    }
+    .auth-card form label {
+        display: block;
+        font-weight: 600;
+        font-size: 0.85rem;
+        color: #34495e;
+        margin-bottom: 5px;
+    }
+    .auth-card form input[type="text"],
+    .auth-card form input[type="password"],
+    .auth-card form input[type="email"] {
+        width: 100%;
+        padding: 11px 14px;
+        border: 1.5px solid #dfe3e8;
+        border-radius: 8px;
+        font-size: 0.95rem;
+        font-family: inherit;
+        background: #f8f9fa;
+        color: #2c3e50;
+        transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+        box-sizing: border-box;
+    }
+    .auth-card form input:focus {
+        outline: none;
+        border-color: #e94560;
+        box-shadow: 0 0 0 3px rgba(233, 69, 96, 0.12);
+        background: white;
+    }
+
+    /* Boton principal */
+    .auth-card form button[type="submit"] {
+        width: 100%;
+        padding: 12px;
+        background: linear-gradient(135deg, #e94560, #c0392b);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 0.95rem;
+        font-weight: 700;
+        font-family: inherit;
+        cursor: pointer;
+        margin-top: 8px;
+        transition: transform 0.15s, box-shadow 0.2s;
+        box-shadow: 0 4px 12px rgba(233, 69, 96, 0.3);
+    }
+    .auth-card form button[type="submit"]:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 6px 18px rgba(233, 69, 96, 0.45);
+    }
+    .auth-card form button[type="submit"]:active {
+        transform: translateY(0);
+    }
+
+    /* Links del pie */
+    .auth-links {
+        text-align: center;
+        margin-top: 18px;
+        padding-top: 14px;
+        border-top: 1px solid #eef1f4;
+    }
+    .auth-links a {
+        color: #e94560;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 0.85rem;
+        transition: color 0.15s;
+    }
+    .auth-links a:hover {
+        color: #c0392b;
+        text-decoration: underline;
+    }
+    .auth-links p {
+        margin: 0 0 6px;
+        font-size: 0.85rem;
+        color: #7f8c8d;
+    }
+    .auth-links p:last-child {
+        margin-bottom: 0;
+    }
+
+    /* Lista de errores del form */
+    .auth-card form .errorlist {
+        list-style: none;
+        padding: 0;
+        margin: 4px 0 0;
+        color: #c0392b;
+        font-size: 0.78rem;
+    }
+    .auth-card form .errorlist li {
+        padding: 2px 0;
+    }
+    .auth-card form .helptext {
+        display: block;
+        font-size: 0.72rem;
+        color: #95a5a6;
+        margin-top: 4px;
+        line-height: 1.3;
+    }
+
+    /* Responsive */
+    @media (max-width: 480px) {
+        .auth-page {
+            padding: 24px 14px;
+            min-height: calc(100vh - 100px);
+        }
+        .auth-card {
+            padding: 28px 22px;
+        }
+        .auth-logo {
+            font-size: 2.4rem;
+        }
+        .auth-card h1 {
+            font-size: 1.3rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="auth-page">
+    <div class="auth-card">
+        <div class="auth-logo">&#128722;</div>
         <h1>Mi Marketplace</h1>
-        <p class="subtitle">Inicia sesión para ver los productos</p>
+        <p class="auth-subtitle">Inicia sesion para ver los productos</p>
 
         {% if messages %}
-            <div class="messages">
+            <div class="auth-messages">
                 {% for message in messages %}
                     <p class="message {{ message.tags }}">{{ message }}</p>
                 {% endfor %}
@@ -158,13 +226,10 @@
             <button type="submit">Ingresar</button>
         </form>
 
-        <div class="register-link">
-            <a href="{% url 'password_reset' %}">¿Olvidaste tu contraseña?</a>
-        </div>
-
-        <div class="register-link">
-            ¿No tienes cuenta? <a href="{% url 'accounts:register' %}">Regístrate</a>
+        <div class="auth-links">
+            <p><a href="{% url 'password_reset' %}">Olvidaste tu contrasena?</a></p>
+            <p>No tienes cuenta? <a href="{% url 'accounts:register' %}">Registrate</a></p>
         </div>
     </div>
-</body>
-</html>
+</div>
+{% endblock %}

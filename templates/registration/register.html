@@ -1,150 +1,425 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Registro - Mi Marketplace</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #1a1a2e, #16213e);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            margin: 0;
-            padding: 20px;
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Registro - Mi Marketplace{% endblock %}
+
+{% block footer %}{% endblock %}
+
+{% block extra_head %}
+<style>
+    /* ============================================================
+       REGISTRO - Pagina de creacion de cuenta
+       ============================================================ */
+
+    .auth-page {
+        background: linear-gradient(135deg, #1a1a2e, #16213e);
+        min-height: calc(100vh - 120px);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 40px 20px;
+        margin: -20px 0;
+    }
+
+    .auth-card {
+        background: white;
+        border-radius: 16px;
+        padding: 36px 32px;
+        box-shadow: 0 12px 48px rgba(0, 0, 0, 0.35);
+        width: 100%;
+        max-width: 420px;
+        animation: authCardIn 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    @keyframes authCardIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .auth-logo {
+        text-align: center;
+        font-size: 2.8rem;
+        margin-bottom: 8px;
+        line-height: 1;
+    }
+    .auth-card h1 {
+        text-align: center;
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #1a1a2e;
+        margin: 0 0 6px;
+        line-height: 1.2;
+    }
+    .auth-subtitle {
+        text-align: center;
+        color: #7f8c8d;
+        font-size: 0.88rem;
+        margin: 0 0 22px;
+        line-height: 1.3;
+    }
+
+    /* Mensajes */
+    .auth-messages { margin-bottom: 16px; }
+    .auth-messages .message {
+        padding: 10px 14px;
+        border-radius: 8px;
+        margin: 6px 0;
+        font-size: 0.85rem;
+        line-height: 1.4;
+        border-left: 4px solid transparent;
+    }
+    .auth-messages .message.error   { background: #fdedec; color: #c0392b; border-left-color: #e74c3c; }
+    .auth-messages .message.warning { background: #fef5e7; color: #b9770e; border-left-color: #f39c12; }
+    .auth-messages .message.success { background: #eafaf1; color: #229954; border-left-color: #2ecc71; }
+    .auth-messages .message.info    { background: #eaf2f8; color: #21618c; border-left-color: #3498db; }
+
+    /* Campos */
+    .auth-field {
+        margin-bottom: 14px;
+    }
+    .auth-field label {
+        display: block;
+        font-weight: 600;
+        font-size: 0.85rem;
+        color: #34495e;
+        margin-bottom: 5px;
+    }
+    .auth-field input[type="text"],
+    .auth-field input[type="email"],
+    .auth-field input[type="password"],
+    .auth-field input[type="tel"],
+    .auth-field input[type="number"] {
+        width: 100%;
+        padding: 11px 14px;
+        border: 1.5px solid #dfe3e8;
+        border-radius: 8px;
+        font-size: 0.95rem;
+        font-family: inherit;
+        background: #f8f9fa;
+        color: #2c3e50;
+        transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+        box-sizing: border-box;
+    }
+    .auth-field input:focus {
+        outline: none;
+        border-color: #e94560;
+        box-shadow: 0 0 0 3px rgba(233, 69, 96, 0.12);
+        background: white;
+    }
+    .auth-field .helptext {
+        display: block;
+        font-size: 0.72rem;
+        color: #95a5a6;
+        margin-top: 4px;
+        line-height: 1.3;
+    }
+    .auth-field .errorlist {
+        list-style: none;
+        padding: 0;
+        margin: 4px 0 0;
+        color: #c0392b;
+        font-size: 0.78rem;
+    }
+    .auth-field .errorlist li { padding: 2px 0; }
+
+    /* Checkbox de terminos */
+    .auth-terms {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        padding: 12px;
+        background: #f8f9fa;
+        border-radius: 8px;
+        border: 1.5px solid #eef1f4;
+        margin: 18px 0 14px;
+        font-size: 0.85rem;
+        line-height: 1.4;
+        color: #34495e;
+        cursor: pointer;
+    }
+    .auth-terms input[type="checkbox"] {
+        width: 18px;
+        height: 18px;
+        accent-color: #e94560;
+        cursor: pointer;
+        flex-shrink: 0;
+        margin-top: 1px;
+    }
+    .auth-terms a {
+        color: #e94560;
+        font-weight: 600;
+        text-decoration: none;
+    }
+    .auth-terms a:hover {
+        text-decoration: underline;
+    }
+    .auth-terms.has-error {
+        border-color: #e74c3c;
+        background: #fdedec;
+    }
+    .auth-terms .terms-error {
+        display: block;
+        color: #c0392b;
+        font-size: 0.78rem;
+        margin-top: 6px;
+        font-weight: 600;
+    }
+
+    /* Boton */
+    .auth-card form button[type="submit"] {
+        width: 100%;
+        padding: 12px;
+        background: linear-gradient(135deg, #e94560, #c0392b);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 0.95rem;
+        font-weight: 700;
+        font-family: inherit;
+        cursor: pointer;
+        margin-top: 4px;
+        transition: transform 0.15s, box-shadow 0.2s;
+        box-shadow: 0 4px 12px rgba(233, 69, 96, 0.3);
+    }
+    .auth-card form button[type="submit"]:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 6px 18px rgba(233, 69, 96, 0.45);
+    }
+    .auth-card form button[type="submit"]:active {
+        transform: translateY(0);
+    }
+
+    /* Links del pie */
+    .auth-links {
+        text-align: center;
+        margin-top: 18px;
+        padding-top: 14px;
+        border-top: 1px solid #eef1f4;
+    }
+    .auth-links p {
+        margin: 0;
+        font-size: 0.85rem;
+        color: #7f8c8d;
+    }
+    .auth-links a {
+        color: #e94560;
+        text-decoration: none;
+        font-weight: 600;
+        transition: color 0.15s;
+    }
+    .auth-links a:hover {
+        color: #c0392b;
+        text-decoration: underline;
+    }
+
+    @media (max-width: 480px) {
+        .auth-page {
+            padding: 24px 14px;
+            min-height: calc(100vh - 100px);
         }
-        .register-container {
-            background: white;
-            padding: 40px 32px;
-            border-radius: 16px;
-            box-shadow: 0 8px 40px rgba(0,0,0,0.3);
-            width: 100%;
-            max-width: 420px;
+        .auth-card {
+            padding: 28px 22px;
         }
-        .register-container h1 {
-            text-align: center;
-            font-size: 2rem;
-            font-weight: 700;
-            color: #1a1a2e;
-            margin-bottom: 8px;
+        .auth-logo {
+            font-size: 2.4rem;
         }
-        .register-container .subtitle {
-            text-align: center;
-            color: #7f8c8d;
-            font-size: 0.9rem;
-            margin-bottom: 28px;
+        .auth-card h1 {
+            font-size: 1.3rem;
         }
-        .register-container form p {
-            margin-bottom: 16px;
-        }
-        .register-container label {
-            display: block;
-            font-weight: 600;
-            font-size: 0.9rem;
-            color: #333;
-            margin-bottom: 4px;
-        }
-        .register-container input {
-            width: 100%;
-            padding: 12px 14px;
-            border: 2px solid #e9ecef;
-            border-radius: 8px;
-            font-size: 1rem;
-            transition: border-color 0.3s, box-shadow 0.3s;
-            background: #f8f9fa;
-        }
-        .register-container input:focus {
-            outline: none;
-            border-color: #e94560;
-            box-shadow: 0 0 0 3px rgba(233,69,96,0.15);
-            background: white;
-        }
-        .register-container .helptext {
-            font-size: 0.8rem;
-            color: #7f8c8d;
-            display: block;
-            margin-top: 4px;
-        }
-        .register-container .errorlist {
-            color: #e74c3c;
-            list-style: none;
-            font-size: 0.85rem;
-            margin: 4px 0 8px;
-        }
-        .register-container button {
-            width: 100%;
-            padding: 14px;
-            background: #e94560;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: background 0.3s, transform 0.2s;
-            margin-top: 8px;
-        }
-        .register-container button:hover {
-            background: #c0392b;
-            transform: scale(1.02);
-        }
-        .register-container .login-link {
-            text-align: center;
-            margin-top: 16px;
-            font-size: 0.9rem;
-            color: #666;
-        }
-        .register-container .login-link a {
-            color: #e94560;
-            text-decoration: none;
-            font-weight: 600;
-        }
-        .register-container .login-link a:hover {
-            text-decoration: underline;
-        }
-        .register-container .logo {
-            text-align: center;
-            font-size: 3rem;
-            margin-bottom: 8px;
-        }
-        @media (max-width: 480px) {
-            .register-container { padding: 28px 20px; }
-        }
-    </style>
-</head>
-<body>
-    <div class="register-container">
-        <div class="logo">🛒</div>
+    }
+
+    /* ============ SUGERENCIAS DE USERNAME ============ */
+    .auth-suggestions {
+        margin-top: 8px;
+        padding: 10px 12px;
+        background: linear-gradient(135deg, #f0f7ff, #e6f2ff);
+        border: 1px solid #cfe3f7;
+        border-radius: 8px;
+        animation: suggIn 0.3s ease;
+    }
+    @keyframes suggIn {
+        from { opacity: 0; transform: translateY(-4px); }
+        to   { opacity: 1; transform: translateY(0); }
+    }
+    .suggestion-label {
+        display: block;
+        font-size: 0.72rem;
+        color: #3498db;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+        margin-bottom: 6px;
+    }
+    .suggestion-chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+    }
+    .suggestion-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        padding: 5px 12px;
+        background: white;
+        color: #2c3e50;
+        border: 1.5px solid #cfe3f7;
+        border-radius: 50px;
+        font-size: 0.82rem;
+        font-weight: 600;
+        font-family: inherit;
+        cursor: pointer;
+        transition: all 0.15s;
+        user-select: none;
+    }
+    .suggestion-chip:hover {
+        background: #e94560;
+        border-color: #e94560;
+        color: white;
+        transform: translateY(-1px);
+        box-shadow: 0 3px 8px rgba(233, 69, 96, 0.3);
+    }
+    .suggestion-chip:active {
+        transform: translateY(0);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="auth-page">
+    <div class="auth-card">
+        <div class="auth-logo">&#128722;</div>
         <h1>Crear cuenta</h1>
-        <p class="subtitle">Regístrate para empezar a comprar</p>
+        <p class="auth-subtitle">Registrate para empezar a comprar</p>
 
-        <form method="post">
+        {% if messages %}
+            <div class="auth-messages">
+                {% for message in messages %}
+                    <p class="message {{ message.tags }}">{{ message }}</p>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <form method="post" novalidate>
             {% csrf_token %}
-            {{ form.as_p }}
-            <button type="submit">Registrarse</button>
 
-        <div class="terms-checkbox" style="margin: 14px 0; padding: 12px; background: #f8f9fa; border-radius: 8px; font-size: 0.85rem; line-height: 1.5;">
-            <label style="display: flex; align-items: flex-start; gap: 8px; cursor: pointer;">
+            {# Errores generales del form (no de un campo) #}
+            {% if form.non_field_errors %}
+                <ul class="errorlist" style="margin-bottom: 12px;">
+                    {% for error in form.non_field_errors %}
+                        <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+
+            {# USERNAME #}
+            <div class="auth-field">
+                <label for="{{ form.username.id_for_label }}">{{ form.username.label }}</label>
+                {{ form.username }}
+                {% if form.username.help_text %}<span class="helptext">{{ form.username.help_text }}</span>{% endif %}
+                {% if form.username.errors %}
+                    <ul class="errorlist">{% for e in form.username.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+                {% endif %}
+                {% if form.suggested_usernames %}
+                    <div class="auth-suggestions">
+                        <span class="suggestion-label">Sugerencias disponibles:</span>
+                        <div class="suggestion-chips">
+                            {% for suggestion in form.suggested_usernames %}
+                                <button type="button" class="suggestion-chip" data-username="{{ suggestion }}">
+                                    {{ suggestion }}
+                                </button>
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+
+            {# EMAIL #}
+            <div class="auth-field">
+                <label for="{{ form.email.id_for_label }}">{{ form.email.label }}</label>
+                {{ form.email }}
+                {% if form.email.help_text %}<span class="helptext">{{ form.email.help_text }}</span>{% endif %}
+                {% if form.email.errors %}<ul class="errorlist">{% for e in form.email.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+            </div>
+
+            {# PASSWORD 1 #}
+            <div class="auth-field">
+                <label for="{{ form.password1.id_for_label }}">{{ form.password1.label }}</label>
+                {{ form.password1 }}
+                {% if form.password1.help_text %}<span class="helptext">{{ form.password1.help_text }}</span>{% endif %}
+                {% if form.password1.errors %}<ul class="errorlist">{% for e in form.password1.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+            </div>
+
+            {# PASSWORD 2 #}
+            <div class="auth-field">
+                <label for="{{ form.password2.id_for_label }}">{{ form.password2.label }}</label>
+                {{ form.password2 }}
+                {% if form.password2.help_text %}<span class="helptext">{{ form.password2.help_text }}</span>{% endif %}
+                {% if form.password2.errors %}<ul class="errorlist">{% for e in form.password2.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+            </div>
+
+            {# TERMINOS Y CONDICIONES #}
+            <label class="auth-terms{% if form.terms_accepted.errors %} has-error{% endif %}" for="{{ form.terms_accepted.id_for_label }}">
                 {{ form.terms_accepted }}
                 <span>
-                    Acepto los <a href="/legal/terminos/" target="_blank">Términos y Condiciones</a>
-                    y la <a href="/legal/privacidad/" target="_blank">Política de Privacidad</a>
+                    Acepto los <a href="/legal/terminos/" target="_blank">Terminos y Condiciones</a>
+                    y la <a href="/legal/privacidad/" target="_blank">Politica de Privacidad</a>
+                    {% if form.terms_accepted.errors %}
+                        <span class="terms-error">{{ form.terms_accepted.errors.0 }}</span>
+                    {% endif %}
                 </span>
             </label>
-            {% if form.terms_accepted.errors %}
-                <div style="color: #c0392b; margin-top: 6px; font-size: 0.82rem;">
-                    {{ form.terms_accepted.errors.0 }}
-                </div>
-            {% endif %}
-        </div>
+
+            <button type="submit">Registrarse</button>
         </form>
 
-        <div class="login-link">
-            ¿Ya tienes cuenta? <a href="{% url 'login' %}">Inicia sesión</a>
+        <div class="auth-links">
+            <p>Ya tienes cuenta? <a href="{% url 'login' %}">Inicia sesion</a></p>
         </div>
     </div>
-</body>
-</html>
+</div>
+
+<script>
+(function() {
+    'use strict';
+
+    document.querySelectorAll('.suggestion-chip').forEach(function(chip) {
+        chip.addEventListener('click', function() {
+            var username = this.dataset.username;
+            var input = document.getElementById('id_username');
+            if (!input) return;
+
+            // Rellenar el input
+            input.value = username;
+            input.focus();
+
+            // Mover el cursor al final
+            input.setSelectionRange(username.length, username.length);
+
+            // Feedback visual: marcar el chip como usado
+            this.style.background = '#27ae60';
+            this.style.borderColor = '#27ae60';
+            this.style.color = 'white';
+
+            // Deshabilitar los otros chips por un momento
+            document.querySelectorAll('.suggestion-chip').forEach(function(c) {
+                c.disabled = true;
+            });
+            setTimeout(function() {
+                document.querySelectorAll('.suggestion-chip').forEach(function(c) {
+                    c.disabled = false;
+                    c.style.background = '';
+                    c.style.borderColor = '';
+                    c.style.color = '';
+                });
+            }, 1500);
+
+            // Ocultar el error del username (se limpia al reenviar)
+            var errorList = input.parentNode.querySelector('.errorlist');
+            if (errorList) {
+                errorList.style.opacity = '0.4';
+            }
+        });
+    });
+})();
+</script>
+{% endblock %}
