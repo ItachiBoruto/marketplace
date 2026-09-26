@@ -648,6 +648,67 @@
     .btn-deliver-mini:hover {
         background: #1e8449 !important;
     }
+
+    /* ============================================================
+       BOTONES A NIVEL PEDIDO - 1 solo paquete
+       ============================================================ */
+    .order-action-row {
+        margin-top: 14px;
+        padding-top: 12px;
+        border-top: 1px solid #e9ecef;
+        display: flex;
+        justify-content: center;
+    }
+    .order-action-form {
+        display: inline-block;
+        margin: 0;
+    }
+    .btn-ship-full,
+    .btn-deliver-full {
+        padding: 10px 24px;
+        border: none;
+        border-radius: 8px;
+        font-size: 0.88rem;
+        font-weight: 700;
+        font-family: inherit;
+        cursor: pointer;
+        transition: transform 0.15s, box-shadow 0.2s;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    .btn-ship-full {
+        background: linear-gradient(135deg, #6c3483, #4a235a);
+        color: white;
+    }
+    .btn-ship-full:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 6px 16px rgba(108, 52, 131, 0.4);
+    }
+    .btn-deliver-full {
+        background: linear-gradient(135deg, #27ae60, #1e8449);
+        color: white;
+    }
+    .btn-deliver-full:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 6px 16px rgba(39, 174, 96, 0.4);
+    }
+    .btn-ship-full:active,
+    .btn-deliver-full:active {
+        transform: translateY(0);
+    }
+
+    /* Badge cuando el pedido esta completado (no clickeable) */
+    .order-completed-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 20px;
+        background: linear-gradient(135deg, #d4edda, #c3e6cb);
+        color: #155724;
+        border-radius: 8px;
+        font-size: 0.88rem;
+        font-weight: 700;
+        border: 1px solid #b1dfbb;
+    }
 </style>
 
 <a href="{% url 'stores:orders' store.id %}" class="btn-back">← Volver a pedidos</a>
@@ -695,21 +756,6 @@
                         <span class="pack-item-status status-{{ item.status }}">{{ item.get_status_display }}</span>
                     </div>
 
-                    {% if item.status == 'confirmed' or item.status == 'shipped' %}
-                    <div class="pack-item-actions">
-                        {% if item.status == 'confirmed' %}
-                            <form method="post" action="{% url 'stores:order_item_ship' store.id order.pk item.pk %}">
-                                {% csrf_token %}
-                                <button type="submit" class="btn btn-ship-mini">🚚 Marcar enviado</button>
-                            </form>
-                        {% elif item.status == 'shipped' %}
-                            <form method="post" action="{% url 'stores:order_item_deliver' store.id order.pk item.pk %}">
-                                {% csrf_token %}
-                                <button type="submit" class="btn btn-deliver-mini">✅ Marcar entregado</button>
-                            </form>
-                        {% endif %}
-                    </div>
-                    {% endif %}
                 </div>
             {% endfor %}
 
@@ -718,10 +764,47 @@
                     Este pedido también incluye {{ other_items_count }} item(s) de otros comercios.
                 </div>
             {% endif %}
+
+            {# ============ ACCIONES A NIVEL PEDIDO (1 solo paquete) ============ #}
+            {# El boton depende del estado REAL de los items, no solo de order.status #}
+            {% if order.status == 'confirmed' or order.status == 'shipped' %}
+                {# Verificar si quedan items por enviar #}
+                {% if order.status == 'confirmed' %}
+                    {% if order.shipping_method == 'pickup' %}
+                        <div class="order-action-row">
+                            <form method="post" action="{% url 'stores:order_mark_delivered' store.id order.pk %}" class="order-action-form">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-deliver-full">&#9989; Marcar todo como entregado</button>
+                            </form>
+                        </div>
+                    {% else %}
+                        <div class="order-action-row">
+                            <form method="post" action="{% url 'stores:order_mark_shipped' store.id order.pk %}" class="order-action-form">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-ship-full">&#128230; Marcar todo como enviado</button>
+                            </form>
+                        </div>
+                    {% endif %}
+                {% elif order.status == 'shipped' %}
+                    <div class="order-action-row">
+                        <form method="post" action="{% url 'stores:order_mark_delivered' store.id order.pk %}" class="order-action-form">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-deliver-full">&#9989; Marcar todo como entregado</button>
+                        </form>
+                    </div>
+                {% endif %}
+            {% elif order.status == 'completed' %}
+                <div class="order-action-row">
+                    <div class="order-completed-badge">&#9989; Pedido completado y entregado</div>
+                </div>
+            {% endif %}
         </div>
 
     </div>
-">
+
+    {% if user.is_superuser or user_role == 'owner' %}
+    <div class="pedido-col-right">
+        <div class="detail-card {% if order.status == 'payment_submitted' %}estado-pending{% elif order.status == 'confirmed' or order.status == 'shipped' or order.status == 'completed' %}estado-confirmed{% endif %}">
             <h2>💳 Verificar pago</h2>
 
             <div class="pago-monto usd">
@@ -782,6 +865,7 @@
             </div>
         </div>
     </div>
+    {% endif %}
 
 </div>
 
@@ -880,9 +964,9 @@
         var action = form.getAttribute('action') || '';
 
         var type = null;
-        if (action.indexOf('order_item_ship') !== -1) {
+        if (action.indexOf('order_item_ship') !== -1 || action.indexOf('order_mark_shipped') !== -1) {
             type = 'shipped';
-        } else if (action.indexOf('order_item_deliver') !== -1) {
+        } else if (action.indexOf('order_item_deliver') !== -1 || action.indexOf('order_mark_delivered') !== -1) {
             type = 'delivered';
         } else if (action.indexOf('order_confirm_payment') !== -1) {
             type = 'payment';

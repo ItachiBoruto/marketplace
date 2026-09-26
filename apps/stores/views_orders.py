@@ -38,7 +38,11 @@ def _update_order_status_after_item_change(order):
     non_cancelled = statuses - {'cancelled'}
     if not non_cancelled:
         order.status = 'cancelled'
+    elif all(s == 'delivered' for s in non_cancelled):
+        # Todos entregados -> pedido completado
+        order.status = 'completed'
     elif all(s in ('shipped', 'delivered') for s in non_cancelled):
+        # Todos al menos enviados -> shipped
         order.status = 'shipped'
     else:
         order.status = 'confirmed'
@@ -370,4 +374,82 @@ def order_reject_payment(request, store_id, order_id):
     )
 
     messages.success(request, f'Pedido {order.reference_code} cancelado. Stock liberado.')
+    return redirect('stores:order_detail', store_id=store.id, order_id=order_id)
+
+# ============================================================
+# Acciones a nivel PEDIDO (marcar todo como enviado / entregado)
+# ============================================================
+@login_required(login_url='login')
+def order_mark_shipped(request, store_id, order_id):
+    """Marca TODOS los items confirmed del pedido como enviados (1 solo paquete)."""
+    if request.method != 'POST':
+        return HttpResponseBadRequest("Metodo no permitido")
+
+    store = get_object_or_404(Store, id=store_id)
+    if not _check_store_manager(request, store):
+        raise Http404()
+
+    order = get_object_or_404(Order, id=order_id)
+
+    # Items elegibles: confirmed, de este comercio
+    items = order.items.filter(store=store, status='confirmed')
+    if not items.exists():
+        messages.warning(request, 'No hay items confirmados para enviar.')
+        return redirect('stores:order_detail', store_id=store.id, order_id=order_id)
+
+    count = items.count()
+    items.update(status='shipped')
+    _update_order_status_after_item_change(order)
+
+    # 1 sola notificacion (no N)
+    notify(
+        order.user,
+        'order_shipped',
+        f'Pedido enviado - {order.reference_code}',
+        f'{store.name} envio tu pedido completo ({count} producto{"s" if count != 1 else ""}).',
+        link=f'/orders/{order.id}/'
+    )
+
+    messages.success(request, f'Pedido marcado como enviado ({count} item{"s" if count != 1 else ""}).')
+    return redirect('stores:order_detail', store_id=store.id, order_id=order_id)
+
+
+@login_required(login_url='login')
+def order_mark_delivered(request, store_id, order_id):
+    """Marca TODOS los items shipped (o confirmed si es pickup) como entregados."""
+    if request.method != 'POST':
+        return HttpResponseBadRequest("Metodo no permitido")
+
+    store = get_object_or_404(Store, id=store_id)
+    if not _check_store_manager(request, store):
+        raise Http404()
+
+    order = get_object_or_404(Order, id=order_id)
+
+    # Elegibles:
+    # - Si el pedido es pickup: items confirmed (no necesitan pasar por shipped)
+    # - Si es delivery: items shipped
+    if order.shipping_method == 'pickup':
+        items = order.items.filter(store=store, status__in=['confirmed', 'shipped'])
+    else:
+        items = order.items.filter(store=store, status='shipped')
+
+    if not items.exists():
+        messages.warning(request, 'No hay items para marcar como entregados.')
+        return redirect('stores:order_detail', store_id=store.id, order_id=order_id)
+
+    count = items.count()
+    items.update(status='delivered')
+    _update_order_status_after_item_change(order)
+
+    # 1 sola notificacion
+    notify(
+        order.user,
+        'order_completed',
+        f'Pedido entregado - {order.reference_code}',
+        f'{store.name} marco tu pedido como entregado.',
+        link=f'/orders/{order.id}/'
+    )
+
+    messages.success(request, f'Pedido marcado como entregado ({count} item{"s" if count != 1 else ""}).')
     return redirect('stores:order_detail', store_id=store.id, order_id=order_id)
