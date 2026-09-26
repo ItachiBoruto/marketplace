@@ -1,14 +1,12 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pedido registrado - Mi Marketplace</title>
-    {% load static %}
-    {% load exchange_filters %}
-    <link rel="stylesheet" href="{% static 'css/style.css' %}">
-    <style>
-        .success-box {
+{% extends "base.html" %}
+{% load static %}
+{% load exchange_filters %}
+
+{% block title %}Pedido registrado - Mi Marketplace{% endblock %}
+
+{% block extra_head %}
+<style>
+.success-box {
             max-width: 600px;
             margin: 40px auto;
             background: white;
@@ -70,20 +68,11 @@
             color: #7f8c8d;
             margin-top: 4px;
         }
-    </style>
-</head>
-<body>
-    <header>
-        <div class="container">
-            <h1>🛒 Mi Marketplace</h1>
-            <nav>
-                <a href="/">🏠 Inicio</a>
-                <a href="{% url 'cart:view' %}" class="header-cart-link"><span class="cart-icon-text">🛒 Carrito</span><span class="cart-count-badge" {% if not cart_count %}style="display:none;"{% endif %}>{{ cart_count|default:0 }}</span></a>
-            </nav>
-        </div>
-    </header>
+</style>
+{% endblock %}
 
-    <main>
+{% block content %}
+<main>
         <div class="container">
             <div class="success-box">
                 <div class="success-icon">✅</div>
@@ -117,5 +106,4 @@
     </main>
     <script src="{% static 'js/notifications.js' %}"></script>
     <script src="/static/js/email-verify-banner.js"></script>
-</body>
-</html>
+{% endblock %}

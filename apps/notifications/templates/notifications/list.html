@@ -1,122 +1,144 @@
+{% extends "base.html" %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Notificaciones - Mi Marketplace</title>
-    <link rel="stylesheet" href="{% static 'css/style.css' %}">
-    <style>
-        .notif-page {
-            max-width: 720px;
-            margin: 24px auto;
-            padding: 0 16px;
-        }
-        .notif-page h1 {
-            font-size: 1.4rem;
-            margin-bottom: 16px;
-            color: #1a1a2e;
-        }
-        .notif-toolbar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 14px;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-        .notif-toolbar .filters {
-            display: flex;
-            gap: 8px;
-        }
-        .notif-toolbar a {
-            padding: 6px 14px;
-            border-radius: 50px;
-            background: #f0f2f5;
-            color: #444;
-            text-decoration: none;
-            font-size: 0.85rem;
-            font-weight: 600;
-        }
-        .notif-toolbar a.active { background: #1a1a2e; color: white; }
-        .notif-toolbar .btn-mark-all {
-            background: none;
-            border: none;
-            color: #3498db;
-            cursor: pointer;
-            font-size: 0.85rem;
-            font-weight: 600;
-            font-family: inherit;
-        }
-        .notif-card {
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-            overflow: hidden;
-        }
-        .notif-form { display: block; }
-        .notif-row {
-            display: block;
-            width: 100%;
-            text-align: left;
-            padding: 14px 18px;
-            border: none;
-            border-bottom: 1px solid #f5f5f5;
-            background: white;
-            cursor: pointer;
-            font-family: inherit;
-            transition: background 0.2s;
-        }
-        .notif-row:hover { background: #f8f9fa; }
-        .notif-row.unread {
-            background: #eaf2f8;
-            border-left: 4px solid #3498db;
-        }
-        .notif-row-title {
-            font-weight: 700;
-            color: #1a1a2e;
-            font-size: 0.95rem;
-            margin-bottom: 3px;
-        }
-        .notif-row-msg {
-            color: #555;
-            font-size: 0.88rem;
-            margin-bottom: 4px;
-        }
-        .notif-row-time {
-            color: #95a5a6;
-            font-size: 0.75rem;
-        }
-        .notif-empty-page {
-            text-align: center;
-            padding: 60px 20px;
-            background: white;
-            border-radius: 12px;
-            color: #95a5a6;
-        }
-        .notif-empty-page .icon { font-size: 3rem; display: block; margin-bottom: 10px; }
-    </style>
-</head>
-<body>
-    <header>
-        <div class="container">
-            <h1>🛒 Mi Marketplace</h1>
-            <nav>
-                <a href="/">🏠 Inicio</a>
-                <a href="/stores/">📦 Comercios</a>
-                <a href="{% url 'cart:view' %}" class="header-cart-link"><span class="cart-icon-text">🛒 Carrito</span><span class="cart-count-badge" {% if not cart_count %}style="display:none;"{% endif %}>{{ cart_count|default:0 }}</span></a>
-                {% if user.is_authenticated and user.is_staff %}
-                    <a href="/admin/">⚙️ Admin</a>
-                {% endif %}
-                {% if user.is_superuser %}
-                    <a href="{% url 'orders:superuser_orders' %}">📋 Panel</a>
-                {% endif %}
-            </nav>
-        </div>
-    </header>
 
-    <main>
-        <div class="notif-page">
+{% block title %}Notificaciones - Mi Marketplace{% endblock %}
+
+{% block extra_head %}
+<style>
+    /* ============================================================
+       NOTIFICACIONES - Ultra compacto
+       ============================================================ */
+    .notif-page {
+        max-width: 560px;
+        margin: 12px auto;
+        padding: 0 12px;
+    }
+    .notif-page h1 {
+        font-size: 1rem;
+        margin: 0 0 10px;
+        color: #1a1a2e;
+        font-weight: 700;
+    }
+    .notif-toolbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 8px;
+        flex-wrap: wrap;
+        gap: 6px;
+    }
+    .notif-toolbar .filters {
+        display: flex;
+        gap: 5px;
+    }
+    .notif-toolbar a {
+        padding: 4px 10px;
+        border-radius: 50px;
+        background: #f0f2f5;
+        color: #444;
+        text-decoration: none;
+        font-size: 0.72rem;
+        font-weight: 600;
+        transition: background 0.15s, color 0.15s;
+    }
+    .notif-toolbar a:hover {
+        background: #e2e6ea;
+    }
+    .notif-toolbar a.active {
+        background: #1a1a2e;
+        color: white;
+    }
+    .notif-toolbar .btn-mark-all {
+        background: none;
+        border: none;
+        color: #3498db;
+        cursor: pointer;
+        font-size: 0.72rem;
+        font-weight: 600;
+        font-family: inherit;
+        padding: 0;
+    }
+    .notif-toolbar .btn-mark-all:hover {
+        text-decoration: underline;
+    }
+    .notif-card {
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+        overflow: hidden;
+    }
+    .notif-form { display: block; margin: 0; }
+    .notif-row {
+        display: block;
+        width: 100%;
+        text-align: left;
+        padding: 8px 12px;
+        border: none;
+        border-bottom: 1px solid #f5f5f5;
+        background: white;
+        cursor: pointer;
+        font-family: inherit;
+        transition: background 0.15s;
+    }
+    .notif-form:last-child .notif-row {
+        border-bottom: none;
+    }
+    .notif-row:hover { background: #f8f9fa; }
+    .notif-row.unread {
+        background: #eaf2f8;
+        border-left: 3px solid #3498db;
+        padding-left: 9px;
+    }
+    .notif-row.unread:hover {
+        background: #e0eaf2;
+    }
+    .notif-row-title {
+        font-weight: 700;
+        color: #1a1a2e;
+        font-size: 0.78rem;
+        margin-bottom: 1px;
+        line-height: 1.2;
+    }
+    .notif-row-msg {
+        color: #666;
+        font-size: 0.72rem;
+        margin-bottom: 2px;
+        line-height: 1.25;
+        display: -webkit-box;
+        -webkit-line-clamp: 1;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+    .notif-row-time {
+        color: #95a5a6;
+        font-size: 0.62rem;
+    }
+    .notif-empty-page {
+        text-align: center;
+        padding: 30px 16px;
+        background: white;
+        border-radius: 8px;
+        color: #95a5a6;
+    }
+    .notif-empty-page .icon { font-size: 2rem; display: block; margin-bottom: 6px; }
+    .notif-empty-page p { margin: 0 0 8px; font-size: 0.82rem; }
+
+    @media (max-width: 480px) {
+        .notif-page { margin: 8px auto; padding: 0 8px; }
+        .notif-page h1 { font-size: 0.95rem; margin-bottom: 8px; }
+        .notif-row { padding: 7px 10px; }
+        .notif-row.unread { padding-left: 7px; }
+        .notif-row-title { font-size: 0.74rem; }
+        .notif-row-msg { font-size: 0.68rem; }
+        .notif-row-time { font-size: 0.6rem; }
+        .notif-toolbar a { padding: 3px 9px; font-size: 0.68rem; }
+        .notif-toolbar .btn-mark-all { font-size: 0.68rem; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="notif-page">
             <h1>🔔 Notificaciones</h1>
 
             <div class="notif-toolbar">
@@ -155,8 +177,4 @@
                 </div>
             {% endif %}
         </div>
-    </main>
-    <script src="{% static 'js/notifications.js' %}"></script>
-    <script src="/static/js/email-verify-banner.js"></script>
-</body>
-</html>
+{% endblock %}

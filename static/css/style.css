@@ -3839,3 +3839,112 @@ header .container.header-container {
         height: 110px;
     }
 }
+
+/* ============================================================
+   NOTIF DROPDOWN COMPACT - Reducir tamano del dropdown de campana
+   ============================================================ */
+
+/* === DESKTOP: dropdown mas chico === */
+@media (min-width: 769px) {
+    .notif-dropdown {
+        width: 260px !important;
+        border-radius: 10px !important;
+    }
+    .notif-dropdown-header {
+        padding: 8px 12px !important;
+    }
+    .notif-dropdown-header strong {
+        font-size: 0.82rem !important;
+    }
+    .notif-mark-all {
+        font-size: 0.68rem !important;
+    }
+    .notif-list {
+        max-height: 220px !important;
+    }
+    .notif-item {
+        padding: 7px 12px !important;
+    }
+    .notif-item-title {
+        font-size: 0.78rem !important;
+        margin-bottom: 1px !important;
+    }
+    .notif-item-msg {
+        font-size: 0.68rem !important;
+        margin-bottom: 2px !important;
+        line-height: 1.25 !important;
+        display: -webkit-box !important;
+        -webkit-line-clamp: 1 !important;
+        -webkit-box-orient: vertical !important;
+        overflow: hidden !important;
+    }
+    .notif-item-time {
+        font-size: 0.62rem !important;
+    }
+    .notif-dropdown-footer {
+        padding: 7px 12px !important;
+    }
+    .notif-dropdown-footer a {
+        font-size: 0.72rem !important;
+    }
+    .notif-empty {
+        padding: 20px 14px !important;
+        font-size: 0.78rem !important;
+    }
+    .notif-empty .icon {
+        font-size: 1.6rem !important;
+        margin-bottom: 4px !important;
+    }
+    .notif-loading {
+        padding: 16px !important;
+        font-size: 0.78rem !important;
+    }
+}
+
+/* === MOBILE: dropdown mas chico (no ocupa toda la pantalla) === */
+@media (max-width: 768px) {
+    .notif-dropdown {
+        position: fixed !important;
+        top: 70px !important;
+        left: auto !important;
+        right: 10px !important;
+        width: 280px !important;
+        max-width: calc(100vw - 20px) !important;
+        max-height: calc(100vh - 100px) !important;
+        border-radius: 10px !important;
+    }
+    .notif-list {
+        max-height: 240px !important;
+    }
+    .notif-dropdown-header {
+        padding: 8px 12px !important;
+    }
+    .notif-dropdown-header strong {
+        font-size: 0.8rem !important;
+    }
+    .notif-mark-all {
+        font-size: 0.66rem !important;
+    }
+    .notif-item {
+        padding: 7px 12px !important;
+    }
+    .notif-item-title {
+        font-size: 0.78rem !important;
+    }
+    .notif-item-msg {
+        font-size: 0.68rem !important;
+        display: -webkit-box !important;
+        -webkit-line-clamp: 1 !important;
+        -webkit-box-orient: vertical !important;
+        overflow: hidden !important;
+    }
+    .notif-item-time {
+        font-size: 0.62rem !important;
+    }
+    .notif-dropdown-footer {
+        padding: 7px 12px !important;
+    }
+    .notif-dropdown-footer a {
+        font-size: 0.72rem !important;
+    }
+}

@@ -1,13 +1,11 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mis pedidos - Mi Marketplace</title>
-    {% load static %}
-    <link rel="stylesheet" href="{% static 'css/style.css' %}">
-    <style>
-        .orders-wrapper {
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Mis pedidos - Mi Marketplace{% endblock %}
+
+{% block extra_head %}
+<style>
+.orders-wrapper {
             max-width: 800px;
             margin: 24px auto;
         }
@@ -80,21 +78,11 @@
             text-decoration: none;
             font-weight: 600;
         }
-    </style>
-</head>
-<body>
-    <header>
-        <div class="container">
-            <h1>🛒 Mi Marketplace</h1>
-            <nav>
-                <a href="/">🏠 Inicio</a>
-                <a href="{% url 'cart:view' %}" class="header-cart-link"><span class="cart-icon-text">🛒 Carrito</span><span class="cart-count-badge" {% if not cart_count %}style="display:none;"{% endif %}>{{ cart_count|default:0 }}</span></a>
-                <span style="color: rgba(255,255,255,0.7); margin: 0 10px;">👤 {{ user.username }}</span>
-            </nav>
-        </div>
-    </header>
+</style>
+{% endblock %}
 
-    <main>
+{% block content %}
+<main>
         <div class="container">
             <div class="orders-wrapper">
                 <h2 class="page-title">📋 Mis pedidos</h2>
@@ -124,5 +112,4 @@
     </main>
     <script src="{% static 'js/notifications.js' %}"></script>
     <script src="/static/js/email-verify-banner.js"></script>
-</body>
-</html>
+{% endblock %}
