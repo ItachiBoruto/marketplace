@@ -16,6 +16,26 @@ def get_or_create_cart(request):
 
 
 
+def _safe_referer_redirect(request, fallback="cart:view"):
+    """
+    Redirige al referer SOLO si es seguro.
+
+    Evita el loop tipico cuando un usuario anonimo hace add-to-cart:
+      1. /cart/add/X/ -> @login_required -> /accounts/login/?next=/cart/add/X/
+      2. Usuario se loguea -> Django lo manda de vuelta a /cart/add/X/
+      3. add_to_cart corre, agrega el item, y redirige al HTTP_REFERER
+      4. HTTP_REFERER es la pagina de login -> LOOP + duplicados
+
+    Si el referer apunta al login, mandamos al carrito en su lugar.
+    """
+    referer = request.META.get("HTTP_REFERER", "")
+    if not referer:
+        return redirect(fallback)
+    if "login" in referer.lower():
+        return redirect(fallback)
+    return redirect(referer)
+
+
 @login_required(login_url='login')
 def add_to_cart(request, product_id):
     is_ajax = (
@@ -35,7 +55,7 @@ def add_to_cart(request, product_id):
                 'cart_count': cart.get_total_items(),
             }, status=400)
         messages.error(request, f'"{product.name}" no está disponible en stock.')
-        return redirect(request.META.get('HTTP_REFERER', '/'))
+        return _safe_referer_redirect(request)
 
     cart_item, created = CartItem.objects.get_or_create(
         cart=cart,
@@ -53,7 +73,7 @@ def add_to_cart(request, product_id):
                     'cart_count': cart.get_total_items(),
                 }, status=400)
             messages.warning(request, f'No hay suficiente stock de "{product.name}". Disponibles: {product.stock}.')
-            return redirect(request.META.get('HTTP_REFERER', '/'))
+            return _safe_referer_redirect(request)
         cart_item.quantity += 1
         cart_item.save()
 
@@ -68,7 +88,7 @@ def add_to_cart(request, product_id):
         })
 
     messages.success(request, f'"{product.name}" agregado al carrito.')
-    return redirect(request.META.get('HTTP_REFERER', '/'))
+    return _safe_referer_redirect(request)
 
 
 @login_required(login_url='login')
