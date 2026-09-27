@@ -1,53 +1,52 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pedido {{ order.reference_code }} - Mi Marketplace</title>
-    {% load static %}
-    {% load exchange_filters %}
-    <link rel="stylesheet" href="{% static 'css/style.css' %}">
-    <style>
-        .detail-wrapper { max-width: 700px; margin: 24px auto; padding: 0 16px; }
+{% extends "base.html" %}
+{% load static %}
+{% load exchange_filters %}
+
+{% block title %}Pedido {{ order.reference_code }} - Mi Marketplace{% endblock %}
+
+{% block extra_head %}
+<style>
+        /* detail-wrapper ya no suma padding: el .container de base.html lo aporta */
+        .detail-wrapper { max-width: 640px; margin: 12px auto 24px; padding: 0; }
         .detail-card {
-            background: white; padding: 20px; border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.08); margin-bottom: 16px;
+            background: white; padding: 14px 16px; border-radius: 10px;
+            box-shadow: 0 3px 14px rgba(0,0,0,0.07); margin-bottom: 10px;
         }
         .detail-card h2 {
-            margin: 0 0 14px; font-size: 1.1rem; color: #1a1a2e;
-            display: flex; align-items: center; gap: 8px;
+            margin: 0 0 10px; font-size: 1rem; color: #1a1a2e;
+            display: flex; align-items: center; gap: 6px;
         }
         .detail-row {
-            display: flex; justify-content: space-between; padding: 8px 0;
-            font-size: 0.92rem; border-bottom: 1px solid #f0f0f0;
+            display: flex; justify-content: space-between; padding: 5px 0;
+            font-size: 0.88rem; border-bottom: 1px solid #f0f0f0;
         }
         .detail-row:last-child { border-bottom: none; }
         .detail-row .label { color: #7f8c8d; }
         .detail-row .value { font-weight: 600; color: #2c3e50; text-align: right; }
         .item-row {
-            display: flex; justify-content: space-between; padding: 10px 0;
-            border-bottom: 1px solid #f0f0f0; font-size: 0.92rem;
+            display: flex; justify-content: space-between; padding: 7px 0;
+            border-bottom: 1px solid #f0f0f0; font-size: 0.88rem;
         }
         .item-row:last-child { border-bottom: none; }
-        .item-row .store { font-size: 0.78rem; color: #7f8c8d; display: block; }
-        .totals-block { margin-top: 12px; padding-top: 12px; border-top: 2px solid #e94560; }
+        .item-row .store { font-size: 0.74rem; color: #7f8c8d; display: block; margin-top: 2px; }
+        .totals-block { margin-top: 8px; padding-top: 8px; border-top: 2px solid #e94560; }
         .total-line {
-            display: flex; justify-content: space-between; padding: 4px 0;
-            font-size: 1.1rem; font-weight: 700; color: #e94560;
+            display: flex; justify-content: space-between; padding: 3px 0;
+            font-size: 1.05rem; font-weight: 700; color: #e94560;
         }
         .subtotal-line {
-            display: flex; justify-content: space-between; padding: 4px 0;
-            font-size: 0.92rem; color: #555;
+            display: flex; justify-content: space-between; padding: 3px 0;
+            font-size: 0.88rem; color: #555;
         }
         .subtotal-line.total-bs {
-            font-size: 0.9rem; color: #2c3e50; font-weight: 600;
+            font-size: 0.86rem; color: #2c3e50; font-weight: 600;
         }
         .rate-note-detail {
-            font-size: 0.75rem; color: #7f8c8d; text-align: right; margin: 4px 0 0;
+            font-size: 0.72rem; color: #7f8c8d; text-align: right; margin: 3px 0 0;
         }
         .status-badge {
-            display: inline-block; padding: 4px 14px; border-radius: 20px;
-            font-size: 0.85rem; font-weight: 600;
+            display: inline-block; padding: 3px 11px; border-radius: 16px;
+            font-size: 0.8rem; font-weight: 600;
         }
         .status-pending_payment { background: #fff3cd; color: #856404; }
         .status-payment_submitted { background: #cce5ff; color: #004085; }
@@ -57,41 +56,29 @@
         .status-cancelled { background: #f8d7da; color: #721c24; }
         .status-expired { background: #e2e3e5; color: #383d41; }
         .proof-image {
-            max-width: 100%; max-height: 300px; border-radius: 8px; margin-top: 8px;
+            max-width: 100%; max-height: 240px; border-radius: 8px; margin-top: 6px;
         }
         .btn-back {
-            display: inline-block; margin-bottom: 12px; color: #6c757d;
-            text-decoration: none; font-size: 0.9rem;
+            display: inline-block; margin-bottom: 8px; color: #6c757d;
+            text-decoration: none; font-size: 0.86rem;
         }
-        /* Delivery badge */
         .shipping-badge {
-            display: inline-flex; align-items: center; gap: 6px;
-            padding: 6px 14px; border-radius: 20px;
-            font-size: 0.85rem; font-weight: 600; margin-bottom: 12px;
+            display: inline-flex; align-items: center; gap: 5px;
+            padding: 4px 11px; border-radius: 16px;
+            font-size: 0.82rem; font-weight: 600; margin-bottom: 8px;
         }
         .shipping-pickup { background: #eaf2f8; color: #21618c; }
         .shipping-delivery { background: #fef5e7; color: #b9770e; }
         .address-box {
-            background: #f8f9fa; padding: 12px 14px; border-radius: 8px;
-            font-size: 0.9rem; color: #2c3e50; line-height: 1.5;
+            background: #f8f9fa; padding: 9px 12px; border-radius: 6px;
+            font-size: 0.86rem; color: #2c3e50; line-height: 1.45;
             border-left: 3px solid #f39c12;
         }
-    </style>
-</head>
-<body>
-    <header>
-        <div class="container">
-            <h1>🛒 Mi Marketplace</h1>
-            <nav>
-                <a href="/">🏠 Inicio</a>
-                <a href="{% url 'orders:list' %}">📋 Mis pedidos</a>
-                <span style="color: rgba(255,255,255,0.7); margin: 0 10px;">👤 {{ user.username }}</span>
-            </nav>
-        </div>
-    </header>
+        </style>
+{% endblock %}
 
-    <main>
-        <div class="container">
+{% block content %}
+<div class="container">
             <div class="detail-wrapper">
                 <a href="{% url 'orders:list' %}" class="btn-back">← Volver a mis pedidos</a>
 
@@ -222,7 +209,4 @@
                 </div>
             </div>
         </div>
-    </main>
-    <script src="/static/js/email-verify-banner.js"></script>
-</body>
-</html>
+{% endblock %}
