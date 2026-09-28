@@ -1,9 +1,10 @@
-{% load static %}<!DOCTYPE html>
+{% load static %}{% load pwa %}<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Mi Marketplace{% endblock %}</title>
+    {% progressive_web_app_meta %}
     {% include 'partials/_meta_tags.html' %}
     <link rel="stylesheet" href="{% static 'css/style.css' %}?v=10">
     {% block extra_head %}{% endblock %}

@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Sin conexion - Mi Marketplace{% endblock %}
+
+{% block content %}
+<main>
+    <div style="max-width: 500px; margin: 60px auto; padding: 0 20px; text-align: center;">
+        <div style="font-size: 4rem; margin-bottom: 16px;">📡</div>
+        <h1 style="font-size: 1.6rem; color: #1a1a2e; margin: 0 0 12px;">
+            Sin conexion
+        </h1>
+        <p style="color: #555; font-size: 1rem; line-height: 1.6; margin: 0 0 24px;">
+            Parece que no tienes internet. Revisa tu conexion y vuelve a intentarlo.
+        </p>
+        <a href="/" style="
+            display: inline-block;
+            padding: 12px 28px;
+            background: #e94560;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+        ">Reintentar</a>
+    </div>
+</main>
+{% endblock %}

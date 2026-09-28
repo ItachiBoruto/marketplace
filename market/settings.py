@@ -60,6 +60,8 @@ INSTALLED_APPS = [
     'axes',
 
     # Nuestras apps
+        'pwa',
+    'pwa_custom',
     'apps.accounts',
     'apps.stores',
     'apps.products',
@@ -333,3 +335,29 @@ REST_FRAMEWORK = {
         'catalog': '30/min',
     },
 }
+
+
+# ============================================================
+# PWA (Progressive Web App) - django-pwa
+# ============================================================
+PWA_APP_NAME = 'Mi Marketplace'
+PWA_APP_DESCRIPTION = 'El marketplace de los comercios venezolanos'
+PWA_APP_THEME_COLOR = '#1a1a2e'
+PWA_APP_BACKGROUND_COLOR = '#ffffff'
+PWA_APP_DISPLAY = 'standalone'
+PWA_APP_SCOPE = '/'
+PWA_APP_ORIENTATION = 'any'
+PWA_APP_START_URL = '/'
+PWA_APP_STATUS_BAR_COLOR = 'default'
+PWA_APP_ICONS = [
+    {'src': '/static/img/icons/icon-192x192.png', 'sizes': '192x192'},
+    {'src': '/static/img/icons/icon-512x512.png', 'sizes': '512x512'},
+]
+PWA_APP_ICONS_APPLE = [
+    {'src': '/static/img/apple-touch-icon.png', 'sizes': '180x180'},
+]
+PWA_APP_DIR = 'ltr'
+PWA_APP_LANG = 'es-VE'
+
+import os
+PWA_SERVICE_WORKER_PATH = os.path.join(BASE_DIR, 'static/js/sw.js')

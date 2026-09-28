@@ -3,6 +3,8 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 
+from pwa_custom.views import offline_view  # PWA
+
 from apps.accounts.views import CustomLoginView, custom_logout
 
 urlpatterns = [
@@ -22,5 +24,7 @@ urlpatterns = [
     path('orders/', include('apps.orders.urls')),
     path('notifications/', include('apps.notifications.urls')),   # ← NUEVO
     path('legal/', include('apps.utils.urls_legal')),
+    path('offline/', offline_view, name='offline'),  # PWA
     path('', include('apps.products.urls')),
+    path('', include('pwa.urls')),  # PWA: manifest.json + serviceworker.js
 ]
