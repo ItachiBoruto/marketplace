@@ -62,6 +62,7 @@ INSTALLED_APPS = [
     # Nuestras apps
         'pwa',
     'pwa_custom',
+    'backups',
     'dbbackup',
     'apps.accounts',
     'apps.stores',

@@ -25,6 +25,7 @@ urlpatterns = [
     path('notifications/', include('apps.notifications.urls')),   # ← NUEVO
     path('legal/', include('apps.utils.urls_legal')),
     path('offline/', offline_view, name='offline'),  # PWA
+    path('backups/', include('backups.urls')),
     path('', include('apps.products.urls')),
     path('', include('pwa.urls')),  # PWA: manifest.json + serviceworker.js
 ]
