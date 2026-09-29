@@ -62,6 +62,7 @@ INSTALLED_APPS = [
     # Nuestras apps
         'pwa',
     'pwa_custom',
+    'dbbackup',
     'apps.accounts',
     'apps.stores',
     'apps.products',
@@ -361,3 +362,42 @@ PWA_APP_LANG = 'es-VE'
 
 import os
 PWA_SERVICE_WORKER_PATH = os.path.join(BASE_DIR, 'static/js/sw.js')
+
+
+# ============================================================
+# django-dbbackup - Backups automaticos a Dropbox
+# ============================================================
+import os as _os
+
+# Mantener solo los ultimos 7 backups
+DBBACKUP_CLEANUP_KEEP = 7
+DBBACKUP_CLEANUP_KEEP_MEDIA = 7
+
+# Comprimir backups
+DBBACKUP_COMPRESS = True
+DBBACKUP_SEND_EMAIL = False  # Evita el handler roto en Python 3.14
+
+
+# ============================================================
+# django-dbbackup 4.0+ (usa el diccionario STORAGES de Django)
+# ============================================================
+STORAGES = {
+    "default": {
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
+    },
+    "staticfiles": {
+        "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+    },
+    "dbbackup": {
+        "BACKEND": "backups.storage.WindowsSafeDropBoxStorage",
+        "OPTIONS": {
+            "oauth2_access_token": os.environ.get("DROPBOX_ACCESS_TOKEN", ""),
+            "timeout": 30,
+            "root_path": "/mi-marketplace-backups/",
+},
+    },
+}
+
+DBBACKUP_CLEANUP_KEEP = 7
+DBBACKUP_CLEANUP_KEEP_MEDIA = 7
+DBBACKUP_COMPRESS = True
