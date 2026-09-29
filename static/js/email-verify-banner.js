@@ -4,6 +4,9 @@
 (function () {
     'use strict';
 
+    // No hacer nada si el usuario es anonimo (evita 302 a login).
+    if (!window.USER_AUTHENTICATED) return;
+
     function escHtml(s) {
         return String(s || '').replace(/[&<>"']/g, function (c) {
             return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];

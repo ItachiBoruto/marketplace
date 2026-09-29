@@ -190,9 +190,17 @@ def resend_verification(request):
 # ============================================================
 # Endpoint de estado (para el banner)
 # ============================================================
-@login_required(login_url="login")
 def verification_status(request):
+    """
+    Devuelve el estado de verificacion de email del usuario.
+
+    Para usuarios anonimos responde neutral SIN pedir login, para
+    evitar el loop /accounts/verification-status/ -> /accounts/login/?next=...
+    que generaba 302 + ruido en Sentry.
+    """
     from django.http import JsonResponse
+    if not request.user.is_authenticated:
+        return JsonResponse({"verified": False, "has_email": False})
     profile, _ = UserProfile.objects.get_or_create(user=request.user)
     return JsonResponse({
         "verified": profile.email_verified,
