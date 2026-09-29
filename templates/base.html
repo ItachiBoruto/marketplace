@@ -79,7 +79,8 @@
         }
     })();
     </script>
-    <script src="{% static 'js/notifications.js' %}"></script>
+    <script>window.USER_AUTHENTICATED = {% if user.is_authenticated %}true{% else %}false{% endif %};</script>
+<script src="{% static 'js/notifications.js' %}"></script>
     <script src="/static/js/email-verify-banner.js"></script>
     {% block extra_js %}{% endblock %}
 </body>

@@ -7,9 +7,15 @@ from django.views.decorators.http import require_POST
 from .models import Notification
 
 
-@login_required(login_url="login")
 def dropdown(request):
-    """HTML parcial con las ultimas notificaciones (para el dropdown del header)."""
+    """
+    HTML parcial con las ultimas notificaciones (para el dropdown del header).
+
+    Para usuarios anonimos devuelve un dropdown vacio (sin pedir login),
+    por la misma razon que unread_count.
+    """
+    if not request.user.is_authenticated:
+        return JsonResponse({"html": "", "unread_count": 0})
     # Sin leer primero, luego las leidas, cada grupo por fecha descendente
     notifications = request.user.notifications.order_by('is_read', '-created_at')[:8]
     unread = request.user.notifications.filter(is_read=False).count()
@@ -21,9 +27,16 @@ def dropdown(request):
     return JsonResponse({"html": html, "unread_count": unread})
 
 
-@login_required(login_url="login")
 def unread_count(request):
-    """Devuelve solo el numero de notificaciones sin leer."""
+    """
+    Devuelve solo el numero de notificaciones sin leer.
+
+    Para usuarios anonimos responde 0 SIN pedir login, para evitar
+    el loop /notifications/unread-count/ -> /accounts/login/?next=...
+    que generaba 302 + ruido en Sentry.
+    """
+    if not request.user.is_authenticated:
+        return JsonResponse({"unread_count": 0})
     count = request.user.notifications.filter(is_read=False).count()
     return JsonResponse({"unread_count": count})
 
