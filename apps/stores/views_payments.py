@@ -174,18 +174,39 @@ def approve_payment_request(request, request_id):
     req = get_object_or_404(StorePaymentChangeRequest, id=request_id, status='pending')
     store = req.store
 
-    # Aplicar los cambios al Store
-    store.bank_name = req.new_bank_name or ''
-    store.account_number = req.new_account_number or ''
-    store.account_holder = req.new_account_holder or ''
-    store.document = req.new_document or ''
-    store.mobile_payment_bank = req.new_mobile_payment_bank or ''
-    store.mobile_document = req.new_mobile_document or ''
-    store.payment_phone = req.new_payment_phone or ''
-    store.save(update_fields=[
-        'bank_name', 'account_number', 'account_holder', 'document',
-        'mobile_payment_bank', 'mobile_document', 'payment_phone'
-    ])
+    # Aplicar los cambios al Store segun la region
+    region = (store.payment_region or 'VE').upper()
+
+    if region == 'MX':
+        # ===== Aplicar campos MX =====
+        store.mx_accepts_spei = req.new_mx_accepts_spei
+        store.mx_spei_clabe = req.new_mx_spei_clabe or ''
+        store.mx_spei_holder = req.new_mx_spei_holder or ''
+        store.mx_spei_bank = req.new_mx_spei_bank or ''
+        store.mx_accepts_mercadopago = req.new_mx_accepts_mercadopago
+        store.mx_mercadopago_alias = req.new_mx_mercadopago_alias or ''
+        store.mx_accepts_paypal = req.new_mx_accepts_paypal
+        store.mx_paypal_email = req.new_mx_paypal_email or ''
+        store.mx_payment_notes = req.new_mx_payment_notes or ''
+        store.save(update_fields=[
+            'mx_accepts_spei', 'mx_spei_clabe', 'mx_spei_holder', 'mx_spei_bank',
+            'mx_accepts_mercadopago', 'mx_mercadopago_alias',
+            'mx_accepts_paypal', 'mx_paypal_email',
+            'mx_payment_notes',
+        ])
+    else:
+        # ===== Aplicar campos VE (comportamiento original) =====
+        store.bank_name = req.new_bank_name or ''
+        store.account_number = req.new_account_number or ''
+        store.account_holder = req.new_account_holder or ''
+        store.document = req.new_document or ''
+        store.mobile_payment_bank = req.new_mobile_payment_bank or ''
+        store.mobile_document = req.new_mobile_document or ''
+        store.payment_phone = req.new_payment_phone or ''
+        store.save(update_fields=[
+            'bank_name', 'account_number', 'account_holder', 'document',
+            'mobile_payment_bank', 'mobile_document', 'payment_phone'
+        ])
 
     # Marcar la solicitud como aprobada
     req.status = 'approved'
@@ -194,17 +215,19 @@ def approve_payment_request(request, request_id):
     req.save(update_fields=['status', 'reviewed_by', 'reviewed_at'])
 
     # Notificar al owner
+    tipo_label = 'SPEI / Mercado Pago / PayPal' if region == 'MX' else 'bancarios'
     notify(
         req.requested_by,
         'system',
-        f'✅ Cambio bancario aprobado - {store.name}',
-        'Los nuevos datos bancarios ya están activos.',
+        f'✅ Cambio {tipo_label} aprobado - {store.name}',
+        f'Los nuevos datos {tipo_label} ya están activos.',
         link=f'/stores/dashboard/{store.id}/payment-change/status/'
     )
 
+    tipo = 'SPEI / Mercado Pago / PayPal' if region == 'MX' else 'bancarios'
     messages.success(
         request,
-        f'Solicitud #{req.pk} aprobada. Los datos bancarios de {store.name} fueron actualizados.'
+        f'Solicitud #{req.pk} aprobada. Los datos {tipo} de {store.name} fueron actualizados.'
     )
     return redirect('orders:payment_requests')
 
