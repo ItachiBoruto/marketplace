@@ -256,6 +256,19 @@
         }
 
         // === CARGA INICIAL ===
-        loadStoreProducts(1, '', '');
+        // Si Django ya renderizo productos en el HTML, NO los reemplazamos.
+        // Solo cargamos via API si el grid esta vacio (evita race condition
+        // que cancelaba las descargas de imagenes en curso).
+        var cardsIniciales = productGrid.querySelectorAll('.variant-card').length;
+        if (cardsIniciales === 0) {
+            loadStoreProducts(1, '', '');
+        } else {
+            // Ya hay productos server-side; el scroll infinito arranca desde
+            // la pagina 1 pero NO tocamos el grid actual. Se activara cuando
+            // el observer detecte que el usuario llego al final.
+            currentPage = 1;
+            hasMore = true;
+            loading.style.display = 'none';
+        }
     });
 })();
