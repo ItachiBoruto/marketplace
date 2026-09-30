@@ -222,6 +222,71 @@
                                 </tr>
                             </thead>
                             <tbody>
+                                {% if req.store.payment_region == 'MX' %}
+                                    {% if req.new_mx_accepts_spei != req.old_mx_accepts_spei %}
+                                        <tr>
+                                            <td><strong>SPEI activado</strong></td>
+                                            <td class="old">{% if req.old_mx_accepts_spei %}Sí{% else %}No{% endif %}</td>
+                                            <td class="new">{% if req.new_mx_accepts_spei %}Sí{% else %}No{% endif %}</td>
+                                        </tr>
+                                    {% endif %}
+                                    {% if req.new_mx_spei_clabe != req.old_mx_spei_clabe %}
+                                        <tr>
+                                            <td><strong>CLABE</strong></td>
+                                            <td class="old">{{ req.old_mx_spei_clabe|default:"—" }}</td>
+                                            <td class="new">{{ req.new_mx_spei_clabe }}</td>
+                                        </tr>
+                                    {% endif %}
+                                    {% if req.new_mx_spei_holder != req.old_mx_spei_holder %}
+                                        <tr>
+                                            <td><strong>Titular CLABE</strong></td>
+                                            <td class="old">{{ req.old_mx_spei_holder|default:"—" }}</td>
+                                            <td class="new">{{ req.new_mx_spei_holder }}</td>
+                                        </tr>
+                                    {% endif %}
+                                    {% if req.new_mx_spei_bank != req.old_mx_spei_bank %}
+                                        <tr>
+                                            <td><strong>Banco SPEI</strong></td>
+                                            <td class="old">{{ req.old_mx_spei_bank|default:"—" }}</td>
+                                            <td class="new">{{ req.new_mx_spei_bank }}</td>
+                                        </tr>
+                                    {% endif %}
+                                    {% if req.new_mx_accepts_mercadopago != req.old_mx_accepts_mercadopago %}
+                                        <tr>
+                                            <td><strong>Mercado Pago activado</strong></td>
+                                            <td class="old">{% if req.old_mx_accepts_mercadopago %}Sí{% else %}No{% endif %}</td>
+                                            <td class="new">{% if req.new_mx_accepts_mercadopago %}Sí{% else %}No{% endif %}</td>
+                                        </tr>
+                                    {% endif %}
+                                    {% if req.new_mx_mercadopago_alias != req.old_mx_mercadopago_alias %}
+                                        <tr>
+                                            <td><strong>Alias / CVU Mercado Pago</strong></td>
+                                            <td class="old">{{ req.old_mx_mercadopago_alias|default:"—" }}</td>
+                                            <td class="new">{{ req.new_mx_mercadopago_alias }}</td>
+                                        </tr>
+                                    {% endif %}
+                                    {% if req.new_mx_accepts_paypal != req.old_mx_accepts_paypal %}
+                                        <tr>
+                                            <td><strong>PayPal activado</strong></td>
+                                            <td class="old">{% if req.old_mx_accepts_paypal %}Sí{% else %}No{% endif %}</td>
+                                            <td class="new">{% if req.new_mx_accepts_paypal %}Sí{% else %}No{% endif %}</td>
+                                        </tr>
+                                    {% endif %}
+                                    {% if req.new_mx_paypal_email != req.old_mx_paypal_email %}
+                                        <tr>
+                                            <td><strong>Email PayPal</strong></td>
+                                            <td class="old">{{ req.old_mx_paypal_email|default:"—" }}</td>
+                                            <td class="new">{{ req.new_mx_paypal_email }}</td>
+                                        </tr>
+                                    {% endif %}
+                                    {% if req.new_mx_payment_notes != req.old_mx_payment_notes %}
+                                        <tr>
+                                            <td><strong>Notas MX</strong></td>
+                                            <td class="old">{{ req.old_mx_payment_notes|default:"—" }}</td>
+                                            <td class="new">{{ req.new_mx_payment_notes }}</td>
+                                        </tr>
+                                    {% endif %}
+                                {% else %}
                                 {% if req.new_bank_name != req.old_bank_name %}
                                     <tr>
                                         <td><strong>Banco</strong></td>
@@ -256,6 +321,7 @@
                                         <td class="old">{{ req.old_payment_phone|default:"—" }}</td>
                                         <td class="new">{{ req.new_payment_phone }}</td>
                                     </tr>
+                                {% endif %}
                                 {% endif %}
                             </tbody>
                         </table>

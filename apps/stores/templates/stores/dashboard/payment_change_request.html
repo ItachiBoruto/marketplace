@@ -219,7 +219,7 @@
                 </label>
             </label>
 
-            <div id="mxSpeiFieldsBlock" style="{% if not form.new_mx_accepts_spei.value %}display:none;{% endif %}margin-top:14px;">
+            <div id="mxSpeiFieldsBlock" style="{% if not form.new_mx_accepts_spei.value and not form.new_mx_spei_clabe.errors and not form.new_mx_spei_holder.errors and not form.new_mx_spei_bank.errors %}display:none;{% endif %}margin-top:14px;">
                 <div class="form-row">
                     <label for="{{ form.new_mx_spei_clabe.id_for_label }}">{{ form.new_mx_spei_clabe.label }}</label>
                     {{ form.new_mx_spei_clabe }}
@@ -252,7 +252,7 @@
                 </label>
             </label>
 
-            <div id="mxMpFieldsBlock" style="{% if not form.new_mx_accepts_mercadopago.value %}display:none;{% endif %}margin-top:14px;">
+            <div id="mxMpFieldsBlock" style="{% if not form.new_mx_accepts_mercadopago.value and not form.new_mx_mercadopago_alias.errors %}display:none;{% endif %}margin-top:14px;">
                 <div class="form-row">
                     <label for="{{ form.new_mx_mercadopago_alias.id_for_label }}">{{ form.new_mx_mercadopago_alias.label }}</label>
                     {{ form.new_mx_mercadopago_alias }}
@@ -275,7 +275,7 @@
                 </label>
             </label>
 
-            <div id="mxPpFieldsBlock" style="{% if not form.new_mx_accepts_paypal.value %}display:none;{% endif %}margin-top:14px;">
+            <div id="mxPpFieldsBlock" style="{% if not form.new_mx_accepts_paypal.value and not form.new_mx_paypal_email.errors %}display:none;{% endif %}margin-top:14px;">
                 <div class="form-row">
                     <label for="{{ form.new_mx_paypal_email.id_for_label }}">{{ form.new_mx_paypal_email.label }}</label>
                     {{ form.new_mx_paypal_email }}

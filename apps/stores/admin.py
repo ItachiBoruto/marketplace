@@ -64,6 +64,29 @@ class StoreAdmin(admin.ModelAdmin):
 
     readonly_fields = ("created_at",)
 
+    def save_model(self, request, obj, form, change):
+        """Valida consistencia de los metodos MX antes de guardar."""
+        if obj.payment_region == 'MX':
+            if obj.mx_accepts_spei and not obj.mx_spei_clabe:
+                from django.contrib import messages
+                messages.warning(
+                    request,
+                    'SPEI esta activado pero falta la CLABE. El comercio podria tener problemas.'
+                )
+            if obj.mx_accepts_mercadopago and not obj.mx_mercadopago_alias:
+                from django.contrib import messages
+                messages.warning(
+                    request,
+                    'Mercado Pago esta activado pero falta el alias.'
+                )
+            if obj.mx_accepts_paypal and not obj.mx_paypal_email:
+                from django.contrib import messages
+                messages.warning(
+                    request,
+                    'PayPal esta activado pero falta el email.'
+                )
+        super().save_model(request, obj, form, change)
+
 
 @admin.register(StoreUserPermission)
 class StoreUserPermissionAdmin(admin.ModelAdmin):
