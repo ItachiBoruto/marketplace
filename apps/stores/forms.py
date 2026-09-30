@@ -21,6 +21,7 @@ class StoreProfileForm(forms.ModelForm):
             "name", "logo", "description", "is_active",
             "legal_name", "rif", "address", "phone", "email",
             "accepts_transfer", "accepts_mobile_payment",
+            "mx_accepts_spei", "mx_accepts_mercadopago", "mx_accepts_paypal",
             "offers_delivery", "delivery_fee",
         ]
         widgets = {
@@ -34,6 +35,9 @@ class StoreProfileForm(forms.ModelForm):
             "email": forms.EmailInput(attrs={"class": "form-control"}),
             "accepts_transfer": forms.CheckboxInput(attrs={"class": "form-check-input"}),
             "accepts_mobile_payment": forms.CheckboxInput(attrs={"class": "form-check-input"}),
+            "mx_accepts_spei": forms.CheckboxInput(attrs={"class": "form-check-input"}),
+            "mx_accepts_mercadopago": forms.CheckboxInput(attrs={"class": "form-check-input"}),
+            "mx_accepts_paypal": forms.CheckboxInput(attrs={"class": "form-check-input"}),
             "offers_delivery": forms.CheckboxInput(attrs={"class": "form-check-input"}),
             "delivery_fee": forms.NumberInput(attrs={"class": "form-control", "step": "0.01", "min": "0"}),
         }
@@ -49,9 +53,28 @@ class StoreProfileForm(forms.ModelForm):
             "email": "Correo electrónico (opcional)",
             "accepts_transfer": "Acepto transferencia bancaria",
             "accepts_mobile_payment": "Acepto pago móvil",
+            "mx_accepts_spei": "Acepto transferencia SPEI",
+            "mx_accepts_mercadopago": "Acepto Mercado Pago",
+            "mx_accepts_paypal": "Acepto PayPal",
             "offers_delivery": "Ofrecer delivery a domicilio",
             "delivery_fee": "Tarifa de delivery (USD)",
         }
+
+    def __init__(self, *args, **kwargs):
+        """
+        Oculta los campos que no aplican a la region del comercio.
+        - VE: oculta toggles MX
+        - MX: oculta toggles VE
+        """
+        super().__init__(*args, **kwargs)
+        region = getattr(self.instance, "payment_region", "VE") or "VE"
+
+        if region == "VE":
+            for nombre in ["mx_accepts_spei", "mx_accepts_mercadopago", "mx_accepts_paypal"]:
+                self.fields.pop(nombre, None)
+        elif region == "MX":
+            for nombre in ["accepts_transfer", "accepts_mobile_payment"]:
+                self.fields.pop(nombre, None)
 
     def clean_logo(self):
         img = self.cleaned_data.get('logo')
@@ -76,36 +99,49 @@ class StoreProfileForm(forms.ModelForm):
 
 
 class PaymentChangeRequestForm(forms.ModelForm):
-    """Formulario para que el owner solicite el cambio de datos bancarios."""
+    """
+    Formulario para que el owner solicite el cambio de datos bancarios.
+
+    Los campos mostrados dependen de la region del comercio (payment_region):
+    - VE: usa los campos new_bank_name, new_account_number, etc.
+    - MX: usa los campos new_mx_accepts_spei, new_mx_spei_clabe, etc.
+    """
 
     class Meta:
         model = StorePaymentChangeRequest
         fields = [
+            # Venezuela
             "new_bank_name", "new_account_number", "new_account_holder",
             "new_document",
             "new_mobile_payment_bank", "new_mobile_document", "new_payment_phone",
+            # Mexico
+            "new_mx_accepts_spei",
+            "new_mx_spei_clabe", "new_mx_spei_holder", "new_mx_spei_bank",
+            "new_mx_accepts_mercadopago",
+            "new_mx_mercadopago_alias",
+            "new_mx_accepts_paypal",
+            "new_mx_paypal_email",
+            "new_mx_payment_notes",
+            # Comun
             "reason",
         ]
         widgets = {
+            # ===== VE =====
             "new_bank_name": forms.TextInput(attrs={
                 "class": "form-control",
                 "placeholder": "Ej: Banesco",
-                "required": True,
             }),
             "new_account_number": forms.TextInput(attrs={
                 "class": "form-control",
                 "placeholder": "Ej: 0134-1234-56-78901234",
-                "required": True,
             }),
             "new_account_holder": forms.TextInput(attrs={
                 "class": "form-control",
                 "placeholder": "Nombre completo del titular",
-                "required": True,
             }),
             "new_document": forms.TextInput(attrs={
                 "class": "form-control",
                 "placeholder": "V-12345678 o J-12345678-9",
-                "required": True,
             }),
             "new_mobile_payment_bank": forms.TextInput(attrs={
                 "class": "form-control",
@@ -119,65 +155,192 @@ class PaymentChangeRequestForm(forms.ModelForm):
                 "class": "form-control",
                 "placeholder": "0414-1234567",
             }),
+            # ===== MX - SPEI =====
+            "new_mx_accepts_spei": forms.CheckboxInput(attrs={
+                "class": "form-check-input",
+            }),
+            "new_mx_spei_clabe": forms.TextInput(attrs={
+                "class": "form-control",
+                "placeholder": "18 digitos, ej: 012180001234567890",
+                "maxlength": "18",
+            }),
+            "new_mx_spei_holder": forms.TextInput(attrs={
+                "class": "form-control",
+                "placeholder": "Nombre completo del titular",
+            }),
+            "new_mx_spei_bank": forms.TextInput(attrs={
+                "class": "form-control",
+                "placeholder": "Ej: BBVA, Santander, Banorte",
+            }),
+            # ===== MX - Mercado Pago =====
+            "new_mx_accepts_mercadopago": forms.CheckboxInput(attrs={
+                "class": "form-check-input",
+            }),
+            "new_mx_mercadopago_alias": forms.TextInput(attrs={
+                "class": "form-control",
+                "placeholder": "Alias o CVU de Mercado Pago",
+            }),
+            # ===== MX - PayPal =====
+            "new_mx_accepts_paypal": forms.CheckboxInput(attrs={
+                "class": "form-check-input",
+            }),
+            "new_mx_paypal_email": forms.EmailInput(attrs={
+                "class": "form-control",
+                "placeholder": "correo@ejemplo.com",
+            }),
+            # ===== MX - Notas =====
+            "new_mx_payment_notes": forms.Textarea(attrs={
+                "class": "form-control",
+                "rows": 2,
+                "placeholder": "Informacion adicional para el cliente mexicano (opcional)",
+            }),
+            # ===== Comun =====
             "reason": forms.Textarea(attrs={
                 "class": "form-control",
                 "rows": 3,
-                "placeholder": "Explica brevemente por qué cambias estos datos (ej: cambio de banco, actualización de cuenta, etc.)",
-                "required": True,
+                "placeholder": "Explica brevemente por que cambias estos datos",
             }),
         }
         labels = {
+            # VE
             "new_bank_name": "Banco",
-            "new_account_number": "Número de cuenta",
+            "new_account_number": "Numero de cuenta",
             "new_account_holder": "Titular de la cuenta",
-            "new_document": "Cédula/RIF",
-            "new_mobile_payment_bank": "Banco receptor",
-            "new_mobile_document": "Cédula/RIF",
-            "new_payment_phone": "Teléfono",
+            "new_document": "Cedula/RIF",
+            "new_mobile_payment_bank": "Banco receptor (pagomovil)",
+            "new_mobile_document": "Cedula/RIF (pagomovil)",
+            "new_payment_phone": "Telefono (pagomovil)",
+            # MX
+            "new_mx_accepts_spei": "Acepto transferencia SPEI",
+            "new_mx_spei_clabe": "CLABE interbancaria (18 digitos)",
+            "new_mx_spei_holder": "Titular de la CLABE",
+            "new_mx_spei_bank": "Banco de la CLABE",
+            "new_mx_accepts_mercadopago": "Acepto Mercado Pago",
+            "new_mx_mercadopago_alias": "Alias / CVU de Mercado Pago",
+            "new_mx_accepts_paypal": "Acepto PayPal",
+            "new_mx_paypal_email": "Email de PayPal",
+            "new_mx_payment_notes": "Notas adicionales (MX)",
+            # Comun
             "reason": "Motivo del cambio",
         }
 
+    def __init__(self, *args, store=None, **kwargs):
+        """
+        Acepta un kwarg opcional 'store'. Si no viene, intenta leerlo
+        desde self.instance.store. Si no puede, asume region VE.
+        """
+        super().__init__(*args, **kwargs)
+
+        # Determinar region
+        if store is not None:
+            self.region = getattr(store, "payment_region", "VE") or "VE"
+        elif self.instance and self.instance.pk and self.instance.store_id:
+            try:
+                self.region = self.instance.store.payment_region or "VE"
+            except Exception:
+                self.region = "VE"
+        else:
+            self.region = "VE"
+
     def clean(self):
         cleaned = super().clean()
+        if self.region == "MX":
+            return self._clean_mx(cleaned)
+        return self._clean_ve(cleaned)
 
-        # Verificar que al menos un campo cambió
+    def _clean_ve(self, cleaned):
+        """Validacion para comercios venezolanos (comportamiento original)."""
         change_fields = [
-            'new_bank_name', 'new_account_number', 'new_account_holder',
-            'new_document', 'new_mobile_payment_bank', 'new_mobile_document', 'new_payment_phone',
+            "new_bank_name", "new_account_number", "new_account_holder",
+            "new_document", "new_mobile_payment_bank", "new_mobile_document",
+            "new_payment_phone",
         ]
         has_any = any(cleaned.get(f) for f in change_fields)
 
         if not has_any:
             raise forms.ValidationError(
-                'Debes indicar al menos un cambio en los datos bancarios.'
+                "Debes indicar al menos un cambio en los datos bancarios."
             )
 
-        # ============================================================
-        # Validacion EN GRUPO de los datos de pago movil:
-        # o se completan los 3, o no se completa ninguno.
-        # ============================================================
-        pm_bank = (cleaned.get('new_mobile_payment_bank') or '').strip()
-        pm_doc = (cleaned.get('new_mobile_document') or '').strip()
-        pm_phone = (cleaned.get('new_payment_phone') or '').strip()
+        # Validacion en grupo de pago movil
+        pm_bank = (cleaned.get("new_mobile_payment_bank") or "").strip()
+        pm_doc = (cleaned.get("new_mobile_document") or "").strip()
+        pm_phone = (cleaned.get("new_payment_phone") or "").strip()
 
-        pm_campos = [pm_bank, pm_doc, pm_phone]
-        pm_llenos = sum(1 for c in pm_campos if c)
+        pm_llenos = sum(1 for c in [pm_bank, pm_doc, pm_phone] if c)
 
         if 0 < pm_llenos < 3:
-            # Alguno lleno pero no todos
             if not pm_bank:
-                self.add_error('new_mobile_payment_bank', 'Requerido si actualizas pago movil.')
+                self.add_error("new_mobile_payment_bank", "Requerido si actualizas pago movil.")
             if not pm_doc:
-                self.add_error('new_mobile_document', 'Requerido si actualizas pago movil.')
+                self.add_error("new_mobile_document", "Requerido si actualizas pago movil.")
             if not pm_phone:
-                self.add_error('new_payment_phone', 'Requerido si actualizas pago movil.')
+                self.add_error("new_payment_phone", "Requerido si actualizas pago movil.")
             raise forms.ValidationError(
-                'Debes completar los 3 campos de pago movil (Banco, Cedula/RIF y Telefono) '
-                'o dejar los 3 vacios.'
+                "Debes completar los 3 campos de pago movil (Banco, Cedula/RIF y Telefono) "
+                "o dejar los 3 vacios."
             )
 
         return cleaned
 
+    def _clean_mx(self, cleaned):
+        """Validacion para comercios mexicanos."""
+        import re as _re
+
+        spei = cleaned.get("new_mx_accepts_spei")
+        mp = cleaned.get("new_mx_accepts_mercadopago")
+        pp = cleaned.get("new_mx_accepts_paypal")
+
+        # Al menos un metodo activo o algun cambio
+        hay_datos = any([
+            cleaned.get("new_mx_spei_clabe"),
+            cleaned.get("new_mx_mercadopago_alias"),
+            cleaned.get("new_mx_paypal_email"),
+            cleaned.get("new_mx_payment_notes"),
+        ])
+
+        if not any([spei, mp, pp]) and not hay_datos:
+            raise forms.ValidationError(
+                "Debes activar al menos un metodo de pago o cambiar algun dato."
+            )
+
+        # SPEI
+        if spei:
+            clabe = (cleaned.get("new_mx_spei_clabe") or "").strip()
+            holder = (cleaned.get("new_mx_spei_holder") or "").strip()
+            bank = (cleaned.get("new_mx_spei_bank") or "").strip()
+
+            if not clabe:
+                self.add_error("new_mx_spei_clabe", "CLABE requerida si activas SPEI.")
+            elif not _re.match(r"^\d{18}$", clabe):
+                self.add_error(
+                    "new_mx_spei_clabe",
+                    "La CLABE debe tener exactamente 18 digitos numericos."
+                )
+            if not holder:
+                self.add_error("new_mx_spei_holder", "Titular requerido si activas SPEI.")
+            if not bank:
+                self.add_error("new_mx_spei_bank", "Banco requerido si activas SPEI.")
+
+        # Mercado Pago
+        if mp:
+            alias = (cleaned.get("new_mx_mercadopago_alias") or "").strip()
+            if not alias:
+                self.add_error(
+                    "new_mx_mercadopago_alias",
+                    "Alias requerido si activas Mercado Pago."
+                )
+
+        # PayPal
+        if pp:
+            email = (cleaned.get("new_mx_paypal_email") or "").strip()
+            if not email:
+                self.add_error(
+                    "new_mx_paypal_email",
+                    "Email requerido si activas PayPal."
+                )
+
+        return cleaned
 
 class ScheduleForm(forms.ModelForm):
     """Formulario para editar un dia de horario."""

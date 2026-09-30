@@ -50,7 +50,7 @@ def request_payment_change(request, store_id):
         return redirect('stores:payment_change_status', store_id=store.id)
 
     if request.method == 'POST':
-        form = PaymentChangeRequestForm(request.POST)
+        form = PaymentChangeRequestForm(request.POST, store=store)
         if form.is_valid():
             req = form.save(commit=False)
             req.store = store
@@ -64,6 +64,16 @@ def request_payment_change(request, store_id):
             req.old_mobile_payment_bank = store.mobile_payment_bank or ''
             req.old_mobile_document = store.mobile_document or ''
             req.old_payment_phone = store.payment_phone or ''
+            # Snapshot MX
+            req.old_mx_accepts_spei = store.mx_accepts_spei
+            req.old_mx_spei_clabe = store.mx_spei_clabe or ''
+            req.old_mx_spei_holder = store.mx_spei_holder or ''
+            req.old_mx_spei_bank = store.mx_spei_bank or ''
+            req.old_mx_accepts_mercadopago = store.mx_accepts_mercadopago
+            req.old_mx_mercadopago_alias = store.mx_mercadopago_alias or ''
+            req.old_mx_accepts_paypal = store.mx_accepts_paypal
+            req.old_mx_paypal_email = store.mx_paypal_email or ''
+            req.old_mx_payment_notes = store.mx_payment_notes or ''
 
             req.save()
 
@@ -83,7 +93,7 @@ def request_payment_change(request, store_id):
             return redirect('stores:payment_change_status', store_id=store.id)
     else:
         # Pre-llenar con los valores actuales
-        form = PaymentChangeRequestForm(initial={
+        form = PaymentChangeRequestForm(store=store, initial={
             'new_bank_name': store.bank_name or '',
             'new_account_number': store.account_number or '',
             'new_account_holder': store.account_holder or '',
@@ -91,6 +101,16 @@ def request_payment_change(request, store_id):
             'new_mobile_payment_bank': store.mobile_payment_bank or '',
             'new_mobile_document': store.mobile_document or '',
             'new_payment_phone': store.payment_phone or '',
+            # MX
+            'new_mx_accepts_spei': store.mx_accepts_spei,
+            'new_mx_spei_clabe': store.mx_spei_clabe or '',
+            'new_mx_spei_holder': store.mx_spei_holder or '',
+            'new_mx_spei_bank': store.mx_spei_bank or '',
+            'new_mx_accepts_mercadopago': store.mx_accepts_mercadopago,
+            'new_mx_mercadopago_alias': store.mx_mercadopago_alias or '',
+            'new_mx_accepts_paypal': store.mx_accepts_paypal,
+            'new_mx_paypal_email': store.mx_paypal_email or '',
+            'new_mx_payment_notes': store.mx_payment_notes or '',
         })
 
     return render(request, 'stores/dashboard/payment_change_request.html', {

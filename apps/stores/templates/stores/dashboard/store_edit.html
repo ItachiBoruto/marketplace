@@ -260,6 +260,7 @@
             </div>
         </div>
 
+        {% if store.payment_region == 'VE' %}
         <!-- ===== METODOS DE PAGO ACEPTADOS ===== -->
         <div class="form-section payment-section">
             <h3>💳 Métodos de pago aceptados</h3>
@@ -355,6 +356,111 @@
             </a>
         </div>
 
+        {% endif %}
+
+        {% if store.payment_region == 'MX' %}
+        <!-- ===== METODOS DE PAGO MX ===== -->
+        <div class="form-section payment-section">
+            <h3>💳 Métodos de pago (México)</h3>
+
+            <p style="font-size:0.85rem; color:#555; margin:0 0 14px; line-height:1.5;">
+                Activa los métodos que aceptas. Cada uno se muestra al cliente en el checkout.
+            </p>
+
+            <label class="checkbox-row {% if form.mx_accepts_spei.value %}checked{% endif %}" id="speiRow">
+                <input type="checkbox" name="mx_accepts_spei" id="{{ form.mx_accepts_spei.id_for_label }}"
+                       {% if form.mx_accepts_spei.value %}checked{% endif %}>
+                <label for="{{ form.mx_accepts_spei.id_for_label }}">
+                    {{ form.mx_accepts_spei.label }}
+                    <span class="sub">Transferencia interbancaria vía CLABE.</span>
+                </label>
+            </label>
+
+            <label class="checkbox-row {% if form.mx_accepts_mercadopago.value %}checked{% endif %}" id="mpRow" style="margin-top:10px;">
+                <input type="checkbox" name="mx_accepts_mercadopago" id="{{ form.mx_accepts_mercadopago.id_for_label }}"
+                       {% if form.mx_accepts_mercadopago.value %}checked{% endif %}>
+                <label for="{{ form.mx_accepts_mercadopago.id_for_label }}">
+                    {{ form.mx_accepts_mercadopago.label }}
+                    <span class="sub">Pago con billetera digital.</span>
+                </label>
+            </label>
+
+            <label class="checkbox-row {% if form.mx_accepts_paypal.value %}checked{% endif %}" id="ppRow" style="margin-top:10px;">
+                <input type="checkbox" name="mx_accepts_paypal" id="{{ form.mx_accepts_paypal.id_for_label }}"
+                       {% if form.mx_accepts_paypal.value %}checked{% endif %}>
+                <label for="{{ form.mx_accepts_paypal.id_for_label }}">
+                    {{ form.mx_accepts_paypal.label }}
+                    <span class="sub">Pago internacional vía PayPal.</span>
+                </label>
+            </label>
+        </div>
+
+        <!-- ===== DATOS SPEI (PROTEGIDOS) ===== -->
+        <div class="form-section payment-section" id="speiDetailsBlock"
+             style="background:#fef5e7;border:2px solid #fdebd0;{% if not form.mx_accepts_spei.value %}display:none;{% endif %}">
+            <h3 style="color:#856404;">🔒 Datos SPEI protegidos</h3>
+            <p style="font-size:0.85rem; color:#856404; margin:0 0 16px; line-height:1.5;">
+                Por seguridad, estos datos <strong>no se pueden editar directamente</strong>.
+                Necesitas solicitar la aprobación del administrador del marketplace.
+            </p>
+            <div style="background:white;padding:14px 16px;border-radius:8px;margin-bottom:14px;">
+                <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #f5f5f5;font-size:0.9rem;">
+                    <span style="color:#7f8c8d;">CLABE:</span>
+                    <span style="font-weight:600;color:#2c3e50;">{{ store.mx_spei_clabe|default:"No configurado" }}</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #f5f5f5;font-size:0.9rem;">
+                    <span style="color:#7f8c8d;">Titular:</span>
+                    <span style="font-weight:600;color:#2c3e50;">{{ store.mx_spei_holder|default:"No configurado" }}</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;padding:6px 0;font-size:0.9rem;">
+                    <span style="color:#7f8c8d;">Banco:</span>
+                    <span style="font-weight:600;color:#2c3e50;">{{ store.mx_spei_bank|default:"No configurado" }}</span>
+                </div>
+            </div>
+            <a href="{% url 'stores:payment_change_request' store.id %}"
+               style="display:inline-block;padding:10px 20px;background:#3498db;color:white;text-decoration:none;border-radius:8px;font-size:0.88rem;font-weight:600;">
+                📝 Solicitar cambio de datos SPEI
+            </a>
+        </div>
+
+        <!-- ===== DATOS MERCADO PAGO (PROTEGIDOS) ===== -->
+        <div class="form-section payment-section" id="mpDetailsBlock"
+             style="background:#fef5e7;border:2px solid #fdebd0;{% if not form.mx_accepts_mercadopago.value %}display:none;{% endif %}">
+            <h3 style="color:#856404;">🔒 Datos Mercado Pago protegidos</h3>
+            <p style="font-size:0.85rem; color:#856404; margin:0 0 16px; line-height:1.5;">
+                Por seguridad, estos datos <strong>no se pueden editar directamente</strong>.
+            </p>
+            <div style="background:white;padding:14px 16px;border-radius:8px;margin-bottom:14px;">
+                <div style="display:flex;justify-content:space-between;padding:6px 0;font-size:0.9rem;">
+                    <span style="color:#7f8c8d;">Alias / CVU:</span>
+                    <span style="font-weight:600;color:#2c3e50;">{{ store.mx_mercadopago_alias|default:"No configurado" }}</span>
+                </div>
+            </div>
+            <a href="{% url 'stores:payment_change_request' store.id %}"
+               style="display:inline-block;padding:10px 20px;background:#3498db;color:white;text-decoration:none;border-radius:8px;font-size:0.88rem;font-weight:600;">
+                📝 Solicitar cambio de datos Mercado Pago
+            </a>
+        </div>
+
+        <!-- ===== DATOS PAYPAL (PROTEGIDOS) ===== -->
+        <div class="form-section payment-section" id="ppDetailsBlock"
+             style="background:#fef5e7;border:2px solid #fdebd0;{% if not form.mx_accepts_paypal.value %}display:none;{% endif %}">
+            <h3 style="color:#856404;">🔒 Datos PayPal protegidos</h3>
+            <p style="font-size:0.85rem; color:#856404; margin:0 0 16px; line-height:1.5;">
+                Por seguridad, estos datos <strong>no se pueden editar directamente</strong>.
+            </p>
+            <div style="background:white;padding:14px 16px;border-radius:8px;margin-bottom:14px;">
+                <div style="display:flex;justify-content:space-between;padding:6px 0;font-size:0.9rem;">
+                    <span style="color:#7f8c8d;">Email:</span>
+                    <span style="font-weight:600;color:#2c3e50;">{{ store.mx_paypal_email|default:"No configurado" }}</span>
+                </div>
+            </div>
+            <a href="{% url 'stores:payment_change_request' store.id %}"
+               style="display:inline-block;padding:10px 20px;background:#3498db;color:white;text-decoration:none;border-radius:8px;font-size:0.88rem;font-weight:600;">
+                📝 Solicitar cambio de datos PayPal
+            </a>
+        </div>
+        {% endif %}
         <!-- ===== DELIVERY ===== -->
         <div class="form-section delivery-section">
             <h3>🛵 Delivery</h3>
@@ -431,6 +537,36 @@
     sync();
 })();
 </script>
+
+<script>
+(function() {
+    'use strict';
+    var speiCb = document.getElementById('{{ form.mx_accepts_spei.id_for_label }}');
+    var mpCb = document.getElementById('{{ form.mx_accepts_mercadopago.id_for_label }}');
+    var ppCb = document.getElementById('{{ form.mx_accepts_paypal.id_for_label }}');
+    var speiBlock = document.getElementById('speiDetailsBlock');
+    var mpBlock = document.getElementById('mpDetailsBlock');
+    var ppBlock = document.getElementById('ppDetailsBlock');
+    var speiRow = document.getElementById('speiRow');
+    var mpRow = document.getElementById('mpRow');
+    var ppRow = document.getElementById('ppRow');
+
+    function sync() {
+        if (speiCb && speiBlock) speiBlock.style.display = speiCb.checked ? 'block' : 'none';
+        if (mpCb && mpBlock) mpBlock.style.display = mpCb.checked ? 'block' : 'none';
+        if (ppCb && ppBlock) ppBlock.style.display = ppCb.checked ? 'block' : 'none';
+        if (speiCb && speiRow) speiRow.classList.toggle('checked', speiCb.checked);
+        if (mpCb && mpRow) mpRow.classList.toggle('checked', mpCb.checked);
+        if (ppCb && ppRow) ppRow.classList.toggle('checked', ppCb.checked);
+    }
+
+    if (speiCb) speiCb.addEventListener('change', sync);
+    if (mpCb) mpCb.addEventListener('change', sync);
+    if (ppCb) ppCb.addEventListener('change', sync);
+    sync();
+})();
+</script>
+
 </form>
 
 <script>

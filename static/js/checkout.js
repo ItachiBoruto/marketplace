@@ -29,6 +29,9 @@
     var DELIVERY_AVAILABLE = readJson('data-delivery-available', false);
     var BANK_TRANSFER = readJson('data-bank-transfer', {});
     var BANK_MOBILE = readJson('data-bank-mobile', {});
+    var BANK_SPEI = readJson('data-bank-spei', {});
+    var BANK_MP = readJson('data-bank-mp', {});
+    var BANK_PAYPAL = readJson('data-bank-paypal', {});
 
     // ============================================================
     // UTILIDADES DE FORMATEO
@@ -132,6 +135,29 @@
         ].join('\n');
         copyToClipboard(data, null);
         alert('Datos de pago movil copiados');
+    };
+
+    // ===== Funciones MX =====
+    window.copyAllSpeiData = function() {
+        var data = [
+            'CLABE: ' + (BANK_SPEI.clabe || ''),
+            'Titular: ' + (BANK_SPEI.holder || ''),
+            'Banco: ' + (BANK_SPEI.bank || '')
+        ].join('\n');
+        copyToClipboard(data, null);
+        alert('Datos de SPEI copiados');
+    };
+
+    window.copyAllMPData = function() {
+        var data = 'Alias / CVU: ' + (BANK_MP.alias || '');
+        copyToClipboard(data, null);
+        alert('Datos de Mercado Pago copiados');
+    };
+
+    window.copyAllPaypalData = function() {
+        var data = 'Email PayPal: ' + (BANK_PAYPAL.email || '');
+        copyToClipboard(data, null);
+        alert('Datos de PayPal copiados');
     };
 
     // ============================================================

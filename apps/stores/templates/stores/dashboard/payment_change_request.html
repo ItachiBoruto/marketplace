@@ -128,6 +128,7 @@
                 </div>
             {% endif %}
 
+        {% if store.payment_region == 'VE' %}
                         <h4 style="margin: 0 0 10px; color: #2c3e50; font-size: 0.95rem; border-bottom: 1px solid #eee; padding-bottom: 8px;">
                 🏦 Datos para transferencia
             </h4>
@@ -201,6 +202,96 @@
                 <div class="help">Número de teléfono asociado al pago móvil.</div>
                 {% if form.new_payment_phone.errors %}<div class="errors">{{ form.new_payment_phone.errors }}</div>{% endif %}
             </div>
+        {% endif %}
+
+        {% if store.payment_region == 'MX' %}
+        <div class="form-section">
+            <h3>🏦 Transferencia SPEI</h3>
+            <p style="font-size:0.85rem; color:#555; margin:0 0 14px;">
+                Marca esta opción si aceptas transferencias interbancarias vía CLABE.
+            </p>
+
+            <label class="checkbox-row {% if form.new_mx_accepts_spei.value %}checked{% endif %}" id="mxSpeiRow">
+                <input type="checkbox" name="new_mx_accepts_spei" id="{{ form.new_mx_accepts_spei.id_for_label }}"
+                       {% if form.new_mx_accepts_spei.value %}checked{% endif %}>
+                <label for="{{ form.new_mx_accepts_spei.id_for_label }}">
+                    {{ form.new_mx_accepts_spei.label }}
+                </label>
+            </label>
+
+            <div id="mxSpeiFieldsBlock" style="{% if not form.new_mx_accepts_spei.value %}display:none;{% endif %}margin-top:14px;">
+                <div class="form-row">
+                    <label for="{{ form.new_mx_spei_clabe.id_for_label }}">{{ form.new_mx_spei_clabe.label }}</label>
+                    {{ form.new_mx_spei_clabe }}
+                    {% if form.new_mx_spei_clabe.errors %}<div class="errors">{{ form.new_mx_spei_clabe.errors }}</div>{% endif %}
+                </div>
+                <div class="form-row">
+                    <label for="{{ form.new_mx_spei_holder.id_for_label }}">{{ form.new_mx_spei_holder.label }}</label>
+                    {{ form.new_mx_spei_holder }}
+                    {% if form.new_mx_spei_holder.errors %}<div class="errors">{{ form.new_mx_spei_holder.errors }}</div>{% endif %}
+                </div>
+                <div class="form-row">
+                    <label for="{{ form.new_mx_spei_bank.id_for_label }}">{{ form.new_mx_spei_bank.label }}</label>
+                    {{ form.new_mx_spei_bank }}
+                    {% if form.new_mx_spei_bank.errors %}<div class="errors">{{ form.new_mx_spei_bank.errors }}</div>{% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <h3>💙 Mercado Pago</h3>
+            <p style="font-size:0.85rem; color:#555; margin:0 0 14px;">
+                Marca esta opción si aceptas pagos con Mercado Pago.
+            </p>
+
+            <label class="checkbox-row {% if form.new_mx_accepts_mercadopago.value %}checked{% endif %}" id="mxMpRow">
+                <input type="checkbox" name="new_mx_accepts_mercadopago" id="{{ form.new_mx_accepts_mercadopago.id_for_label }}"
+                       {% if form.new_mx_accepts_mercadopago.value %}checked{% endif %}>
+                <label for="{{ form.new_mx_accepts_mercadopago.id_for_label }}">
+                    {{ form.new_mx_accepts_mercadopago.label }}
+                </label>
+            </label>
+
+            <div id="mxMpFieldsBlock" style="{% if not form.new_mx_accepts_mercadopago.value %}display:none;{% endif %}margin-top:14px;">
+                <div class="form-row">
+                    <label for="{{ form.new_mx_mercadopago_alias.id_for_label }}">{{ form.new_mx_mercadopago_alias.label }}</label>
+                    {{ form.new_mx_mercadopago_alias }}
+                    {% if form.new_mx_mercadopago_alias.errors %}<div class="errors">{{ form.new_mx_mercadopago_alias.errors }}</div>{% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <h3>💳 PayPal</h3>
+            <p style="font-size:0.85rem; color:#555; margin:0 0 14px;">
+                Marca esta opción si aceptas pagos internacionales vía PayPal.
+            </p>
+
+            <label class="checkbox-row {% if form.new_mx_accepts_paypal.value %}checked{% endif %}" id="mxPpRow">
+                <input type="checkbox" name="new_mx_accepts_paypal" id="{{ form.new_mx_accepts_paypal.id_for_label }}"
+                       {% if form.new_mx_accepts_paypal.value %}checked{% endif %}>
+                <label for="{{ form.new_mx_accepts_paypal.id_for_label }}">
+                    {{ form.new_mx_accepts_paypal.label }}
+                </label>
+            </label>
+
+            <div id="mxPpFieldsBlock" style="{% if not form.new_mx_accepts_paypal.value %}display:none;{% endif %}margin-top:14px;">
+                <div class="form-row">
+                    <label for="{{ form.new_mx_paypal_email.id_for_label }}">{{ form.new_mx_paypal_email.label }}</label>
+                    {{ form.new_mx_paypal_email }}
+                    {% if form.new_mx_paypal_email.errors %}<div class="errors">{{ form.new_mx_paypal_email.errors }}</div>{% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <h3>📝 Notas adicionales</h3>
+            <div class="form-row">
+                <label for="{{ form.new_mx_payment_notes.id_for_label }}">{{ form.new_mx_payment_notes.label }}</label>
+                {{ form.new_mx_payment_notes }}
+            </div>
+        </div>
+        {% endif %}
 
             <div class="field">
                 <label for="{{ form.reason.id_for_label }}">{{ form.reason.label }}</label>
@@ -213,7 +304,28 @@
                 <button type="submit" class="btn-submit">📤 Enviar solicitud</button>
                 <a href="{% url 'stores:store_edit' store.id %}" class="btn-cancel">Cancelar</a>
             </div>
-        </form>
+        
+<script id="mxToggleScript">
+(function() {
+    'use strict';
+    function setup(cbId, blockId, rowId) {
+        var cb = document.getElementById(cbId);
+        var block = document.getElementById(blockId);
+        var row = document.getElementById(rowId);
+        if (!cb) return;
+        function sync() {
+            if (block) block.style.display = cb.checked ? 'block' : 'none';
+            if (row) row.classList.toggle('checked', cb.checked);
+        }
+        cb.addEventListener('change', sync);
+        sync();
+    }
+    setup('{{ form.new_mx_accepts_spei.id_for_label }}', 'mxSpeiFieldsBlock', 'mxSpeiRow');
+    setup('{{ form.new_mx_accepts_mercadopago.id_for_label }}', 'mxMpFieldsBlock', 'mxMpRow');
+    setup('{{ form.new_mx_accepts_paypal.id_for_label }}', 'mxPpFieldsBlock', 'mxPpRow');
+})();
+</script>
+</form>
     </div>
 </div>
 {% endblock %}

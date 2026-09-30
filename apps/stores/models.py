@@ -32,6 +32,18 @@ class Store(models.Model):
                   "(ignora los horarios por día)."
     )
 
+    # ===== Region de pagos (activa una pared u otra) =====
+    payment_region = models.CharField(
+        max_length=2,
+        choices=[
+            ("VE", "Venezuela"),
+            ("MX", "Mexico"),
+        ],
+        default="VE",
+        verbose_name="Region de pagos",
+        help_text="Determina que metodos de pago se muestran al comercio y al cliente."
+    )
+
     # ===== Metodos de pago aceptados =====
     accepts_transfer = models.BooleanField(
         default=True,
@@ -88,6 +100,69 @@ class Store(models.Model):
         blank=True,
         verbose_name="Notas adicionales",
         help_text="Información extra para el cliente (opcional)"
+    )
+
+    # ===== Metodos de pago Mexico (solo activos si payment_region='MX') =====
+    # SPEI - Transferencia interbancaria
+    mx_accepts_spei = models.BooleanField(
+        default=False,
+        verbose_name="[MX] Acepta SPEI",
+        help_text="Transferencia interbancaria via CLABE (18 digitos)."
+    )
+    mx_spei_clabe = models.CharField(
+        max_length=18,
+        blank=True,
+        null=True,
+        verbose_name="[MX] CLABE interbancaria",
+        help_text="18 digitos de la CLABE del comercio."
+    )
+    mx_spei_holder = models.CharField(
+        max_length=150,
+        blank=True,
+        null=True,
+        verbose_name="[MX] Titular de la CLABE",
+        help_text="Nombre completo del titular de la cuenta SPEI."
+    )
+    mx_spei_bank = models.CharField(
+        max_length=50,
+        blank=True,
+        null=True,
+        verbose_name="[MX] Banco de la CLABE",
+        help_text="Ej: BBVA, Santander, Banorte, HSBC..."
+    )
+
+    # Mercado Pago
+    mx_accepts_mercadopago = models.BooleanField(
+        default=False,
+        verbose_name="[MX] Acepta Mercado Pago",
+        help_text="Pago via billetera digital Mercado Pago."
+    )
+    mx_mercadopago_alias = models.CharField(
+        max_length=100,
+        blank=True,
+        null=True,
+        verbose_name="[MX] Alias / CLABE de Mercado Pago",
+        help_text="Alias, CVU o link de cobro de Mercado Pago."
+    )
+
+    # PayPal (para futuro)
+    mx_accepts_paypal = models.BooleanField(
+        default=False,
+        verbose_name="[MX] Acepta PayPal",
+        help_text="Pago internacional via PayPal."
+    )
+    mx_paypal_email = models.EmailField(
+        blank=True,
+        null=True,
+        verbose_name="[MX] Email de PayPal",
+        help_text="Correo asociado a la cuenta de PayPal del comercio."
+    )
+
+    # Notas adicionales MX
+    mx_payment_notes = models.TextField(
+        blank=True,
+        verbose_name="[MX] Notas adicionales de pago",
+        help_text="Informacion extra para el cliente mexicano (opcional)."
     )
 
     created_at = models.DateTimeField(auto_now_add=True)
@@ -159,6 +234,34 @@ class StorePaymentChangeRequest(models.Model):
     new_mobile_payment_bank = models.CharField(max_length=100, blank=True, verbose_name='Banco pago movil (nuevo)')
     new_mobile_document = models.CharField(max_length=20, blank=True, verbose_name='Cedula/RIF pagomovil (nuevo)')
     new_payment_phone = models.CharField(max_length=20, blank=True, verbose_name='Teléfono (nuevo)')
+    # ===== Valores propuestos MX =====
+    new_mx_accepts_spei = models.BooleanField(
+        default=False, verbose_name='[MX] Acepta SPEI (nuevo)'
+    )
+    new_mx_spei_clabe = models.CharField(
+        max_length=18, blank=True, verbose_name='[MX] CLABE (nueva)'
+    )
+    new_mx_spei_holder = models.CharField(
+        max_length=150, blank=True, verbose_name='[MX] Titular CLABE (nuevo)'
+    )
+    new_mx_spei_bank = models.CharField(
+        max_length=50, blank=True, verbose_name='[MX] Banco SPEI (nuevo)'
+    )
+    new_mx_accepts_mercadopago = models.BooleanField(
+        default=False, verbose_name='[MX] Acepta Mercado Pago (nuevo)'
+    )
+    new_mx_mercadopago_alias = models.CharField(
+        max_length=100, blank=True, verbose_name='[MX] Alias Mercado Pago (nuevo)'
+    )
+    new_mx_accepts_paypal = models.BooleanField(
+        default=False, verbose_name='[MX] Acepta PayPal (nuevo)'
+    )
+    new_mx_paypal_email = models.EmailField(
+        blank=True, verbose_name='[MX] Email PayPal (nuevo)'
+    )
+    new_mx_payment_notes = models.TextField(
+        blank=True, verbose_name='[MX] Notas de pago (nuevas)'
+    )
 
     # Snapshot del estado actual (para comparar)
     old_bank_name = models.CharField(max_length=100, blank=True)
@@ -168,6 +271,16 @@ class StorePaymentChangeRequest(models.Model):
     old_mobile_payment_bank = models.CharField(max_length=100, blank=True)
     old_mobile_document = models.CharField(max_length=20, blank=True)
     old_payment_phone = models.CharField(max_length=20, blank=True)
+    # ===== Snapshots MX (estado actual al momento de solicitar) =====
+    old_mx_accepts_spei = models.BooleanField(default=False)
+    old_mx_spei_clabe = models.CharField(max_length=18, blank=True)
+    old_mx_spei_holder = models.CharField(max_length=150, blank=True)
+    old_mx_spei_bank = models.CharField(max_length=50, blank=True)
+    old_mx_accepts_mercadopago = models.BooleanField(default=False)
+    old_mx_mercadopago_alias = models.CharField(max_length=100, blank=True)
+    old_mx_accepts_paypal = models.BooleanField(default=False)
+    old_mx_paypal_email = models.EmailField(blank=True)
+    old_mx_payment_notes = models.TextField(blank=True)
 
     reason = models.TextField(blank=True, verbose_name='Motivo del cambio')
 

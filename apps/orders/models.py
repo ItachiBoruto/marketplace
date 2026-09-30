@@ -53,8 +53,13 @@ class Order(models.Model):
 
     # Datos del pago (los llena el usuario)
     PAYMENT_METHOD_CHOICES = [
+        # Venezuela
         ('transfer', 'Transferencia bancaria'),
         ('mobile', 'Pago movil'),
+        # Mexico
+        ('spei', 'Transferencia SPEI'),
+        ('mercadopago', 'Mercado Pago'),
+        ('paypal', 'PayPal'),
     ]
     payment_method = models.CharField(
         max_length=20,

@@ -116,6 +116,10 @@ def checkout(request):
             pickup_available=pickup_available,
             accepts_transfer=store.accepts_transfer,
             accepts_mobile=store.accepts_mobile_payment,
+            accepts_spei=store.mx_accepts_spei,
+            accepts_mercadopago=store.mx_accepts_mercadopago,
+            accepts_paypal=store.mx_accepts_paypal,
+            payment_region=store.payment_region or 'VE',
         )
         if form.is_valid():
             method = form.cleaned_data['shipping_method']
@@ -176,6 +180,10 @@ def checkout(request):
             pickup_available=pickup_available,
             accepts_transfer=store.accepts_transfer,
             accepts_mobile=store.accepts_mobile_payment,
+            accepts_spei=store.mx_accepts_spei,
+            accepts_mercadopago=store.mx_accepts_mercadopago,
+            accepts_paypal=store.mx_accepts_paypal,
+            payment_region=store.payment_region or 'VE',
         )
 
     # ===== Datos de pago del comercio =====
@@ -195,6 +203,21 @@ def checkout(request):
         'document': store.mobile_document or store.document or '',
     }
 
+    # ===== Datos MX (solo si region == MX) =====
+    store_spei_info = {
+        'clabe': store.mx_spei_clabe or '',
+        'holder': store.mx_spei_holder or '',
+        'bank': store.mx_spei_bank or '',
+    }
+
+    store_mp_info = {
+        'alias': store.mx_mercadopago_alias or '',
+    }
+
+    store_paypal_info = {
+        'email': store.mx_paypal_email or '',
+    }
+
     return render(request, 'orders/checkout.html', {
         'cart': cart,
         'items': items,
@@ -205,6 +228,13 @@ def checkout(request):
         'mobile_info': store_mobile_info,
         'accepts_transfer': store.accepts_transfer,
         'accepts_mobile': store.accepts_mobile_payment,
+        'payment_region': store.payment_region or 'VE',
+        'accepts_spei': store.mx_accepts_spei,
+        'accepts_mercadopago': store.mx_accepts_mercadopago,
+        'accepts_paypal': store.mx_accepts_paypal,
+        'spei_info': store_spei_info,
+        'mp_info': store_mp_info,
+        'paypal_info': store_paypal_info,
         'delivery_available': delivery_available,
         'pickup_available': pickup_available,
         'total_delivery_fee': total_delivery_fee,

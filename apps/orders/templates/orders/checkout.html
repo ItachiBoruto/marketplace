@@ -173,23 +173,102 @@
 
                             <!-- ============ COLUMNA IZQUIERDA: BOTONES ============ -->
                             <div class="pm-buttons-col">
-                                {% if accepts_transfer %}
-                                <button type="button" class="pm-btn selected" data-method="transfer" id="pmBtnTransfer">
-                                    <span class="pm-icon">🏦</span>
-                                    <span class="pm-label">Transfer.</span>
-                                </button>
-                                {% endif %}
-                                {% if accepts_mobile %}
-                                <button type="button" class="pm-btn{% if not accepts_transfer %} selected{% endif %}" data-method="mobile" id="pmBtnMobile">
-                                    <span class="pm-icon">📱</span>
-                                    <span class="pm-label">Pago móvil</span>
-                                </button>
+                                {% if payment_region == 'MX' %}
+                                    {# ===== Botones MX ===== #}
+                                    {% if accepts_spei %}
+                                    <button type="button" class="pm-btn selected" data-method="spei" id="pmBtnSpei">
+                                        <span class="pm-icon">🏦</span>
+                                        <span class="pm-label">SPEI</span>
+                                    </button>
+                                    {% endif %}
+                                    {% if accepts_mercadopago %}
+                                    <button type="button" class="pm-btn{% if not accepts_spei %} selected{% endif %}" data-method="mercadopago" id="pmBtnMP">
+                                        <span class="pm-icon">💙</span>
+                                        <span class="pm-label">Mercado Pago</span>
+                                    </button>
+                                    {% endif %}
+                                    {% if accepts_paypal %}
+                                    <button type="button" class="pm-btn{% if not accepts_spei and not accepts_mercadopago %} selected{% endif %}" data-method="paypal" id="pmBtnPaypal">
+                                        <span class="pm-icon">💳</span>
+                                        <span class="pm-label">PayPal</span>
+                                    </button>
+                                    {% endif %}
+                                {% else %}
+                                    {# ===== Botones VE ===== #}
+                                    {% if accepts_transfer %}
+                                    <button type="button" class="pm-btn selected" data-method="transfer" id="pmBtnTransfer">
+                                        <span class="pm-icon">🏦</span>
+                                        <span class="pm-label">Transfer.</span>
+                                    </button>
+                                    {% endif %}
+                                    {% if accepts_mobile %}
+                                    <button type="button" class="pm-btn{% if not accepts_transfer %} selected{% endif %}" data-method="mobile" id="pmBtnMobile">
+                                        <span class="pm-icon">📱</span>
+                                        <span class="pm-label">Pago móvil</span>
+                                    </button>
+                                    {% endif %}
                                 {% endif %}
                             </div>
 
                             <!-- ============ COLUMNA DERECHA: PANELES ============ -->
                             <div class="pm-panels-col">
 
+                                {% if payment_region == 'MX' %}
+                                    {# ===== PANELES MX ===== #}
+
+                                    {# PANEL: SPEI #}
+                                    {% if accepts_spei %}
+                                    <div class="pm-panel" id="pmPanelSpei" data-method="spei">
+                                        <div class="bank-row-copy">
+                                            <div class="bank-row"><strong>CLABE:</strong><span>{{ spei_info.clabe }}</span></div>
+                                            <button type="button" class="btn-copy" onclick="copyToClipboard('{{ spei_info.clabe }}', this)">📋</button>
+                                        </div>
+                                        {% if spei_info.holder %}
+                                        <div class="bank-row-copy">
+                                            <div class="bank-row"><strong>Titular:</strong><span>{{ spei_info.holder }}</span></div>
+                                            <button type="button" class="btn-copy" onclick="copyToClipboard('{{ spei_info.holder }}', this)">📋</button>
+                                        </div>
+                                        {% endif %}
+                                        {% if spei_info.bank %}
+                                        <div class="bank-row-copy">
+                                            <div class="bank-row"><strong>Banco:</strong><span>{{ spei_info.bank }}</span></div>
+                                            <button type="button" class="btn-copy" onclick="copyToClipboard('{{ spei_info.bank }}', this)">📋</button>
+                                        </div>
+                                        {% endif %}
+                                        <button type="button" class="btn-copy-all" onclick="copyAllSpeiData()">
+                                            📋 Copiar todos
+                                        </button>
+                                    </div>
+                                    {% endif %}
+
+                                    {# PANEL: MERCADO PAGO #}
+                                    {% if accepts_mercadopago %}
+                                    <div class="pm-panel{% if not accepts_spei %} show{% endif %}" id="pmPanelMP" data-method="mercadopago">
+                                        <div class="bank-row-copy">
+                                            <div class="bank-row"><strong>Alias / CVU:</strong><span>{{ mp_info.alias }}</span></div>
+                                            <button type="button" class="btn-copy" onclick="copyToClipboard('{{ mp_info.alias }}', this)">📋</button>
+                                        </div>
+                                        <button type="button" class="btn-copy-all" onclick="copyAllMPData()">
+                                            📋 Copiar alias
+                                        </button>
+                                    </div>
+                                    {% endif %}
+
+                                    {# PANEL: PAYPAL #}
+                                    {% if accepts_paypal %}
+                                    <div class="pm-panel{% if not accepts_spei and not accepts_mercadopago %} show{% endif %}" id="pmPanelPaypal" data-method="paypal">
+                                        <div class="bank-row-copy">
+                                            <div class="bank-row"><strong>Email:</strong><span>{{ paypal_info.email }}</span></div>
+                                            <button type="button" class="btn-copy" onclick="copyToClipboard('{{ paypal_info.email }}', this)">📋</button>
+                                        </div>
+                                        <button type="button" class="btn-copy-all" onclick="copyAllPaypalData()">
+                                            📋 Copiar email
+                                        </button>
+                                    </div>
+                                    {% endif %}
+
+                                {% else %}
+                                    {# ===== PANELES VE ===== #}
                                 {# PANEL: TRANSFERENCIA #}
                                 {% if accepts_transfer %}
                                 <div class="pm-panel" id="pmPanelTransfer" data-method="transfer">
@@ -245,12 +324,13 @@
                                     </button>
                                 </div>
                                 {% endif %}
+                                {% endif %}
 
                             </div>
                         </div>
 
                         {# Campo oculto con el metodo elegido #}
-                        <input type="hidden" name="payment_method" id="paymentMethodInput" value="{% if accepts_transfer %}transfer{% elif accepts_mobile %}mobile{% endif %}">
+                        <input type="hidden" name="payment_method" id="paymentMethodInput" value="{% if payment_region == 'MX' %}{% if accepts_spei %}spei{% elif accepts_mercadopago %}mercadopago{% elif accepts_paypal %}paypal{% endif %}{% else %}{% if accepts_transfer %}transfer{% elif accepts_mobile %}mobile{% endif %}{% endif %}">
 
 
                         {% for field in form %}
@@ -285,8 +365,11 @@
     {{ delivery_available|json_script:'data-delivery-available' }}
     {{ bank_info|json_script:'data-bank-transfer' }}
     {{ mobile_info|json_script:'data-bank-mobile' }}
+    {{ spei_info|json_script:'data-bank-spei' }}
+    {{ mp_info|json_script:'data-bank-mp' }}
+    {{ paypal_info|json_script:'data-bank-paypal' }}
 {% endblock %}
 
 {% block extra_js %}
-<script src="{% static 'js/checkout.js' %}?v=1"></script>
+<script src="{% static 'js/checkout.js' %}?v=2"></script>
 {% endblock %}

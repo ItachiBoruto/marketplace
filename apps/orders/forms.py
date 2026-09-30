@@ -67,6 +67,10 @@ class PaymentForm(forms.ModelForm):
         self.pickup_available = kwargs.pop('pickup_available', True)
         self.accepts_transfer = kwargs.pop('accepts_transfer', True)
         self.accepts_mobile = kwargs.pop('accepts_mobile', False)
+        self.accepts_spei = kwargs.pop('accepts_spei', False)
+        self.accepts_mercadopago = kwargs.pop('accepts_mercadopago', False)
+        self.accepts_paypal = kwargs.pop('accepts_paypal', False)
+        self.payment_region = kwargs.pop('payment_region', 'VE')
         super().__init__(*args, **kwargs)
 
         # Construir dinamicamente las opciones disponibles
@@ -85,12 +89,21 @@ class PaymentForm(forms.ModelForm):
         # Seleccionar el primer metodo disponible por defecto
         self.fields['shipping_method'].initial = choices[0][0]
 
-        # ===== Choices de metodo de PAGO =====
+        # ===== Choices de metodo de PAGO (segun region) =====
         payment_choices = []
-        if self.accepts_transfer:
-            payment_choices.append(('transfer', 'Transferencia bancaria'))
-        if self.accepts_mobile:
-            payment_choices.append(('mobile', 'Pago movil'))
+        if self.payment_region == 'MX':
+            if self.accepts_spei:
+                payment_choices.append(('spei', 'Transferencia SPEI'))
+            if self.accepts_mercadopago:
+                payment_choices.append(('mercadopago', 'Mercado Pago'))
+            if self.accepts_paypal:
+                payment_choices.append(('paypal', 'PayPal'))
+        else:
+            # VE (default)
+            if self.accepts_transfer:
+                payment_choices.append(('transfer', 'Transferencia bancaria'))
+            if self.accepts_mobile:
+                payment_choices.append(('mobile', 'Pago movil'))
 
         # Si el comercio no acepta ninguno -> no permitir envio
         if not payment_choices:
@@ -158,17 +171,37 @@ class PaymentForm(forms.ModelForm):
 
         # ===== Validar el metodo de PAGO =====
         payment = cleaned.get('payment_method')
-        if payment == 'transfer' and not self.accepts_transfer:
-            raise forms.ValidationError(
-                '❌ Este comercio no acepta transferencia bancaria.'
-            )
-        if payment == 'mobile' and not self.accepts_mobile:
-            raise forms.ValidationError(
-                '❌ Este comercio no acepta pago móvil.'
-            )
         if not payment:
             raise forms.ValidationError(
                 '❌ Debes elegir un método de pago.'
             )
+
+        if self.payment_region == 'MX':
+            validos_mx = {
+                'spei': self.accepts_spei,
+                'mercadopago': self.accepts_mercadopago,
+                'paypal': self.accepts_paypal,
+            }
+            if payment not in validos_mx:
+                raise forms.ValidationError(
+                    '❌ Método de pago no válido.'
+                )
+            if not validos_mx[payment]:
+                raise forms.ValidationError(
+                    '❌ Este comercio no acepta ese método de pago.'
+                )
+        else:
+            if payment == 'transfer' and not self.accepts_transfer:
+                raise forms.ValidationError(
+                    '❌ Este comercio no acepta transferencia bancaria.'
+                )
+            if payment == 'mobile' and not self.accepts_mobile:
+                raise forms.ValidationError(
+                    '❌ Este comercio no acepta pago móvil.'
+                )
+            if payment not in ('transfer', 'mobile'):
+                raise forms.ValidationError(
+                    '❌ Método de pago no válido.'
+                )
 
         return cleaned
