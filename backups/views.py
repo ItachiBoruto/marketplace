@@ -58,3 +58,23 @@ def run_backup_view(request):
             {"ok": False, "error": str(e)[:200]},
             status=400,
         )
+
+
+@require_http_methods(["GET"])
+def debug_env_view(request):
+    """
+    Endpoint TEMPORAL para verificar variables de entorno en Render.
+    Remover despues del diagnostico.
+    """
+    import os
+    token_dropbox = os.environ.get("DROPBOX_ACCESS_TOKEN", "") or ""
+    token_cron = os.environ.get("DBBACKUP_CRON_TOKEN", "") or ""
+
+    return JsonResponse({
+        "DROPBOX_ACCESS_TOKEN_presente": bool(token_dropbox),
+        "DROPBOX_ACCESS_TOKEN_longitud": len(token_dropbox),
+        "DROPBOX_ACCESS_TOKEN_preview": (token_dropbox[:8] + "..." + token_dropbox[-6:]) if len(token_dropbox) > 14 else "(muy corto)",
+        "DBBACKUP_CRON_TOKEN_presente": bool(token_cron),
+        "DBBACKUP_CRON_TOKEN_longitud": len(token_cron),
+        "DJANGO_SETTINGS_MODULE": os.environ.get("DJANGO_SETTINGS_MODULE", "(no definido)"),
+    })
