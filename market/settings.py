@@ -78,6 +78,7 @@ INSTALLED_APPS = [
 # ===== MIDDLEWARE =====
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'django.middleware.gzip.GZipMiddleware',
     'apps.audit.middleware_nocache.NoCacheForAuthenticatedMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'corsheaders.middleware.CorsMiddleware',
@@ -178,7 +179,7 @@ STORAGES = {
         'BACKEND': 'cloudinary_storage.storage.MediaCloudinaryStorage',
     },
     'staticfiles': {
-        'BACKEND': 'django.contrib.staticfiles.storage.StaticFilesStorage',
+        'BACKEND': 'whitenoise.storage.CompressedManifestStaticFilesStorage',
     },
     'dbbackup': {
         'BACKEND': 'backups.storage.WindowsSafeDropBoxStorage',
@@ -391,3 +392,11 @@ DBBACKUP_SEND_EMAIL = False  # Evita el handler roto en Python 3.14
 DBBACKUP_CLEANUP_KEEP = 7
 DBBACKUP_CLEANUP_KEEP_MEDIA = 7
 DBBACKUP_COMPRESS = True
+
+
+# ============================================================
+# WhiteNoise - Compresion Brotli + GZip para estaticos
+# ============================================================
+WHITENOISE_USE_BROTLI = True
+WHITENOISE_COMPRESS_LEVEL = 6  # 1-9 (mas alto = mejor compresion, mas CPU)
+WHITENOISE_MAX_AGE = 31536000  # 1 año de cache para archivos con hash
