@@ -9,6 +9,12 @@
     'use strict';
 
     // ============================================================
+    // REGION DE PAGO (VE o MX)
+    // ============================================================
+    var formEl = document.querySelector('form[data-payment-region]');
+    var PAYMENT_REGION = (formEl && formEl.dataset.paymentRegion) || 'VE';
+
+    // ============================================================
     // DATOS DEL SERVIDOR
     // ============================================================
     function readJson(id, fallback) {
@@ -366,9 +372,11 @@
         function updateState() {
             var val = refInput.value;
             var len = val.length;
-            countEl.textContent = len + ' / 12';
+            var maxLen = PAYMENT_REGION === 'MX' ? 40 : 12;
+            countEl.textContent = len + ' / ' + maxLen;
 
-            if (len >= 4 && len <= 12) {
+            var maxLen = PAYMENT_REGION === 'MX' ? 40 : 12;
+            if (len >= 4 && len <= maxLen) {
                 wrapper.classList.add('valid');
                 wrapper.classList.remove('invalid');
                 hintEl.textContent = 'referencia valida';
@@ -399,9 +407,14 @@
         // 6) Filtrar input: solo numeros, max 12
         refInput.addEventListener('input', function() {
             var original = this.value;
-            var cleaned = original.replace(/[^0-9]/g, '');
-            if (cleaned.length > 12) {
-                cleaned = cleaned.slice(0, 12);
+            var // Si es MX, permitir alfanumerico y guiones
+            var patron = PAYMENT_REGION === 'MX' 
+                ? /[^A-Za-z0-9\- ]/g 
+                : /[^0-9]/g;
+            var cleaned = original.replace(patron, '');
+            var maxLen = PAYMENT_REGION === 'MX' ? 40 : 12;
+            if (cleaned.length > maxLen) {
+                cleaned = cleaned.slice(0, maxLen);
             }
             // Detectar si se filtro algo (para shake)
             if (cleaned !== original) {

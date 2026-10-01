@@ -1,3 +1,5 @@
+import re
+
 from django import forms
 
 from apps.utils.validators import validate_image
@@ -114,16 +116,43 @@ class PaymentForm(forms.ModelForm):
         self.fields['payment_method'].choices = payment_choices
         self.fields['payment_method'].initial = payment_choices[0][0]
 
+        # Ajustar labels segun region
+        if self.payment_region == 'MX':
+            self.fields['payment_bank'].label = 'Banco emisor (SPEI)'
+            self.fields['payment_bank'].widget.attrs['placeholder'] = 'Ej: BBVA, Santander, Banorte'
+            self.fields['payment_reference'].label = 'Clave de rastreo / ID de operacion'
+            self.fields['payment_reference'].widget.attrs['placeholder'] = 'Ej: MBAN0100240913XXXX o ID de Mercado Pago'
+            self.fields['payment_reference'].widget.attrs.pop('pattern', None)
+            self.fields['payment_reference'].widget.attrs.pop('inputmode', None)
+            self.fields['payment_reference'].widget.attrs.pop('maxlength', None)
+            self.fields['payment_reference'].widget.attrs.pop('minlength', None)
+        
+
         # Ocultar el campo de direccion si no hay delivery
         if not self.delivery_available:
             self.fields['delivery_address'].widget = forms.HiddenInput()
 
     def clean_payment_reference(self):
         ref = self.cleaned_data.get('payment_reference', '').strip()
-        # Solo numeros
+        if not ref:
+            return ref
+
+        # ===== MEXICO: alfanumerico, mas flexible =====
+        if self.payment_region == 'MX':
+            # Permitir alfanumerico, guiones, espacios
+            if not re.match(r'^[A-Za-z0-9\- ]+$', ref):
+                raise forms.ValidationError(
+                    'La clave de rastreo solo puede contener letras, numeros, guiones y espacios.'
+                )
+            if len(ref) < 4:
+                raise forms.ValidationError('La clave debe tener al menos 4 caracteres.')
+            if len(ref) > 40:
+                raise forms.ValidationError('La clave no puede tener mas de 40 caracteres.')
+            return ref
+
+        # ===== VENEZUELA: solo numeros 4-12 =====
         if not ref.isdigit():
             raise forms.ValidationError('La referencia solo puede contener numeros.')
-        # Longitud
         if len(ref) < 4:
             raise forms.ValidationError('La referencia debe tener al menos 4 digitos.')
         if len(ref) > 12:

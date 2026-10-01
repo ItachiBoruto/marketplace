@@ -18,7 +18,7 @@
                 </div>
             {% endif %}
 
-            <form method="post" enctype="multipart/form-data" id="checkoutForm">
+            <form method="post" enctype="multipart/form-data" id="checkoutForm" data-payment-region="{{ payment_region|default:"VE" }}">
                 {% csrf_token %}
                 {% if store %}<input type="hidden" name="store_id" value="{{ store.id }}">{% endif %}
 
