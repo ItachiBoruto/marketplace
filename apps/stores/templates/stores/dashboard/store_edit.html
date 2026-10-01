@@ -1,4 +1,5 @@
 {% extends 'stores/dashboard/base.html' %}
+{% load cloudinary_tags %}
 
 {% block title %}Editar perfil del comercio{% endblock %}
 
@@ -198,7 +199,7 @@
                 {{ form.logo }}
                 {% if store.logo %}
                     <div class="help-text">Logo actual:
-                        <a href="{{ store.logo.url }}" target="_blank">ver</a>
+                        <a href="{{ store.logo.url|cloudinary_thumb:200 }}" target="_blank">ver</a>
                     </div>
                 {% endif %}
                 {% if form.logo.errors %}<div class="errors">{{ form.logo.errors }}</div>{% endif %}

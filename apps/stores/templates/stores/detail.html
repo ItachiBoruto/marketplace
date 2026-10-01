@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load cloudinary_tags %}
 {% load static %}
 
 {% block title %}{{ store.name }} - Mi Marketplace{% endblock %}
@@ -19,7 +20,7 @@
         <div class="profile-info">
             <div class="profile-avatar">
                 {% if store.logo %}
-                    <img src="{{ store.logo.url }}" alt="{{ store.name }}">
+                    <img src="{{ store.logo.url|cloudinary_thumb:200 }}" alt="{{ store.name }}">
                 {% else %}
                     <div class="no-avatar">🏪</div>
                 {% endif %}
@@ -147,7 +148,7 @@
             <div class="variant-card" data-product-id="{{ product.id }}">
                 <div class="variant-image">
                     {% if product.image %}
-                        <img src="{{ product.image.url }}" alt="{{ product.name }}">
+                        <img src="{{ product.image.url|cloudinary_thumb:400 }}" alt="{{ product.name }}">
                     {% else %}
                         <div class="no-image">Sin imagen</div>
                     {% endif %}
@@ -187,9 +188,9 @@
                 <span class="cat-card-name">Todos</span>
             </div>
             {% for cat in store_categories %}
-                <div class="cat-card" data-slug="{{ cat.slug }}" data-name="{{ cat.name|lower }}" data-color="{{ cat.color }}" data-image="{% if cat.image %}{{ cat.image.url }}{% endif %}" data-emoji="{{ cat.emoji }}">
+                <div class="cat-card" data-slug="{{ cat.slug }}" data-name="{{ cat.name|lower }}" data-color="{{ cat.color }}" data-image="{% if cat.image %}{{ cat.image.url|cloudinary_thumb:400 }}{% endif %}" data-emoji="{{ cat.emoji }}">
                     <div class="cat-card-bg"
-                         {% if cat.image %}style="background-image: url('{{ cat.image.url }}');"{% else %}style="background: {{ cat.color }};"{% endif %}>
+                         {% if cat.image %}style="background-image: url('{{ cat.image.url|cloudinary_thumb:400 }}');"{% else %}style="background: {{ cat.color }};"{% endif %}>
                         {% if not cat.image %}
                             <img src="{% static 'icons/categories/' %}{{ cat.slug }}.svg"
                                  alt="{{ cat.name }}"

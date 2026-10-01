@@ -1,8 +1,9 @@
+{% load cloudinary_tags %}
 <div class="product-detail-container">
     <div class="product-detail-card">
         <div class="product-detail-image">
             {% if product.image %}
-                <img src="{{ product.image.url }}" alt="{{ product.name }}">
+                <img src="{{ product.image.url|cloudinary_thumb:400 }}" alt="{{ product.name }}">
             {% else %}
                 <div class="no-image-large">📷 Sin imagen</div>
             {% endif %}
