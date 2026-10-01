@@ -12,7 +12,11 @@ from apps.stores.models import Store
 
 # ===== PÁGINA PRINCIPAL (PROTEGIDA) =====
 def product_list(request):
-    """Página principal: muestra todos los productos disponibles (solo para usuarios autenticados)."""
+    """
+    Página principal (PUBLICA, no requiere login).
+    Muestra el catálogo de productos para atraer visitantes no registrados.
+    La compra requiere autenticación, pero la navegación no.
+    """
     products = Product.objects.filter(is_available=True).select_related('store', 'category')
     
     # Búsqueda
@@ -192,7 +196,11 @@ class StoreProductListAPI(APIView):
 
 # ===== DETALLE DE PRODUCTO (AJAX, para modales) =====
 def product_detail_ajax(request, product_id):
-    """Devuelve el HTML parcial del producto para cargar en modal."""
+    """
+    Devuelve el HTML parcial del producto para cargar en modal.
+    Vista PUBLICA: cualquiera puede ver el detalle (coherente con
+    product_list publica). La compra requiere login en el checkout.
+    """
     product = get_object_or_404(Product, id=product_id, is_available=True)
     return render(request, "products/_product_detail.html", {"product": product})
 
