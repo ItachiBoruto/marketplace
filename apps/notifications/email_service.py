@@ -66,12 +66,11 @@ def send_new_order_to_admin(order, request=None):
     )
 
 
-def send_order_item_rejected(order, item, store_name, request=None):
-    """Notifica al cliente que un item fue rechazado."""
+def send_order_rejected(order, store, reason, request=None):
+    """Notifica al cliente que su pedido completo fue rechazado."""
     if not order.user.email:
         return 0
 
-    # Construir URL sin depender del request (para poder correr en background)
     base_url = getattr(settings, "SITE_URL", "")
     if request:
         order_url = request.build_absolute_uri(reverse("orders:detail", args=[order.pk]))
@@ -80,13 +79,20 @@ def send_order_item_rejected(order, item, store_name, request=None):
     else:
         order_url = reverse("orders:detail", args=[order.pk])
 
+    # Extraer contacto del comercio (puede estar vacio)
+    store_phone = getattr(store, 'phone', '') or ''
+    store_email = getattr(store, 'email', '') or ''
+
     return _base_send(
-        subject=f"Actualizacion de tu pedido {order.reference_code}",
-        template_name="emails/order_rejected_client.html",
+        subject=f"Pedido rechazado - {order.reference_code}",
+        template_name="emails/order_rejected_full.html",
         context={
             "order": order,
-            "item": item,
-            "store_name": store_name,
+            "store": store,
+            "store_name": store.name,
+            "store_phone": store_phone,
+            "store_email": store_email,
+            "reason": reason,
             "order_url": order_url,
         },
         to_emails=[order.user.email],

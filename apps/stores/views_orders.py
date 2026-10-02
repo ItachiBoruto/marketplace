@@ -5,11 +5,11 @@ from django.http import Http404, HttpResponseBadRequest
 from django.shortcuts import get_object_or_404, redirect
 from django.views.generic import DetailView, ListView
 
-from apps.notifications.email_service import send_order_item_rejected
+from apps.notifications.email_service import send_order_rejected
 from apps.utils.async_tasks import run_async
 from apps.notifications.models import notify
 from apps.orders.models import Order, OrderItem
-from apps.orders.services import reject_order_item, release_order_stock
+from apps.orders.services import release_order_stock
 
 from .mixins import ManagerRequiredMixin, RoleContextMixin
 from .models import Store, StoreUserPermission
@@ -154,148 +154,6 @@ class StoreOrderDetailView(RoleContextMixin, ManagerRequiredMixin, DetailView):
 # ============================================================
 # Acciones (POST)
 # ============================================================
-@login_required(login_url='login')
-def approve_order_item(request, store_id, order_id, item_id):
-    if request.method != 'POST':
-        return HttpResponseBadRequest("Metodo no permitido")
-
-    store = get_object_or_404(Store, id=store_id)
-    if not _check_store_manager(request, store):
-        raise Http404()
-
-    item = get_object_or_404(OrderItem, id=item_id, order_id=order_id, store=store)
-
-    if item.status != 'pending':
-        messages.warning(request, 'Este item ya fue procesado.')
-        return redirect('stores:order_detail', store_id=store.id, order_id=order_id)
-
-    item.status = 'confirmed'
-    item.save(update_fields=['status'])
-    _update_order_status_after_item_change(item.order)
-
-    notify(
-        item.order.user,
-        'order_confirmed',
-        f'Producto aprobado: {item.product_name}',
-        f'Tu pedido {item.order.reference_code} fue aprobado por {store.name}. Pronto se enviará.',
-        link=f'/orders/{item.order_id}/'
-    )
-
-    messages.success(request, f'Item "{item.product_name}" aprobado.')
-    return redirect('stores:order_detail', store_id=store.id, order_id=order_id)
-
-
-@login_required(login_url='login')
-def reject_order_item_view(request, store_id, order_id, item_id):
-    if request.method != 'POST':
-        return HttpResponseBadRequest("Metodo no permitido")
-
-    store = get_object_or_404(Store, id=store_id)
-    if not _check_store_manager(request, store):
-        raise Http404()
-
-    item = get_object_or_404(OrderItem, id=item_id, order_id=order_id, store=store)
-
-    if item.status == 'cancelled':
-        messages.warning(request, 'Este item ya fue cancelado.')
-        return redirect('stores:order_detail', store_id=store.id, order_id=order_id)
-
-    if item.status in ('shipped', 'delivered'):
-        messages.error(request, 'No puedes rechazar un item ya enviado.')
-        return redirect('stores:order_detail', store_id=store.id, order_id=order_id)
-
-    reject_order_item(item, reason=f'Rechazado por {request.user.username}')
-    _update_order_status_after_item_change(item.order)
-
-    notify(
-        item.order.user,
-        'order_rejected',
-        f'Producto rechazado: {item.product_name}',
-        f'{store.name} no pudo completar este item de tu pedido {item.order.reference_code}.',
-        link=f'/orders/{item.order_id}/'
-    )
-
-    # Email al cliente (en background)
-    run_async(
-        send_order_item_rejected,
-        order=item.order,
-        item=item,
-        store_name=store.name,
-    )
-
-    messages.success(request, f'Item "{item.product_name}" rechazado. Stock devuelto.')
-    return redirect('stores:order_detail', store_id=store.id, order_id=order_id)
-
-
-@login_required(login_url='login')
-def mark_item_shipped(request, store_id, order_id, item_id):
-    if request.method != 'POST':
-        return HttpResponseBadRequest("Metodo no permitido")
-
-    store = get_object_or_404(Store, id=store_id)
-    if not _check_store_manager(request, store):
-        raise Http404()
-
-    item = get_object_or_404(OrderItem, id=item_id, order_id=order_id, store=store)
-
-    if item.status != 'confirmed':
-        messages.warning(request, 'Solo puedes enviar items previamente confirmados.')
-        return redirect('stores:order_detail', store_id=store.id, order_id=order_id)
-
-    item.status = 'shipped'
-    item.save(update_fields=['status'])
-    _update_order_status_after_item_change(item.order)
-
-    notify(
-        item.order.user,
-        'order_shipped',
-        f'Producto enviado: {item.product_name}',
-        f'{store.name} envió tu pedido {item.order.reference_code}.',
-        link=f'/orders/{item.order_id}/'
-    )
-
-    messages.success(request, f'Item "{item.product_name}" marcado como enviado.')
-    return redirect('stores:order_detail', store_id=store.id, order_id=order_id)
-
-
-@login_required(login_url="login")
-def mark_item_delivered(request, store_id, order_id, item_id):
-    """Marca un item como entregado al cliente."""
-    if request.method != "POST":
-        return HttpResponseBadRequest("Metodo no permitido")
-
-    store = get_object_or_404(Store, id=store_id)
-    if not _check_store_manager(request, store):
-        raise Http404()
-
-    item = get_object_or_404(OrderItem, id=item_id, order_id=order_id, store=store)
-
-    # Permitir marcar entregado si:
-    # - Esta confirmado Y el pedido es de retiro (pickup)
-    # - O esta enviado (delivery)
-    if item.status == "confirmed" and item.order.shipping_method != "pickup":
-        messages.warning(request, "Debes marcar como enviado primero.")
-        return redirect("stores:order_detail", store_id=store.id, order_id=order_id)
-
-    if item.status not in ("confirmed", "shipped"):
-        messages.warning(request, "Este item no puede marcarse como entregado.")
-        return redirect("stores:order_detail", store_id=store.id, order_id=order_id)
-
-    item.status = "delivered"
-    item.save(update_fields=["status"])
-    _update_order_status_after_item_change(item.order)
-
-    notify(
-        item.order.user,
-        "order_completed",
-        f"Producto entregado: {item.product_name}",
-        f"{store.name} marco tu pedido {item.order.reference_code} como entregado.",
-        link=f"/orders/{item.order_id}/"
-    )
-
-    messages.success(request, f'Item "{item.product_name}" marcado como entregado.')
-    return redirect("stores:order_detail", store_id=store.id, order_id=order_id)
-
 # ============================================================
 # Verificacion de pago del pedido (nivel pedido, no item)
 # ============================================================
@@ -357,6 +215,11 @@ def order_reject_payment(request, store_id, order_id):
         messages.warning(request, 'Este pedido ya fue procesado.')
         return redirect('stores:order_detail', store_id=store.id, order_id=order_id)
 
+    # Motivo del rechazo (opcional, viene del form)
+    reason = (request.POST.get('reject_reason') or '').strip()
+    if not reason:
+        reason = 'El comercio no pudo verificar el pago recibido.'
+
     # Liberar stock reservado y cancelar
     release_order_stock(order, reason=f'Pago rechazado por {store.name}')
     order.status = 'cancelled'
@@ -365,12 +228,21 @@ def order_reject_payment(request, store_id, order_id):
     # Marcar los items de este comercio como cancelados
     order.items.filter(store=store).exclude(status='cancelled').update(status='cancelled')
 
+    # Notificacion in-app
     notify(
         order.user,
         'order_rejected',
         f'Pedido cancelado - {order.reference_code}',
-        f'{store.name} no pudo verificar tu pago. Contacta al comercio para mas informacion.',
+        f'{store.name} rechazo el pago: {reason}',
         link=f'/orders/{order.pk}/'
+    )
+
+    # Email al cliente (en background)
+    run_async(
+        send_order_rejected,
+        order=order,
+        store=store,
+        reason=reason,
     )
 
     messages.success(request, f'Pedido {order.reference_code} cancelado. Stock liberado.')

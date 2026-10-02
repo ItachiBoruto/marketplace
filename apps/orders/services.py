@@ -167,38 +167,6 @@ def release_order_stock(order, reason='Liberación manual'):
 
 
 @transaction.atomic
-def reject_order_item(item, reason='Rechazado por el vendedor'):
-    """
-    Rechaza un item específico: devuelve su stock.
-    """
-    # Solo bloquear la fila de OrderItem, no las tablas relacionadas
-    # (evita el error "FOR UPDATE cannot be applied to the nullable side of an outer join")
-    item = OrderItem.objects.select_for_update(
-        of=("self",)
-    ).select_related('product', 'store').get(pk=item.pk)
-
-    if item.status == 'cancelled':
-        return False
-
-    if item.product_id is not None:
-        product = Product.objects.select_for_update().get(pk=item.product_id)
-        product.stock += item.quantity
-        product.save(update_fields=['stock'])
-
-        StockMovement.objects.create(
-            store=item.store,
-            product=product,
-            quantity_change=item.quantity,
-            movement_type='RETURN',
-            created_by='system',
-            order_reference=f'{reason} - Pedido #{item.order_id}',
-        )
-
-    item.status = 'cancelled'
-    item.save(update_fields=['status'])
-    return True
-
-
 def expire_old_reservations():
     """
     Libera el stock de pedidos cuya reserva expiró.
