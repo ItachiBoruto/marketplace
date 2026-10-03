@@ -2,7 +2,7 @@ from django.conf import settings
 from django.contrib import admin, messages
 
 from apps.notifications.models import notify
-from .models import ExchangeRate, Order, OrderItem
+from .models import ExchangeRate, Order, OrderItem, OrderClaim, OrderClaimMessage
 from .services import release_order_stock
 
 
@@ -124,3 +124,64 @@ class ExchangeRateAdmin(admin.ModelAdmin):
         return request.user.is_superuser
     def has_delete_permission(self, request, obj=None):
         return request.user.is_superuser
+
+
+# ============================================================
+# ADMIN - Sistema de reclamos
+# ============================================================
+
+
+class OrderClaimMessageInline(admin.TabularInline):
+    model = OrderClaimMessage
+    extra = 0
+    fields = ('sender', 'message', 'attachment', 'is_system', 'created_at')
+    readonly_fields = ('created_at',)
+    can_delete = False
+
+
+@admin.register(OrderClaim)
+class OrderClaimAdmin(admin.ModelAdmin):
+    list_display = (
+        'id', 'order_link', 'claim_type', 'status',
+        'opened_by', 'created_at', 'resolved_at',
+    )
+    list_filter = ('status', 'claim_type', 'created_at')
+    search_fields = (
+        'order__reference_code', 'opened_by__username',
+        'description', 'resolution',
+    )
+    readonly_fields = ('created_at', 'updated_at')
+    inlines = [OrderClaimMessageInline]
+
+    fieldsets = (
+        ('Información básica', {
+            'fields': ('order', 'opened_by', 'claim_type', 'status', 'created_at', 'updated_at')
+        }),
+        ('Descripción del problema', {
+            'fields': ('description', 'evidence')
+        }),
+        ('Resolución', {
+            'fields': ('resolution', 'resolution_evidence', 'resolved_by', 'resolved_at')
+        }),
+        ('Escalado', {
+            'classes': ('collapse',),
+            'fields': ('escalated_at', 'escalated_reason')
+        }),
+        ('Cierre', {
+            'classes': ('collapse',),
+            'fields': ('closed_by', 'closed_at')
+        }),
+    )
+
+    def order_link(self, obj):
+        return obj.order.reference_code
+    order_link.short_description = 'Pedido'
+    order_link.admin_order_field = 'order__reference_code'
+
+
+@admin.register(OrderClaimMessage)
+class OrderClaimMessageAdmin(admin.ModelAdmin):
+    list_display = ('id', 'claim', 'sender', 'is_system', 'created_at')
+    list_filter = ('is_system', 'created_at')
+    search_fields = ('claim__order__reference_code', 'sender__username', 'message')
+    readonly_fields = ('created_at',)

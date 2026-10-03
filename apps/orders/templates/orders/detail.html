@@ -83,6 +83,45 @@
             <div class="detail-wrapper">
                 <a href="{% url 'orders:list' %}" class="btn-back">← Volver a mis pedidos</a>
 
+                {# ===== RECLAMO ===== #}
+                {% if claim %}
+                    {# Ya existe un reclamo (activo o cerrado) #}
+                    <div style="background:{% if claim.status == 'closed' %}#d4edda{% elif claim.status == 'escalated' %}#f8d7da{% else %}#fff3cd{% endif %};
+                                border-left:4px solid {% if claim.status == 'closed' %}#28a745{% elif claim.status == 'escalated' %}#dc3545{% else %}#ffc107{% endif %};
+                                padding:14px 18px;border-radius:8px;margin-bottom:16px;">
+                        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
+                            <div>
+                                <strong style="color:{% if claim.status == 'closed' %}#155724{% elif claim.status == 'escalated' %}#721c24{% else %}#856404{% endif %};">
+                                    Reclamo #{{ claim.pk }} - {{ claim.get_status_display }}
+                                </strong>
+                                <p style="margin:4px 0 0;font-size:0.85rem;color:#555;">
+                                    {{ claim.get_claim_type_display }} · {{ claim.created_at|date:"d/m/Y H:i" }}
+                                </p>
+                            </div>
+                            <a href="{% url 'orders:claim_detail' claim.pk %}"
+                               style="display:inline-block;padding:8px 16px;background:#3498db;color:white;text-decoration:none;border-radius:6px;font-size:0.85rem;font-weight:600;">
+                                Ver reclamo →
+                            </a>
+                        </div>
+                    </div>
+                {% elif puede_reclamar %}
+                    {# Puede abrir reclamo #}
+                    <div style="background:#fff3cd;border-left:4px solid #ffc107;padding:14px 18px;border-radius:8px;margin-bottom:16px;">
+                        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
+                            <div>
+                                <strong style="color:#856404;">¿Tienes un problema con este pedido?</strong>
+                                <p style="margin:4px 0 0;font-size:0.85rem;color:#555;">
+                                    Puedes reportarlo y el comercio lo revisará.
+                                </p>
+                            </div>
+                            <a href="{% url 'orders:claim_create' order.pk %}"
+                               style="display:inline-block;padding:8px 16px;background:#f39c12;color:white;text-decoration:none;border-radius:6px;font-size:0.85rem;font-weight:600;">
+                                ⚠️ Reportar problema
+                            </a>
+                        </div>
+                    </div>
+                {% endif %}
+
                 <!-- Estado general -->
                 <div class="detail-card">
                     <h2>Pedido {{ order.reference_code }}</h2>

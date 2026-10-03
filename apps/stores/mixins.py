@@ -74,14 +74,21 @@ class RoleContextMixin:
         # Contadores para el dashboard (solo si hay store)
         store_id = getattr(self, "store_id", None)
         if store_id:
-            from apps.orders.models import Order
+            from apps.orders.models import Order, OrderClaim
             # Contar PEDIDOS unicos con items pendientes (no items)
             context["pending_orders_count"] = Order.objects.filter(
                 items__store_id=store_id,
                 items__status="pending"
             ).distinct().count()
+
+            # Contar reclamos activos (open, in_review, resolved, escalated)
+            context["pending_claims_count"] = OrderClaim.objects.filter(
+                order__items__store_id=store_id,
+                status__in=('open', 'in_review', 'resolved', 'escalated'),
+            ).distinct().count()
         else:
             context["pending_orders_count"] = 0
+            context["pending_claims_count"] = 0
 
         return context
 

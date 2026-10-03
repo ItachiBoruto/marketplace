@@ -1,3 +1,4 @@
+from . import views_claims
 from django.urls import path
 
 from apps.inventory.views_admin import MovementListView, StockAdjustView
@@ -33,6 +34,12 @@ urlpatterns = [
     path("dashboard/<int:store_id>/orders/<int:order_id>/reject/", views_orders.order_reject_payment, name="order_reject_payment"),
     path("dashboard/<int:store_id>/orders/<int:order_id>/ship/", views_orders.order_mark_shipped, name="order_mark_shipped"),
     path("dashboard/<int:store_id>/orders/<int:order_id>/deliver/", views_orders.order_mark_delivered, name="order_mark_delivered"),
+    # ===== Sistema de reclamos =====
+    path("dashboard/<int:store_id>/claims/", views_claims.StoreClaimsListView.as_view(), name="store_claims_list"),
+    path("dashboard/<int:store_id>/claims/<int:claim_id>/", views_claims.store_claim_detail, name="store_claim_detail"),
+    path("dashboard/<int:store_id>/claims/<int:claim_id>/message/", views_claims.store_claim_add_message, name="store_claim_add_message"),
+    path("dashboard/<int:store_id>/claims/<int:claim_id>/resolve/", views_claims.store_claim_resolve, name="store_claim_resolve"),
+    path("dashboard/<int:store_id>/claims/<int:claim_id>/escalate/", views_claims.store_claim_escalate, name="store_claim_escalate"),
     # Usuarios del comercio (solo superuser)
     path("dashboard/<int:store_id>/users/", views_users.StoreUsersView.as_view(), name="users"),
     path("dashboard/<int:store_id>/users/search/", views_users.search_users, name="users_search"),

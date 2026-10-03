@@ -1,0 +1,179 @@
+{% extends "stores/dashboard/base.html" %}
+{% load static %}
+
+{% block title %}Reclamos - {{ store.name }}{% endblock %}
+
+{% block content %}
+<style>
+    .claims-header { margin-bottom: 20px; }
+    .claims-header h1 {
+        margin: 0 0 6px; font-size: 1.4rem; color: #1a1a2e;
+    }
+    .claims-header p { color: #666; font-size: 0.9rem; margin: 0; }
+
+    .filter-tabs {
+        display: flex; flex-wrap: wrap; gap: 6px; margin: 20px 0;
+        border-bottom: 2px solid #f0f0f0; padding-bottom: 10px;
+    }
+    .filter-tabs a {
+        display: inline-flex; align-items: center; gap: 6px;
+        padding: 8px 14px; border-radius: 8px; text-decoration: none;
+        color: #555; font-size: 0.88rem; font-weight: 500;
+        background: #f8f9fa; transition: all 0.15s;
+    }
+    .filter-tabs a:hover { background: #e9ecef; color: #333; }
+    .filter-tabs a.active { background: #e94560; color: white; }
+    .filter-tabs a .count {
+        background: rgba(0,0,0,0.1); padding: 2px 6px; border-radius: 10px;
+        font-size: 0.75rem; font-weight: 600;
+    }
+    .filter-tabs a.active .count { background: rgba(255,255,255,0.25); }
+
+    .claim-card {
+        background: white; border-radius: 12px; padding: 18px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.06); margin-bottom: 12px;
+        border-left: 4px solid #ddd;
+        display: flex; justify-content: space-between;
+        align-items: center; flex-wrap: wrap; gap: 14px;
+        transition: transform 0.15s, box-shadow 0.15s;
+    }
+    .claim-card:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 14px rgba(0,0,0,0.1);
+    }
+    .claim-card.status-open { border-left-color: #ffc107; }
+    .claim-card.status-in_review { border-left-color: #3498db; }
+    .claim-card.status-resolved { border-left-color: #28a745; }
+    .claim-card.status-escalated { border-left-color: #dc3545; }
+    .claim-card.status-closed { border-left-color: #6c757d; opacity: 0.7; }
+    .claim-card.status-rejected { border-left-color: #6c757d; opacity: 0.7; }
+
+    .claim-info { flex: 1; min-width: 200px; }
+    .claim-info h3 {
+        margin: 0 0 4px; font-size: 1rem; color: #1a1a2e;
+        display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+    }
+    .claim-info .pedido {
+        font-size: 0.82rem; color: #666; margin: 0;
+    }
+    .claim-info .tipo {
+        font-size: 0.85rem; color: #333; margin: 6px 0 0;
+        font-weight: 500;
+    }
+    .claim-info .cliente {
+        font-size: 0.8rem; color: #888; margin: 4px 0 0;
+    }
+    .claim-info .preview {
+        font-size: 0.85rem; color: #666; margin: 8px 0 0;
+        overflow: hidden; text-overflow: ellipsis;
+        display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+    }
+
+    .status-badge {
+        display: inline-block; padding: 4px 10px; border-radius: 12px;
+        font-size: 0.75rem; font-weight: 600;
+    }
+    .status-badge.open { background: #fff3cd; color: #856404; }
+    .status-badge.in_review { background: #cce5ff; color: #004085; }
+    .status-badge.resolved { background: #d4edda; color: #155724; }
+    .status-badge.escalated { background: #f8d7da; color: #721c24; }
+    .status-badge.closed { background: #e2e3e5; color: #383d41; }
+    .status-badge.rejected { background: #e2e3e5; color: #383d41; }
+
+    .btn-view {
+        display: inline-block; padding: 10px 20px; border-radius: 8px;
+        background: #e94560; color: white; text-decoration: none;
+        font-size: 0.85rem; font-weight: 600; white-space: nowrap;
+    }
+    .btn-view:hover { background: #d63850; }
+
+    .empty-state {
+        text-align: center; padding: 60px 20px;
+        background: white; border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+    .empty-state .icon { font-size: 3rem; display: block; margin-bottom: 12px; }
+    .empty-state h3 { margin: 0 0 6px; color: #1a1a2e; }
+    .empty-state p { color: #888; margin: 0; }
+
+    .pagination {
+        display: flex; justify-content: center; gap: 6px; margin-top: 24px;
+    }
+    .pagination a, .pagination span {
+        padding: 8px 14px; border-radius: 8px; text-decoration: none;
+        background: white; color: #555; font-size: 0.9rem;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    }
+    .pagination .current { background: #e94560; color: white; }
+</style>
+
+<div class="claims-header">
+    <h1>⚠️ Reclamos de {{ store.name }}</h1>
+    <p>Aquí puedes ver y responder los reclamos que los clientes abren sobre tus pedidos.</p>
+</div>
+
+<div class="filter-tabs">
+    <a href="?status=active" class="{% if current_status == 'active' %}active{% endif %}">
+        Activos <span class="count">{{ count_active }}</span>
+    </a>
+    <a href="?status=open" class="{% if current_status == 'open' %}active{% endif %}">
+        Nuevos <span class="count">{{ count_open }}</span>
+    </a>
+    <a href="?status=in_review" class="{% if current_status == 'in_review' %}active{% endif %}">
+        En revisión <span class="count">{{ count_in_review }}</span>
+    </a>
+    <a href="?status=resolved" class="{% if current_status == 'resolved' %}active{% endif %}">
+        Resueltos <span class="count">{{ count_resolved }}</span>
+    </a>
+    <a href="?status=escalated" class="{% if current_status == 'escalated' %}active{% endif %}">
+        Escalados <span class="count">{{ count_escalated }}</span>
+    </a>
+    <a href="?status=closed" class="{% if current_status == 'closed' %}active{% endif %}">
+        Cerrados <span class="count">{{ count_closed }}</span>
+    </a>
+    <a href="?status=all" class="{% if current_status == 'all' %}active{% endif %}">
+        Todos <span class="count">{{ count_all }}</span>
+    </a>
+</div>
+
+{% if claims %}
+    {% for claim in claims %}
+        <div class="claim-card status-{{ claim.status }}">
+            <div class="claim-info">
+                <h3>
+                    Reclamo #{{ claim.pk }}
+                    <span class="status-badge {{ claim.status }}">{{ claim.get_status_display }}</span>
+                </h3>
+                <p class="pedido">
+                    Pedido: <strong>{{ claim.order.reference_code }}</strong>
+                    · Abierto el {{ claim.created_at|date:"d/m/Y H:i" }}
+                </p>
+                <p class="tipo">{{ claim.get_claim_type_display }}</p>
+                <p class="cliente">Cliente: {{ claim.opened_by.username }}</p>
+                <p class="preview">{{ claim.description|truncatewords:20 }}</p>
+            </div>
+            <a href="{% url 'stores:store_claim_detail' store.id claim.pk %}" class="btn-view">
+                Ver y responder →
+            </a>
+        </div>
+    {% endfor %}
+
+    {% if is_paginated %}
+        <div class="pagination">
+            {% if page_obj.has_previous %}
+                <a href="?status={{ current_status }}&page={{ page_obj.previous_page_number }}">← Anterior</a>
+            {% endif %}
+            <span class="current">Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+            {% if page_obj.has_next %}
+                <a href="?status={{ current_status }}&page={{ page_obj.next_page_number }}">Siguiente →</a>
+            {% endif %}
+        </div>
+    {% endif %}
+{% else %}
+    <div class="empty-state">
+        <span class="icon">✅</span>
+        <h3>No hay reclamos {{ current_status }}</h3>
+        <p>Cuando un cliente reporte un problema, aparecerá aquí.</p>
+    </div>
+{% endif %}
+{% endblock %}

@@ -236,3 +236,159 @@ class ExchangeRate(models.Model):
         super().save(*args, **kwargs)
         if self.is_active:
             ExchangeRate.objects.exclude(pk=self.pk).update(is_active=False)
+
+
+# ============================================================
+# SISTEMA DE RECLAMOS
+# ============================================================
+
+
+class OrderClaim(models.Model):
+    """
+    Reclamo formal de un cliente sobre un pedido.
+
+    Un pedido puede tener a lo sumo UN reclamo activo.
+    Si el cliente quiere reportar otro problema, debe esperar a que
+    el anterior se cierre.
+    """
+
+    CLAIM_TYPE_CHOICES = [
+        ('no_received', 'No recibí el producto'),
+        ('wrong_product', 'Recibí un producto distinto'),
+        ('paid_more', 'Pagué de más por error'),
+        ('paid_less', 'Pagué de menos / referencia mal anotada'),
+        ('not_confirmed', 'El comercio no confirmó mi pago'),
+        ('other', 'Otro problema'),
+    ]
+
+    STATUS_CHOICES = [
+        ('open', 'Abierto'),
+        ('in_review', 'En revisión por el comercio'),
+        ('resolved', 'Resuelto por el comercio'),
+        ('closed', 'Cerrado'),
+        ('escalated', 'Escalado al administrador'),
+        ('rejected', 'Rechazado por el administrador'),
+    ]
+
+    # ===== Relación con el pedido =====
+    order = models.OneToOneField(
+        Order, on_delete=models.CASCADE,
+        related_name='claim',
+        verbose_name='Pedido',
+    )
+    opened_by = models.ForeignKey(
+        User, on_delete=models.PROTECT,
+        related_name='claims_opened',
+        verbose_name='Abierto por',
+    )
+
+    # ===== Contenido del reclamo =====
+    claim_type = models.CharField(
+        max_length=20, choices=CLAIM_TYPE_CHOICES,
+        verbose_name='Tipo de problema',
+    )
+    description = models.TextField(
+        verbose_name='Descripción del problema',
+        help_text='Explica qué pasó con el pedido.',
+    )
+    evidence = models.ImageField(
+        upload_to='claims/evidence/', blank=True, null=True,
+        verbose_name='Evidencia (imagen)',
+        help_text='Comprobante, captura de pantalla, foto del producto, etc.',
+    )
+
+    # ===== Estado y resolución =====
+    status = models.CharField(
+        max_length=20, choices=STATUS_CHOICES, default='open',
+        verbose_name='Estado',
+    )
+    resolution = models.TextField(
+        blank=True,
+        verbose_name='Resolución',
+        help_text='Cómo el comercio resolvió el reclamo.',
+    )
+    resolution_evidence = models.ImageField(
+        upload_to='claims/resolutions/', blank=True, null=True,
+        verbose_name='Evidencia de resolución (imagen)',
+    )
+
+    # ===== Quién y cuándo =====
+    resolved_by = models.ForeignKey(
+        User, on_delete=models.SET_NULL, null=True, blank=True,
+        related_name='claims_resolved',
+        verbose_name='Resuelto por',
+    )
+    resolved_at = models.DateTimeField(null=True, blank=True, verbose_name='Resuelto el')
+
+    escalated_at = models.DateTimeField(null=True, blank=True, verbose_name='Escalado el')
+    escalated_reason = models.TextField(blank=True, verbose_name='Motivo del escalado')
+
+    closed_by = models.ForeignKey(
+        User, on_delete=models.SET_NULL, null=True, blank=True,
+        related_name='claims_closed',
+        verbose_name='Cerrado por',
+    )
+    closed_at = models.DateTimeField(null=True, blank=True, verbose_name='Cerrado el')
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = 'Reclamo'
+        verbose_name_plural = 'Reclamos'
+        indexes = [
+            models.Index(fields=['status', '-created_at']),
+            models.Index(fields=['opened_by', '-created_at']),
+        ]
+
+    def __str__(self):
+        return f"Reclamo #{self.pk} - {self.order.reference_code} ({self.get_status_display()})"
+
+    @property
+    def is_active(self):
+        """El reclamo sigue en curso (no cerrado ni rechazado)."""
+        return self.status in ('open', 'in_review', 'resolved', 'escalated')
+
+
+class OrderClaimMessage(models.Model):
+    """
+    Mensaje dentro de la conversación de un reclamo.
+    Permite chat entre cliente y comercio, con adjuntos opcionales.
+    """
+
+    claim = models.ForeignKey(
+        OrderClaim, on_delete=models.CASCADE,
+        related_name='messages',
+        verbose_name='Reclamo',
+    )
+    sender = models.ForeignKey(
+        User, on_delete=models.PROTECT,
+        related_name='claim_messages',
+        verbose_name='Remitente',
+    )
+    message = models.TextField(
+        verbose_name='Mensaje',
+    )
+    attachment = models.ImageField(
+        upload_to='claims/attachments/', blank=True, null=True,
+        verbose_name='Adjunto (imagen)',
+    )
+    is_system = models.BooleanField(
+        default=False,
+        verbose_name='Mensaje del sistema',
+        help_text='Mensajes automáticos (ej: "reclamo abierto", "escalado a admin").',
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['created_at']
+        verbose_name = 'Mensaje de reclamo'
+        verbose_name_plural = 'Mensajes de reclamo'
+        indexes = [
+            models.Index(fields=['claim', 'created_at']),
+        ]
+
+    def __str__(self):
+        tipo = 'sistema' if self.is_system else self.sender.username
+        return f"{self.claim_id} - {tipo} - {self.created_at:%d/%m %H:%M}"

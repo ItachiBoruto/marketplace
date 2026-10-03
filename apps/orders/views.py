@@ -261,7 +261,22 @@ def order_detail(request, order_id):
         Order.objects.prefetch_related('items__store'),
         id=order_id, user=request.user
     )
-    return render(request, 'orders/detail.html', {'order': order})
+
+    # Info del reclamo (si existe)
+    claim = getattr(order, 'claim', None)
+
+    # Estados en los que se permite abrir un reclamo
+    ESTADOS_RECLAMABLES = ('payment_submitted', 'confirmed', 'shipped', 'completed')
+    puede_reclamar = (
+        order.status in ESTADOS_RECLAMABLES and
+        (claim is None or claim.status not in ('open', 'in_review', 'resolved', 'escalated'))
+    )
+
+    return render(request, 'orders/detail.html', {
+        'order': order,
+        'claim': claim,
+        'puede_reclamar': puede_reclamar,
+    })
 
 
 def payment_qr(request):

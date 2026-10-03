@@ -1,0 +1,243 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Reclamo #{{ claim.pk }} - {{ order.reference_code }}{% endblock %}
+
+{% block content %}
+<style>
+    .claim-wrapper { max-width: 800px; margin: 24px auto; padding: 0 16px; }
+    .claim-header {
+        background: white; border-radius: 12px; padding: 20px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.06); margin-bottom: 16px;
+    }
+    .claim-header h1 { margin: 0 0 6px; font-size: 1.2rem; color: #1a1a2e; }
+    .claim-header .meta { font-size: 0.85rem; color: #666; }
+    .status-badge {
+        display: inline-block; padding: 4px 12px; border-radius: 16px;
+        font-size: 0.8rem; font-weight: 600; margin-top: 8px;
+    }
+    .status-open { background: #fff3cd; color: #856404; }
+    .status-in_review { background: #cce5ff; color: #004085; }
+    .status-resolved { background: #d4edda; color: #155724; }
+    .status-closed { background: #e2e3e5; color: #383d41; }
+    .status-escalated { background: #f8d7da; color: #721c24; }
+    .status-rejected { background: #f8d7da; color: #721c24; }
+
+    .claim-info {
+        background: #f8f9fa; border-left: 4px solid #6c757d;
+        padding: 14px 18px; border-radius: 8px; margin-bottom: 16px;
+        font-size: 0.9rem; color: #333;
+    }
+    .claim-info strong { color: #1a1a2e; }
+
+    .chat-container {
+        background: white; border-radius: 12px; padding: 20px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.06); margin-bottom: 16px;
+    }
+    .chat-container h2 {
+        margin: 0 0 16px; font-size: 1rem; color: #1a1a2e;
+        padding-bottom: 10px; border-bottom: 1px solid #eee;
+    }
+
+    .message {
+        padding: 12px 14px; margin-bottom: 12px; border-radius: 8px;
+        font-size: 0.92rem; line-height: 1.5;
+    }
+    .message-mine { background: #eaf2f8; margin-left: 30px; }
+    .message-other { background: #f8f9fa; margin-right: 30px; }
+    .message-system {
+        background: #fff3cd; text-align: center; font-size: 0.85rem;
+        color: #856404; font-style: italic; margin: 0 40px;
+    }
+    .message-header {
+        display: flex; justify-content: space-between;
+        margin-bottom: 6px; font-size: 0.8rem; color: #666;
+    }
+    .message-sender { font-weight: 600; color: #333; }
+    .message-text { color: #2c3e50; white-space: pre-wrap; }
+    .message-attachment { margin-top: 8px; }
+    .message-attachment img {
+        max-width: 100%; max-height: 300px;
+        border-radius: 6px; border: 1px solid #ddd;
+    }
+
+    .message-form {
+        background: white; border-radius: 12px; padding: 20px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+    .message-form textarea {
+        width: 100%; padding: 10px 12px; border: 1px solid #ddd;
+        border-radius: 8px; font-size: 0.95rem; font-family: inherit;
+        box-sizing: border-box; resize: vertical;
+    }
+    .message-form input[type="file"] {
+        display: block; margin-top: 8px; font-size: 0.85rem;
+    }
+    .message-form button {
+        margin-top: 12px; padding: 10px 24px; border: none;
+        border-radius: 8px; background: #3498db; color: white;
+        font-size: 0.9rem; font-weight: 600; cursor: pointer;
+    }
+    .message-form button:hover { background: #2980b9; }
+
+    .actions-bar {
+        display: flex; gap: 10px; flex-wrap: wrap; margin-top: 16px;
+    }
+    .btn-resolve {
+        padding: 12px 20px; border: none; border-radius: 8px;
+        background: #28a745; color: white; font-size: 0.9rem;
+        font-weight: 600; cursor: pointer;
+    }
+    .btn-escalate {
+        padding: 12px 20px; border: none; border-radius: 8px;
+        background: #dc3545; color: white; font-size: 0.9rem;
+        font-weight: 600; cursor: pointer;
+    }
+
+    .closed-notice {
+        background: #e2e3e5; padding: 14px; border-radius: 8px;
+        text-align: center; color: #555; font-size: 0.9rem;
+    }
+</style>
+
+<div class="claim-wrapper">
+    <a href="{% url 'orders:detail' claim.order.pk %}" style="color:#666;text-decoration:none;font-size:0.9rem;display:inline-block;margin-bottom:12px;">← Volver al pedido</a>
+
+    <div class="claim-header">
+        <h1>Reclamo #{{ claim.pk }}</h1>
+        <div class="meta">
+            Pedido {{ claim.order.reference_code }} · Abierto el {{ claim.created_at|date:"d/m/Y H:i" }}
+        </div>
+        <span class="status-badge status-{{ claim.status }}">{{ claim.get_status_display }}</span>
+    </div>
+
+    <div class="claim-info">
+        <p style="margin:0 0 6px;"><strong>Tipo:</strong> {{ claim.get_claim_type_display }}</p>
+        <p style="margin:0;"><strong>Descripción:</strong></p>
+        <p style="margin:6px 0 0;white-space:pre-wrap;">{{ claim.description }}</p>
+        {% if claim.evidence %}
+            <div style="margin-top:10px;">
+                <strong>Evidencia:</strong><br>
+                <img src="{{ claim.evidence.url }}" alt="Evidencia"
+                     style="max-width:100%;max-height:250px;border-radius:6px;margin-top:6px;">
+            </div>
+        {% endif %}
+    </div>
+
+    {% if claim.status == 'resolved' and claim.resolution %}
+        <div style="background:#d4edda;border-left:4px solid #28a745;padding:14px 18px;border-radius:8px;margin-bottom:16px;">
+            <strong style="color:#155724;">✓ Resolución del comercio:</strong>
+            <p style="margin:8px 0 0;color:#155724;white-space:pre-wrap;">{{ claim.resolution }}</p>
+            {% if claim.resolution_evidence %}
+                <img src="{{ claim.resolution_evidence.url }}" alt="Evidencia de resolución"
+                     style="max-width:100%;max-height:250px;border-radius:6px;margin-top:8px;">
+            {% endif %}
+        </div>
+    {% endif %}
+
+    {% if claim.status == 'escalated' %}
+        <div style="background:#f8d7da;border-left:4px solid #dc3545;padding:14px 18px;border-radius:8px;margin-bottom:16px;">
+            <strong style="color:#721c24;">⚠️ Escalado al administrador</strong>
+            <p style="margin:8px 0 0;color:#721c24;font-size:0.9rem;">
+                Tu reclamo fue enviado al administrador del marketplace. Te contactaremos pronto.
+            </p>
+        </div>
+    {% endif %}
+
+    <div class="chat-container">
+        <h2>💬 Conversación</h2>
+
+        {% for msg in claim_messages %}
+            {% if msg.is_system %}
+                <div class="message message-system">
+                    {{ msg.message }}
+                    <div style="margin-top:4px;font-size:0.75rem;">{{ msg.created_at|date:"d/m/Y H:i" }}</div>
+                </div>
+            {% elif msg.sender == user %}
+                <div class="message message-mine">
+                    <div class="message-header">
+                        <span class="message-sender">Tú</span>
+                        <span>{{ msg.created_at|date:"d/m/Y H:i" }}</span>
+                    </div>
+                    <div class="message-text">{{ msg.message }}</div>
+                    {% if msg.attachment %}
+                        <div class="message-attachment">
+                            <img src="{{ msg.attachment.url }}" alt="Adjunto">
+                        </div>
+                    {% endif %}
+                </div>
+            {% else %}
+                <div class="message message-other">
+                    <div class="message-header">
+                        <span class="message-sender">{{ msg.sender.username }}</span>
+                        <span>{{ msg.created_at|date:"d/m/Y H:i" }}</span>
+                    </div>
+                    <div class="message-text">{{ msg.message }}</div>
+                    {% if msg.attachment %}
+                        <div class="message-attachment">
+                            <img src="{{ msg.attachment.url }}" alt="Adjunto">
+                        </div>
+                    {% endif %}
+                </div>
+            {% endif %}
+        {% endfor %}
+    </div>
+
+    {# CHAT ACTIVO: solo en open / in_review #}
+    {% if puede_responder %}
+        <form method="post" action="{% url 'orders:claim_add_message' claim.pk %}"
+              enctype="multipart/form-data" class="message-form">
+            {% csrf_token %}
+            {{ form.message }}
+            {{ form.attachment }}
+            <button type="submit">📤 Enviar mensaje</button>
+        </form>
+    {% endif %}
+
+    {# CONFIRMACION: cuando el comercio marco resuelto #}
+    {% if puede_confirmar %}
+        <div style="background:#d4edda;border:2px solid #28a745;padding:18px;border-radius:12px;margin-top:16px;text-align:center;">
+            <h3 style="margin:0 0 8px;color:#155724;">¿La resolución fue satisfactoria?</h3>
+            <p style="margin:0 0 16px;color:#155724;font-size:0.9rem;">
+                El comercio marcó este reclamo como resuelto. Por favor confirma si estás conforme.
+            </p>
+            <div class="actions-bar" style="justify-content:center;">
+                <form method="post" action="{% url 'orders:claim_close' claim.pk %}" style="display:inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn-resolve"
+                            onclick="return confirm('¿Confirmas que el problema fue resuelto?');">
+                        ✓ Sí, fue resuelto
+                    </button>
+                </form>
+                <form method="post" action="{% url 'orders:claim_escalate' claim.pk %}" style="display:inline;">
+                    {% csrf_token %}
+                    <input type="hidden" name="escalate_reason" id="escalateReason">
+                    <button type="button" class="btn-escalate"
+                            onclick="escalarReclamo()">
+                        ⚠️ No estoy conforme
+                    </button>
+                </form>
+            </div>
+        </div>
+    {% endif %}
+
+    {# CHAT CERRADO: cualquier otro estado #}
+    {% if not puede_responder and not puede_confirmar %}
+        <div class="closed-notice">
+            Este reclamo ya está {{ claim.get_status_display|lower }}.
+        </div>
+    {% endif %}
+</div>
+
+<script>
+function escalarReclamo() {
+    var razon = prompt('¿Por qué no estás conforme con la resolución? (mínimo 10 caracteres)');
+    if (razon && razon.length >= 10) {
+        document.getElementById('escalateReason').value = razon;
+        document.getElementById('escalateReason').form.submit();
+    } else if (razon) {
+        alert('La razón debe tener al menos 10 caracteres.');
+    }
+}
+</script>
+{% endblock %}

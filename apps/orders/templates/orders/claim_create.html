@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Reportar problema - {{ order.reference_code }}{% endblock %}
+
+{% block content %}
+<style>
+    .claim-wrapper { max-width: 700px; margin: 24px auto; padding: 0 16px; }
+    .claim-card {
+        background: white; border-radius: 12px; padding: 24px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+    .claim-card h1 { margin: 0 0 6px; font-size: 1.3rem; color: #1a1a2e; }
+    .claim-card .sub { font-size: 0.9rem; color: #666; margin: 0 0 20px; }
+    .info-box {
+        background: #fff3cd; border-left: 4px solid #ffc107;
+        padding: 14px 18px; border-radius: 8px; margin-bottom: 20px;
+        font-size: 0.9rem; color: #856404;
+    }
+    .form-row { margin-bottom: 16px; }
+    .form-row label {
+        display: block; font-weight: 600; color: #333;
+        font-size: 0.9rem; margin-bottom: 6px;
+    }
+    .form-control {
+        width: 100%; padding: 10px 12px; border: 1px solid #ddd;
+        border-radius: 8px; font-size: 0.95rem; font-family: inherit;
+        box-sizing: border-box;
+    }
+    .form-control:focus { outline: none; border-color: #e94560; }
+    textarea.form-control { resize: vertical; }
+    .help-text { font-size: 0.8rem; color: #888; margin-top: 4px; }
+    .errors { color: #c0392b; font-size: 0.85rem; margin-top: 6px; }
+    .btn-submit {
+        width: 100%; padding: 14px; border: none; border-radius: 8px;
+        background: #e94560; color: white; font-size: 1rem;
+        font-weight: 600; cursor: pointer;
+    }
+    .btn-submit:hover { background: #d63850; }
+    .btn-cancel {
+        display: block; text-align: center; margin-top: 12px;
+        color: #666; font-size: 0.9rem; text-decoration: none;
+    }
+    .btn-cancel:hover { color: #333; }
+</style>
+
+<div class="claim-wrapper">
+    <div class="claim-card">
+        <h1>⚠️ Reportar problema</h1>
+        <p class="sub">Pedido {{ order.reference_code }} · {{ order.created_at|date:"d/m/Y" }}</p>
+
+        <div class="info-box">
+            Cuéntanos qué pasó con tu pedido. El comercio recibirá tu reclamo
+            y podrá responderte directamente desde el sistema.
+        </div>
+
+        {% if form.non_field_errors %}
+            <div class="errors" style="padding:12px;background:#fdedec;border-radius:8px;margin-bottom:16px;">
+                {{ form.non_field_errors }}
+            </div>
+        {% endif %}
+
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+
+            <div class="form-row">
+                <label for="{{ form.claim_type.id_for_label }}">{{ form.claim_type.label }}</label>
+                {{ form.claim_type }}
+                {% if form.claim_type.errors %}<div class="errors">{{ form.claim_type.errors }}</div>{% endif %}
+            </div>
+
+            <div class="form-row">
+                <label for="{{ form.description.id_for_label }}">{{ form.description.label }}</label>
+                {{ form.description }}
+                <div class="help-text">Sé específico: qué esperabas, qué recibiste, cuándo, etc.</div>
+                {% if form.description.errors %}<div class="errors">{{ form.description.errors }}</div>{% endif %}
+            </div>
+
+            <div class="form-row">
+                <label for="{{ form.evidence.id_for_label }}">{{ form.evidence.label }}</label>
+                {{ form.evidence }}
+                <div class="help-text">{{ form.evidence.help_text }}</div>
+                {% if form.evidence.errors %}<div class="errors">{{ form.evidence.errors }}</div>{% endif %}
+            </div>
+
+            <button type="submit" class="btn-submit">📤 Enviar reclamo</button>
+            <a href="{% url 'orders:detail' order.pk %}" class="btn-cancel">Cancelar</a>
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -4,7 +4,7 @@ from django import forms
 
 from apps.utils.validators import validate_image
 
-from .models import Order
+from .models import Order, OrderClaim, OrderClaimMessage
 
 
 class PaymentForm(forms.ModelForm):
@@ -234,3 +234,88 @@ class PaymentForm(forms.ModelForm):
                 )
 
         return cleaned
+
+
+
+# ============================================================
+# FORMULARIOS DEL SISTEMA DE RECLAMOS
+# ============================================================
+
+
+class OrderClaimForm(forms.ModelForm):
+    """Cliente abre un reclamo sobre un pedido."""
+
+    class Meta:
+        model = OrderClaim
+        fields = ["claim_type", "description", "evidence"]
+        widgets = {
+            "claim_type": forms.Select(attrs={"class": "form-control"}),
+            "description": forms.Textarea(attrs={
+                "class": "form-control",
+                "rows": 5,
+                "placeholder": "Explica qué pasó con tu pedido (mínimo 20 caracteres).",
+            }),
+            "evidence": forms.ClearableFileInput(attrs={
+                "class": "form-control",
+                "accept": "image/*",
+            }),
+        }
+        labels = {
+            "claim_type": "¿Qué tipo de problema tuviste?",
+            "description": "Describe el problema",
+            "evidence": "Evidencia (opcional)",
+        }
+        help_texts = {
+            "evidence": "Puedes adjuntar una captura de pantalla o foto (opcional).",
+        }
+
+    def clean_description(self):
+        desc = (self.cleaned_data.get("description") or "").strip()
+        if len(desc) < 20:
+            raise forms.ValidationError("La descripción debe tener al menos 20 caracteres.")
+        return desc
+
+    def clean_evidence(self):
+        img = self.cleaned_data.get("evidence")
+        if img:
+            from django.core.files.uploadedfile import UploadedFile
+            if isinstance(img, UploadedFile) and img.size > 0:
+                validate_image(img)
+        return img
+
+
+class OrderClaimMessageForm(forms.ModelForm):
+    """Mensaje dentro de la conversación de un reclamo."""
+
+    class Meta:
+        model = OrderClaimMessage
+        fields = ["message", "attachment"]
+        widgets = {
+            "message": forms.Textarea(attrs={
+                "class": "form-control",
+                "rows": 3,
+                "placeholder": "Escribe tu mensaje...",
+            }),
+            "attachment": forms.ClearableFileInput(attrs={
+                "class": "form-control",
+                "accept": "image/*",
+            }),
+        }
+        labels = {
+            "message": "Mensaje",
+            "attachment": "Adjunto (opcional)",
+        }
+
+    def clean_message(self):
+        msg = (self.cleaned_data.get("message") or "").strip()
+        if len(msg) < 2:
+            raise forms.ValidationError("El mensaje es muy corto.")
+        return msg
+
+    def clean_attachment(self):
+        img = self.cleaned_data.get("attachment")
+        if img:
+            from django.core.files.uploadedfile import UploadedFile
+            if isinstance(img, UploadedFile) and img.size > 0:
+                validate_image(img)
+        return img

@@ -82,6 +82,9 @@
                 <a href="{% url 'stores:orders' store.id %}">
                     🧾 Pedidos{% if pending_orders_count %} <span class="nav-badge">{{ pending_orders_count }}</span>{% endif %}
                 </a>
+                <a href="{% url 'stores:store_claims_list' store.id %}">
+                    ⚠️ Reclamos{% if pending_claims_count %} <span class="nav-badge">{{ pending_claims_count }}</span>{% endif %}
+                </a>
                 <a href="{% url 'stores:product_list' store.id %}">📦 Productos</a>
                 <a href="{% url 'stores:product_create' store.id %}">➕ Agregar</a>
             {% endif %}

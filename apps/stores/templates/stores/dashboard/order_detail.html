@@ -5,6 +5,28 @@
 
 {% block content %}
 <style>
+
+    {# ===== BANNER DE RECLAMO ===== #}
+    {% if order.claim %}
+        <div id="claim_banner" style="background:{% if order.claim.status == 'escalated' %}#f8d7da{% elif order.claim.status == 'resolved' %}#d4edda{% elif order.claim.status == 'closed' %}#e2e3e5{% else %}#fff3cd{% endif %};
+                    border-left:4px solid {% if order.claim.status == 'escalated' %}#dc3545{% elif order.claim.status == 'resolved' %}#28a745{% elif order.claim.status == 'closed' %}#6c757d{% else %}#ffc107{% endif %};
+                    padding:14px 18px;border-radius:8px;margin-bottom:16px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
+                <div>
+                    <strong style="color:{% if order.claim.status == 'escalated' %}#721c24{% elif order.claim.status == 'resolved' %}#155724{% elif order.claim.status == 'closed' %}#383d41{% else %}#856404{% endif %};">
+                        ⚠️ Reclamo #{{ order.claim.pk }} - {{ order.claim.get_status_display }}
+                    </strong>
+                    <p style="margin:4px 0 0;font-size:0.85rem;color:#555;">
+                        {{ order.claim.get_claim_type_display }} · Abierto el {{ order.claim.created_at|date:"d/m/Y H:i" }}
+                    </p>
+                </div>
+                <a href="{% url 'stores:store_claim_detail' store.id order.claim.pk %}"
+                   style="display:inline-block;padding:8px 16px;background:#e94560;color:white;text-decoration:none;border-radius:6px;font-size:0.85rem;font-weight:600;">
+                    Ver reclamo y responder →
+                </a>
+            </div>
+        </div>
+    {% endif %}
     .detail-card {
         background: white; border-radius: 12px; padding: 20px;
         box-shadow: 0 2px 8px rgba(0,0,0,0.06); margin-bottom: 16px;
