@@ -1,11 +1,18 @@
 from django.urls import path
 
 from apps.stores import views_payments as store_payment_views
-from . import views, views_panel
+from . import views, views_claims, views_panel
 
 app_name = 'orders'
 
 urlpatterns = [
+    # ===== Sistema de reclamos (cliente) =====
+    path('claim/create/<int:order_id>/', views_claims.claim_create, name='claim_create'),
+    path('claim/<int:claim_id>/', views_claims.claim_detail, name='claim_detail'),
+    path('claim/<int:claim_id>/message/', views_claims.claim_add_message, name='claim_add_message'),
+    path('claim/<int:claim_id>/close/', views_claims.claim_close, name='claim_close'),
+    path('claim/<int:claim_id>/escalate/', views_claims.claim_escalate, name='claim_escalate'),
+
     path('checkout/', views.checkout, name='checkout'),
     path('success/<int:order_id>/', views.order_success, name='success'),
     path('mis-pedidos/', views.order_list, name='list'),
