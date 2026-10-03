@@ -407,7 +407,7 @@
         // 6) Filtrar input: solo numeros, max 12
         refInput.addEventListener('input', function() {
             var original = this.value;
-            var // Si es MX, permitir alfanumerico y guiones
+            // Si es MX, permitir alfanumerico y guiones
             var patron = PAYMENT_REGION === 'MX' 
                 ? /[^A-Za-z0-9\- ]/g 
                 : /[^0-9]/g;
